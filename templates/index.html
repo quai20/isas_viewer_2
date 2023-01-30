@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>ISAS Viewer</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico')}}">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="robots" content="noindex, follow">
+    <script src="{{ url_for('static', filename='dist/jquery-3.6.0.js')}}"></script>
+    <script src="{{ url_for('static', filename='dist/jquery-ui/jquery-ui.js')}}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='dist/jquery-ui/jquery-ui.css')}}">
+    <script src="{{ url_for('static', filename='js/popper.js')}}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.min.js')}}"></script>
+    <script src="{{ url_for('static', filename='dist/jQueryRotate.js')}}"></script>
+    <script src="{{ url_for('static', filename='js/main.js')}}"></script>
+    <script src="{{ url_for('static', filename='datasets.js')}}"></script>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/iv.css')}}">
+</head>
+
+<body>
+    
+        <h1 style="padding-left: 90px;">ISAS Viewer</h2>
+    
+    <div class="container d-md-flex align-items-stretch">
+
+        <div id="content" class="p-4 p-md-5 pt-5" style="display:flex; margin-top: 0; padding-top:1rem !important;">
+            <div id="map" style="width: 100%; height: 90%; position:relative; background-color: #ffffff;"></div>
+            <div id="colorbar"></div>
+        </div>
+
+        <nav id="sidebar">
+            <div class="p-4 pt-5" style="padding-top: 1rem !important;">
+                <ul class="list-unstyled components mb-5">                    
+                    <li>
+                        <a><b>Dataset</b></a>
+                        <select name="dataset" id="dataset" style="width:95%;" onchange="updateSelectors()">
+                            <!-- <option value="0">Select dataset</option> -->
+                        </select>
+                    </li>
+                    <li>
+                        <a><b>Variable</b></a>
+                        <select name="variable" id="variable" style="width:95%;">
+                            <!-- <option value="0">Select variable</option> -->
+                        </select>
+                    </li>
+                    <li>
+                        <a><b>Date</b></a>
+                        <select name="daterange" id="daterange" style="width:95%;">
+                            <!-- <option value="0">Select variable</option> -->
+                        </select>
+                    </li>
+                    <li>
+                        <a><b>Depth</b></a>
+                        <select name="depth" id="depth" style="width:95%;">
+                            <!-- <option value="0">Select z-level</option> -->
+                        </select>
+                    </li>
+                    <li>
+                        <a><b>CLim</b></a>
+                        <input type="number" id="lowval" name="lowval" style="width:40%; float: left;">
+                        <input type="number" id="highval" name="highval" style="width:40%; margin-left: 20px;">
+                    </li>
+                    <li>
+                        <center><button class="btn btn1" onclick="updateMap()">Udpate</button></center>
+                    </li>
+                </ul>
+                <hr>
+                <div>                    
+                    <p style="color:black;"><b>Full data</b></p>
+                    <button class="button-17" role="button" title="time serie" onclick="gen_timeserie();">
+                        <img src="{{ url_for('static', filename='/dist/icons/timeserie.png')}}" width="40px"
+                            height="30px"></img>
+                    </button>
+                    <button class="button-17" role="button" title="profile" onclick="gen_profile();">
+                        <img src="{{ url_for('static', filename='/dist/icons/profile.png')}}" width="40px"
+                            height="30px"></img>
+                    </button>
+                    <button class="button-17" role="button" title="snapshot" onclick="gen_snapshot();">
+                        <img src="{{ url_for('static', filename='/dist/icons/camera.png')}}" width="40px"
+                            height="30px"></img>
+                    </button> 
+                    <p></p>                                   
+                    <p style="color:black;"><b>Anomaly</b></p>
+                    <button class="button-17" role="button" title="time serie" onclick="ano_timeserie();">
+                        <img src="{{ url_for('static', filename='/dist/icons/timeserie.png')}}" width="40px"
+                            height="30px"></img>
+                    </button>
+                    <button class="button-17" role="button" title="profile" onclick="ano_profile();">
+                        <img src="{{ url_for('static', filename='/dist/icons/profile.png')}}" width="40px"
+                            height="30px"></img>
+                    </button>
+                    <button class="button-17" role="button" title="snapshot" onclick="ano_snapshot();">
+                        <img src="{{ url_for('static', filename='/dist/icons/camera.png')}}" width="40px"
+                            height="30px"></img>
+                    </button>                                        
+                </div>
+                <br>
+                <hr>
+                <div>
+                    <p style="color:black;"><b>More informations</b></p>
+                    <a href="https://www.umr-lops.fr/SNO-Argo/Products/ISAS-in-situ-T-S-gridded-fields" target="_blank">ISAS-in-situ-T-S-gridded-fields</a>
+                </div>
+            </div>
+        </nav>
+    </div>
+
+    <script>
+
+        //FILL DATASET SELECTOR
+        const sel0 = document.getElementById("dataset");
+        for (let i = 0; i < dataset_config.length; i++) {
+            const opt0 = document.createElement("option");
+            opt0.value = String(i);
+            opt0.text = dataset_config[i]['name'];
+            opt0.selected = true;
+            sel0.add(opt0, sel0.options[i]);
+        }
+
+        //FILL VARIABLE SELECTOR
+        const sel1 = document.getElementById("variable");
+        for (let i = 0; i < dataset_config[dataset_config.length - 1]['vars'].length; i++) {
+            const opt1 = document.createElement("option");
+            opt1.value = String(i);
+            opt1.text = dataset_config[dataset_config.length - 1]['vars'][i];
+            opt1.selected = true;
+            sel1.add(opt1, sel1.options[i]);
+        }
+
+        //FILL DEPTH SELECTOR
+        const sel2 = document.getElementById("depth");
+        for (let i = 0; i < dataset_config[dataset_config.length - 1]['levels'].length; i++) {
+            const opt2 = document.createElement("option");
+            opt2.value = String(i);
+            opt2.text = String(dataset_config[dataset_config.length - 1]['levels'][i]).substr(0, 5) + " m";
+            opt2.selected = true;
+            sel2.add(opt2, sel2.options[i]);
+        }
+
+        //FILL DATE RANGE
+        const sel3 = document.getElementById("daterange");
+        for (let i = 0; i < dataset_config[dataset_config.length - 1]['daterange'].length; i++) {
+            const opt3 = document.createElement("option");
+            opt3.value = String(i);
+            opt3.text = dataset_config[dataset_config.length - 1]['daterange'][i].substr(0, 10);
+            opt3.selected = true;
+            sel3.add(opt3, sel3.options[i]);
+        }
+
+        function updateSelectors() {
+            //
+            var dx = parseInt(document.getElementById('dataset').value);
+            //FILL VARIABLE SELECTOR            
+            const sel1 = document.getElementById("variable");
+            for (a in sel1.options) { sel1.options.remove(0); }
+            for (let i = 0; i < dataset_config[dx]['vars'].length; i++) {
+                const opt1 = document.createElement("option");
+                opt1.value = String(i);
+                opt1.text = dataset_config[dx]['vars'][i];
+                opt1.selected = true;
+                sel1.add(opt1, sel1.options[i]);
+            }
+
+            //FILL DEPTH SELECTOR
+            const sel2 = document.getElementById("depth");
+            for (a in sel2.options) { sel2.options.remove(0); }
+            for (let i = 0; i < dataset_config[dx]['levels'].length; i++) {
+                const opt2 = document.createElement("option");
+                opt2.value = String(i);
+                opt2.text = String(dataset_config[dx]['levels'][i]).substr(0, 5) + " m";
+                opt2.selected = true;
+                sel2.add(opt2, sel2.options[i]);
+            }
+
+            //DEFINE RANGE
+            const sel3 = document.getElementById("daterange");
+            for (a in sel3.options) { sel3.options.remove(0); }
+            for (let i = 0; i < dataset_config[dx]['daterange'].length; i++) {
+                const opt3 = document.createElement("option");
+                opt3.value = String(i);
+                opt3.text = dataset_config[dx]['daterange'][i].substr(0, 10);
+                opt3.selected = true;
+                sel3.add(opt3, sel3.options[i]);
+            }
+
+        }
+    </script>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='dist/proj4leaflet/lib/leaflet/leaflet.css')}}" />
+    <script src="{{ url_for('static', filename='dist/proj4leaflet/lib/leaflet/leaflet.js')}}"></script>
+    <!-- Mouse position -->
+    <link rel="stylesheet"
+        href="{{ url_for('static', filename='dist/Leaflet.MousePosition-master/src/L.Control.MousePosition.css')}}" />
+    <script
+        src="{{ url_for('static', filename='dist/Leaflet.MousePosition-master/src/L.Control.MousePosition.js')}}"></script>
+    <!-- Spin -->
+    <script src="{{ url_for('static', filename='dist/Spin/spin.min.js')}}" charset="utf-8"></script>
+    <script src="{{ url_for('static', filename='dist/Spin/leaflet.spin.min.js')}}" charset="utf-8"></script>
+
+    <!-- Draw-->
+    <script src="{{ url_for('static', filename='dist/draw/leaflet.draw.js')}}" charset="utf-8"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='dist/draw/leaflet.draw.css')}}" />
+
+    <!-- Main Js-->
+    <script src="{{ url_for('static', filename='map.js')}}"></script>
+</body>
+
+</html>
