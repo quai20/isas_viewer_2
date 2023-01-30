@@ -13,8 +13,9 @@ var islayed = false;
    'time': dataset_config[dst]['daterange'][req_time], 'lowval': lowval, 'highval': highval
  };
 
-
-function updateMap() {
+ // this function is called by the UPDATE button
+function updateMap() {  
+  
   map.spin(false);
   // loader
   map.spin(true, { lines: 8, length: 30, width: 13, radius: 20, scale: 0.5, color: 'black' });
@@ -74,7 +75,7 @@ function updateMap() {
       version: '1.3.0'
     }).addTo(map);
   }  
-  
+
   //legend
   document.getElementById("colorbar").innerHTML = "<img id=\"imgL\"src=\"" + legend_url + "\" alt=\"\" height=264px width=110px>";
 
