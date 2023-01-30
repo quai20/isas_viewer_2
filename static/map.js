@@ -1,6 +1,19 @@
 var wms_layer = new L.LayerGroup();
 var islayed = false;
 
+ // Get user selection
+ var dst = parseInt(document.getElementById('dataset').value);
+ var variable = parseInt(document.getElementById('variable').value);
+ var level = parseInt(document.getElementById('depth').value);
+ var req_time = parseInt(document.getElementById('daterange').value);
+ var lowval = parseFloat(document.getElementById('lowval').value);
+ var highval = parseFloat(document.getElementById('highval').value);
+ var user_selection = {
+   'dataset': dataset_config[dst]['name'], 'variable': dataset_config[dst]['vars'][variable], 'depth': dataset_config[dst]['levels'][level],
+   'time': dataset_config[dst]['daterange'][req_time], 'lowval': lowval, 'highval': highval
+ };
+
+
 function updateMap() {
   map.spin(false);
   // loader
@@ -13,16 +26,18 @@ function updateMap() {
   }
 
   // Get user selection
-  var dst = parseInt(document.getElementById('dataset').value);
-  var variable = parseInt(document.getElementById('variable').value);
-  var level = parseInt(document.getElementById('depth').value);
-  var req_time = parseInt(document.getElementById('daterange').value);
+  dst = parseInt(document.getElementById('dataset').value);
+  variable = parseInt(document.getElementById('variable').value);
+  level = parseInt(document.getElementById('depth').value);
+  req_time = parseInt(document.getElementById('daterange').value);
+  lowval = parseFloat(document.getElementById('lowval').value);
+  highval = parseFloat(document.getElementById('highval').value);
+  user_selection = {
+    'dataset': dataset_config[dst]['name'], 'variable': dataset_config[dst]['vars'][variable], 'depth': dataset_config[dst]['levels'][level],
+    'time': dataset_config[dst]['daterange'][req_time], 'lowval': lowval, 'highval': highval
+  };
 
-  var lowval = parseFloat(document.getElementById('lowval').value);
-  var highval = parseFloat(document.getElementById('highval').value);
-
-  if (isNaN(lowval) || isNaN(highval) || (lowval > highval)) {
-    //http://tds0.ifremer.fr/thredds/wms/LPO_GLOBANA_ISAS13_MNTH_TIME_SERIE?REQUEST=GetLegendGraphic&LAYER=TEMP&bgcolor=0xffffff&colorscalerange=0,10            
+  if (isNaN(lowval) || isNaN(highval) || (lowval > highval)) {    
     var legend_url = dataset_config[dst]['url'] + "REQUEST=GetLegendGraphic&LAYER=" + dataset_config[dst]['vars'][variable] + "&bgcolor=0xffffff";
     //console.log(legend_url);
     wms_layer = L.tileLayer.wms(dataset_config[dst]['url'], {
@@ -58,8 +73,8 @@ function updateMap() {
       opacity: 0.7,
       version: '1.3.0'
     }).addTo(map);
-  }
-  //console.log(legend_url);
+  }  
+  
   //legend
   document.getElementById("colorbar").innerHTML = "<img id=\"imgL\"src=\"" + legend_url + "\" alt=\"\" height=264px width=110px>";
 
@@ -68,12 +83,10 @@ function updateMap() {
     map.spin(true, { lines: 8, length: 30, width: 13, radius: 20, scale: 0.5, color: 'black' });
   });
 
-  wms_layer.on('load tileerror tileabort', function (e) {
-    //console.log("tiles loaded");
+  wms_layer.on('load tileerror tileabort', function (e) {    
     map.spin(false);
   });
-
-  //wms_layer.setOpacity(0.6);
+  
   layerControl.addOverlay(wms_layer, "User request")
   islayed = true;
 }
@@ -174,7 +187,7 @@ map.on('click', function (e) {
 });
 map.on('draw:created', function (e) {
   var type = e.layerType,
-  layer = e.layer;
+    layer = e.layer;
   layer.addTo(map);
   var coords = layer.getLatLngs();
 
@@ -201,7 +214,7 @@ function gen_timeserie_2(lat, lon, ano) {
   //open map popup to host to figure
   popup = L.popup().setLatLng([lat, lon]).setContent("<div id='img_ts'><div class=\"lds-dual-ring\"></div></div>").openOn(map);
 
-  reqstring = 'lat=' + lat.toString() + '&lon=' + lon.toString()
+  reqstring = 'lat=' + lat.toString() + '&lon=' + lon.toString() + '&user_selection=' + JSON.stringify(user_selection);
 
   if (ano == 0) {
     $.ajax({
@@ -212,6 +225,8 @@ function gen_timeserie_2(lat, lon, ano) {
       success: function (data) {
         dataarray = JSON.parse(data)
         console.log(dataarray);
+        // EDIT POPUP
+        document.getElementById("img_ts").innerText = dataarray ;
       }
     });
   }

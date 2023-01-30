@@ -4,7 +4,7 @@
 from flask import Flask, request, jsonify, render_template
 import ast, json
 import numpy as np
-import time
+
 
 app = Flask(__name__)
 
@@ -15,9 +15,11 @@ def init_webpage():
 @app.route("/get_ts", methods=['POST','GET'])
 def time_serie_route():
     lat = request.args.get('lat')
-    lon = request.args.get('lon')           
-    # call py func    
-    return json.dumps("routed TS "+lat+"/"+lon)
+    lon = request.args.get('lon')          
+    user_selection =  request.args.get('user_selection')          
+    # call py func & return path to img file or error message
+    #    
+    return json.dumps("routed TS "+lat+"/"+lon+" - user selection : "+user_selection)
 
 @app.route("/get_prf", methods=['POST','GET'])
 def profile_route():
