@@ -1,21 +1,21 @@
 var wms_layer = new L.LayerGroup();
 var islayed = false;
 
- // Get user selection
- var dst = parseInt(document.getElementById('dataset').value);
- var variable = parseInt(document.getElementById('variable').value);
- var level = parseInt(document.getElementById('depth').value);
- var req_time = parseInt(document.getElementById('daterange').value);
- var lowval = parseFloat(document.getElementById('lowval').value);
- var highval = parseFloat(document.getElementById('highval').value);
- var user_selection = {
-   'dataset': dataset_config[dst]['name'], 'variable': dataset_config[dst]['vars'][variable], 'depth': dataset_config[dst]['levels'][level],
-   'time': dataset_config[dst]['daterange'][req_time], 'lowval': lowval, 'highval': highval
- };
+// Get user selection
+var dst = parseInt(document.getElementById('dataset').value);
+var variable = parseInt(document.getElementById('variable').value);
+var level = parseInt(document.getElementById('depth').value);
+var req_time = parseInt(document.getElementById('daterange').value);
+var lowval = parseFloat(document.getElementById('lowval').value);
+var highval = parseFloat(document.getElementById('highval').value);
+var user_selection = {
+  'dataset': dataset_config[dst]['name'], 'variable': dataset_config[dst]['vars'][variable], 'depth': dataset_config[dst]['levels'][level],
+  'time': dataset_config[dst]['daterange'][req_time], 'lowval': lowval, 'highval': highval
+};
 
- // this function is called by the UPDATE button
-function updateMap() {  
-  
+// this function is called by the UPDATE button
+function updateMap() {
+
   map.spin(false);
   // loader
   map.spin(true, { lines: 8, length: 30, width: 13, radius: 20, scale: 0.5, color: 'black' });
@@ -38,7 +38,7 @@ function updateMap() {
     'time': dataset_config[dst]['daterange'][req_time], 'lowval': lowval, 'highval': highval
   };
 
-  if (isNaN(lowval) || isNaN(highval) || (lowval > highval)) {    
+  if (isNaN(lowval) || isNaN(highval) || (lowval > highval)) {
     var legend_url = dataset_config[dst]['url'] + "REQUEST=GetLegendGraphic&LAYER=" + dataset_config[dst]['vars'][variable] + "&bgcolor=0xffffff";
     //console.log(legend_url);
     wms_layer = L.tileLayer.wms(dataset_config[dst]['url'], {
@@ -74,7 +74,7 @@ function updateMap() {
       opacity: 0.7,
       version: '1.3.0'
     }).addTo(map);
-  }  
+  }
 
   //legend
   document.getElementById("colorbar").innerHTML = "<img id=\"imgL\"src=\"" + legend_url + "\" alt=\"\" height=264px width=110px>";
@@ -84,10 +84,10 @@ function updateMap() {
     map.spin(true, { lines: 8, length: 30, width: 13, radius: 20, scale: 0.5, color: 'black' });
   });
 
-  wms_layer.on('load tileerror tileabort', function (e) {    
+  wms_layer.on('load tileerror tileabort', function (e) {
     map.spin(false);
   });
-  
+
   layerControl.addOverlay(wms_layer, "User request")
   islayed = true;
 }
@@ -158,36 +158,17 @@ function ano_snapshot() {
   map.fireEvent('click');
 }
 
-// I SHOULD REPLACE ALL THOSE FUNCTION BY ONLY ONE AND ADD ARGUMENT
-
 map.on('click', function (e) {
-  if (clicked == 1) {
-    gen_timeserie_2(e.latlng.lat, e.latlng.lng, 0)
+  if ([1, 2, 4, 5].includes(clicked)) {
+    gen_img([e.latlng.lat, e.latlng.lng, 0, 0], clicked)
     $('.leaflet-container').css('cursor', '');
     clicked = 0;
   }
-  else if (clicked == 2) {
-    gen_profile_2(e.latlng.lat, e.latlng.lng, 0)
-    $('.leaflet-container').css('cursor', '');
-    clicked = 0;
-  }
-  else if (clicked == 3) {
-    RectDrawer.enable();
-  }
-  else if (clicked == 4) {
-    gen_timeserie_2(e.latlng.lat, e.latlng.lng, 1)
-    $('.leaflet-container').css('cursor', '');
-    clicked = 0;
-  }
-  else if (clicked == 5) {
-    gen_profile_2(e.latlng.lat, e.latlng.lng, 1)
-    $('.leaflet-container').css('cursor', '');
-    clicked = 0;
-  }
-  else if (clicked == 6) {
+  else if ([3, 6].includes(clicked)) {
     RectDrawer.enable();
   }
 });
+
 map.on('draw:created', function (e) {
   var type = e.layerType,
     layer = e.layer;
@@ -196,111 +177,43 @@ map.on('draw:created', function (e) {
 
   popuplat = (coords[0][0]['lat'] + coords[0][2]['lat']) / 2;
   popuplon = (coords[0][0]['lng'] + coords[0][2]['lng']) / 2;
-  popup = L.popup().setLatLng([popuplat, popuplon]).setContent("<div id='img_ts'><div class=\"lds-dual-ring\"></div></div>").openOn(map);
+  popup = L.popup().setLatLng([popuplat, popuplon]).setContent("<div id='img_div'><div class=\"lds-dual-ring\"></div></div>").openOn(map);
   popup.on('remove', function () {
     map.removeLayer(layer);
   });
-
-  if (clicked == 3) {
-    gen_snapshot_2(coords, 0);
-    $('.leaflet-container').css('cursor', '');
-    clicked = 0;
-  }
-  else if (clicked == 6) {
-    gen_snapshot_2(coords, 1);
-    $('.leaflet-container').css('cursor', '');
-    clicked = 0;
-  }
+  gen_img([coords[0][0]['lat'], coords[0][0]['lng'], coords[0][2]['lat'], coords[0][2]['lng']], clicked);
+  $('.leaflet-container').css('cursor', '');
+  clicked = 0;
 });
 
-function gen_timeserie_2(lat, lon, ano) {
-  //open map popup to host to figure
-  popup = L.popup().setLatLng([lat, lon]).setContent("<div id='img_ts'><div class=\"lds-dual-ring\"></div></div>").openOn(map);
+function gen_img(coords_array, clicked) {  
+  
+  var lat0 = coords_array[0];
+  var lon0 = coords_array[1];
+  var lat1 = coords_array[2];
+  var lon1 = coords_array[3];
 
-  reqstring = 'lat=' + lat.toString() + '&lon=' + lon.toString() + '&user_selection=' + JSON.stringify(user_selection);
+  //open popup to host to figure
+  if ([1, 2, 4, 5].includes(clicked)) {
+    popup = L.popup().setLatLng([lat0, lon0]).setContent("<div id='img_div'><div class=\"lds-dual-ring\"></div></div>").openOn(map);
+  }
 
-  if (ano == 0) {
-    $.ajax({
-      type: "GET",
-      url: '/get_ts',
-      data: reqstring,
-      contentType: 'application/json;charset=UTF-8',
-      success: function (data) {
-        dataarray = JSON.parse(data)
-        console.log(dataarray);
-        // EDIT POPUP
-        document.getElementById("img_ts").innerText = dataarray ;
-      }
-    });
-  }
-  else if (ano == 1) {
-    $.ajax({
-      type: "GET",
-      url: '/ano_ts',
-      data: reqstring,
-      contentType: 'application/json;charset=UTF-8',
-      success: function (data) {
-        dataarray = JSON.parse(data)
-        console.log(dataarray);
-      }
-    });
-  }
+
+  reqstring = 'lat0=' + lat0.toString() + '&lon0=' + lon0.toString() + '&lat1=' + lat1.toString() + '&lon1=' + lon1.toString() +
+    '&operation=' + clicked.toString() + '&user_selection=' + JSON.stringify(user_selection);
+
+  $.ajax({
+    type: "GET",
+    url: '/get_img',
+    data: reqstring,
+    contentType: 'application/json;charset=UTF-8',
+    success: function (data) {
+      dataarray = JSON.parse(data)
+      console.log(dataarray);
+      // EDIT POPUP
+      document.getElementById("img_div").innerText = dataarray;
+    }
+  });
+
 }
 
-function gen_profile_2(lat, lon, ano) {
-  reqstring = 'lat=' + lat.toString() + '&lon=' + lon.toString() + '&user_selection=' + JSON.stringify(user_selection);
-  popup = L.popup().setLatLng([lat, lon]).setContent("<div id='img_ts'><div class=\"lds-dual-ring\"></div></div>").openOn(map);
-
-  if (ano == 0) {
-    $.ajax({
-      type: "GET",
-      url: '/get_prf',
-      data: reqstring,
-      contentType: 'application/json;charset=UTF-8',
-      success: function (data) {
-        dataarray = JSON.parse(data)
-        console.log(dataarray);
-      }
-    });
-  }
-  else if (ano == 1) {
-    $.ajax({
-      type: "GET",
-      url: '/ano_prf',
-      data: reqstring,
-      contentType: 'application/json;charset=UTF-8',
-      success: function (data) {
-        dataarray = JSON.parse(data)
-        console.log(dataarray);
-      }
-    });
-  }
-}
-
-function gen_snapshot_2(coords, ano) {
-  reqstring = 'lat0=' + coords[0][0]['lat'].toString() + '&lon0=' + coords[0][0]['lng'].toString() + '&lat1=' + coords[0][2]['lat'].toString() + '&lon1=' + coords[0][2]['lng'].toString()+ '&user_selection=' + JSON.stringify(user_selection);
-  if (ano == 0) {
-    $.ajax({
-      type: "GET",
-      url: '/get_snapshot',
-      data: reqstring,
-      contentType: 'application/json;charset=UTF-8',
-      success: function (data) {
-        dataarray = JSON.parse(data)
-        console.log(dataarray);
-      }
-    });
-  }
-  else if (ano == 1) {
-    $.ajax({
-      type: "GET",
-      url: '/ano_snapshot',
-      data: reqstring,
-      contentType: 'application/json;charset=UTF-8',
-      success: function (data) {
-        dataarray = JSON.parse(data)
-        console.log(dataarray);
-      }
-    });
-  }
-}
