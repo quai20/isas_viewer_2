@@ -158,6 +158,8 @@ function ano_snapshot() {
   map.fireEvent('click');
 }
 
+// I SHOULD REPLACE ALL THOSE FUNCTION BY ONLY ONE AND ADD ARGUMENT
+
 map.on('click', function (e) {
   if (clicked == 1) {
     gen_timeserie_2(e.latlng.lat, e.latlng.lng, 0)
@@ -246,7 +248,7 @@ function gen_timeserie_2(lat, lon, ano) {
 }
 
 function gen_profile_2(lat, lon, ano) {
-  reqstring = 'lat=' + lat.toString() + '&lon=' + lon.toString()
+  reqstring = 'lat=' + lat.toString() + '&lon=' + lon.toString() + '&user_selection=' + JSON.stringify(user_selection);
   popup = L.popup().setLatLng([lat, lon]).setContent("<div id='img_ts'><div class=\"lds-dual-ring\"></div></div>").openOn(map);
 
   if (ano == 0) {
@@ -276,7 +278,7 @@ function gen_profile_2(lat, lon, ano) {
 }
 
 function gen_snapshot_2(coords, ano) {
-  reqstring = 'lat0=' + coords[0][0]['lat'].toString() + '&lon0=' + coords[0][0]['lng'].toString() + '&lat1=' + coords[0][2]['lat'].toString() + '&lon1=' + coords[0][2]['lng'].toString()
+  reqstring = 'lat0=' + coords[0][0]['lat'].toString() + '&lon0=' + coords[0][0]['lng'].toString() + '&lat1=' + coords[0][2]['lat'].toString() + '&lon1=' + coords[0][2]['lng'].toString()+ '&user_selection=' + JSON.stringify(user_selection);
   if (ano == 0) {
     $.ajax({
       type: "GET",

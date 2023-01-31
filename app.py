@@ -25,6 +25,7 @@ def time_serie_route():
 def profile_route():
     lat = request.args.get('lat')
     lon = request.args.get('lon')        
+    user_selection =  request.args.get('user_selection')       
     # call py func    
     return json.dumps("routed PRF "+lat+"/"+lon)
 
@@ -34,6 +35,7 @@ def snapshot_route():
     lon0 = request.args.get('lon0')
     lat1 = request.args.get('lat1')
     lon1 = request.args.get('lon1')        
+    user_selection =  request.args.get('user_selection')       
     # call py func    
     return json.dumps("routed SNAP "+lat0+"/"+lon0+" - "+lat1+"/"+lon1)
 
@@ -41,6 +43,7 @@ def snapshot_route():
 def ano_time_serie_route():
     lat = request.args.get('lat')
     lon = request.args.get('lon')        
+    user_selection =  request.args.get('user_selection')       
     # call py func    
     return json.dumps("routed ANO TS "+lat+"/"+lon)
 
