@@ -15,8 +15,6 @@
     <script src="{{ url_for('static', filename='dist/jQueryRotate.js')}}"></script>
     <script src="{{ url_for('static', filename='js/main.js')}}"></script>
 
-    <!-- <script src="{{ url_for('static', filename='datasets.js')}}"></script> -->
-
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/iv.css')}}">
 </head>
@@ -28,12 +26,12 @@
         <div class="container d-md-flex align-items-stretch">
 
             <div id="content" class="p-4 p-md-5 pt-5" style="display:flex; margin-top: 0; padding-top:1rem !important;">
-                <div id="map" style="width: 100%; height: 90%; position:relative; background-color: #ffffff;"></div>
+                <div id="map" style="width: 100%; height: 95%; position:relative; background-color: #ffffff;"></div>
                 <div id="colorbar"></div>
             </div>
 
-            <nav id="sidebar">
-                <div class="p-4 pt-5" style="padding-top: 1rem !important;">
+            <nav id="bssidebar">
+                <div class="p-4 pt-5" style="padding-top: 0rem !important;">
                     <ul class="list-unstyled components mb-5">
                         <li>
                             <a><b>Dataset</b></a>
@@ -72,33 +70,33 @@
                     <div>
                         <p style="color:black;"><b>Full data</b></p>
                         <button class="button-17" role="button" title="time serie" onclick="gen_timeserie();">
-                            <img src="{{ url_for('static', filename='/dist/icons/timeserie.png')}}" width="40px"
+                            <img src="{{ url_for('static', filename='/dist/icons/timeserie_carbon.png')}}" width="40px"
                                 height="30px"></img>
                         </button>
                         <button class="button-17" role="button" title="profile" onclick="gen_profile();">
-                            <img src="{{ url_for('static', filename='/dist/icons/profile.png')}}" width="40px"
+                            <img src="{{ url_for('static', filename='/dist/icons/profile_carbon.png')}}" width="40px"
                                 height="30px"></img>
                         </button>
                         <button class="button-17" role="button" title="snapshot" onclick="gen_snapshot();">
-                            <img src="{{ url_for('static', filename='/dist/icons/camera.png')}}" width="40px"
+                            <img src="{{ url_for('static', filename='/dist/icons/map_carbon.png')}}" width="40px"
                                 height="30px"></img>
                         </button>
                         <p></p>
                         <p style="color:black;"><b>Anomaly</b></p>
                         <button class="button-17" role="button" title="time serie" onclick="ano_timeserie();">
-                            <img src="{{ url_for('static', filename='/dist/icons/timeserie.png')}}" width="40px"
+                            <img src="{{ url_for('static', filename='/dist/icons/timeserie_carbon.png')}}" width="40px"
                                 height="30px"></img>
                         </button>
                         <button class="button-17" role="button" title="profile" onclick="ano_profile();">
-                            <img src="{{ url_for('static', filename='/dist/icons/profile.png')}}" width="40px"
+                            <img src="{{ url_for('static', filename='/dist/icons/profile_carbon.png')}}" width="40px"
                                 height="30px"></img>
                         </button>
                         <button class="button-17" role="button" title="snapshot" onclick="ano_snapshot();">
-                            <img src="{{ url_for('static', filename='/dist/icons/camera.png')}}" width="40px"
+                            <img src="{{ url_for('static', filename='/dist/icons/map_carbon.png')}}" width="40px"
                                 height="30px"></img>
                         </button>
                     </div>
-                    <br>
+                    <!-- <br> -->
                     <hr>
                     <div>
                         <p style="color:black;"><b>More informations</b></p>
@@ -197,8 +195,8 @@
             }
         </script>
 
-        <link rel="stylesheet" href="{{ url_for('static', filename='dist/proj4leaflet/lib/leaflet/leaflet.css')}}" />
-        <script src="{{ url_for('static', filename='dist/proj4leaflet/lib/leaflet/leaflet.js')}}"></script>
+        <link rel="stylesheet" href="{{ url_for('static', filename='dist/leaflet/leaflet.css')}}" />
+        <script src="{{ url_for('static', filename='dist/leaflet/leaflet.js')}}"></script>
         <!-- Mouse position -->
         <link rel="stylesheet"
             href="{{ url_for('static', filename='dist/Leaflet.MousePosition-master/src/L.Control.MousePosition.css')}}" />
@@ -211,6 +209,17 @@
         <!-- Draw-->
         <script src="{{ url_for('static', filename='dist/draw/leaflet.draw.js')}}" charset="utf-8"></script>
         <link rel="stylesheet" href="{{ url_for('static', filename='dist/draw/leaflet.draw.css')}}" />
+
+        <!--SideBar-->
+        <link rel="stylesheet" href="{{ url_for('static', filename='dist/SideBar/L.Control.Sidebar.css')}}" />
+        <script src="{{ url_for('static', filename='dist/SideBar/L.Control.Sidebar.js')}}"></script>
+
+        <!-- Window popup -->
+        <script
+            src="{{ url_for('static', filename='dist/leaflet-control-window-master/src/L.Control.Window.js')}}"></script>
+        <link rel="stylesheet"
+            href="{{ url_for('static', filename='dist/leaflet-control-window-master/src/L.Control.Window.css')}}" />
+
 </body>
 
 </html>

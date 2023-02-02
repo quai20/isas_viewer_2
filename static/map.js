@@ -125,10 +125,16 @@ function initDemoMap() {
 // MAP CREATION
 var mapStuff = initDemoMap();
 var map = mapStuff.map;
+var marker = L.marker();
 var layerControl = mapStuff.layerControl;
 var RectDrawer = new L.Draw.Rectangle(map);
-var popup = L.popup();
 var clicked = 0;
+var tempLayer = L.layerGroup().addTo(map);
+
+var winc = L.control.window(map, {position: 'topLeft'}).on('hide', function() {          
+  tempLayer.clearLayers();
+});
+
 
 function gen_timeserie() {
   clicked = 1;
@@ -160,7 +166,7 @@ function ano_snapshot() {
 
 map.on('click', function (e) {
   if ([1, 2, 4, 5].includes(clicked)) {
-    gen_img([e.latlng.lat, e.latlng.lng, 0, 0], clicked)
+    gen_img([e.latlng.lat, e.latlng.lng, e.latlng.lat, e.latlng.lng], clicked)
     $('.leaflet-container').css('cursor', '');
     clicked = 0;
   }
@@ -170,37 +176,37 @@ map.on('click', function (e) {
 });
 
 map.on('draw:created', function (e) {
+
   var type = e.layerType,
     layer = e.layer;
-  layer.addTo(map);
-  var coords = layer.getLatLngs();
+  layer.addTo(tempLayer);
+  var coords = layer.getLatLngs();      
 
-  popuplat = (coords[0][0]['lat'] + coords[0][2]['lat']) / 2;
-  popuplon = (coords[0][0]['lng'] + coords[0][2]['lng']) / 2;
-  popup = L.popup().setLatLng([popuplat, popuplon]).setContent("<div id='img_div'><div class=\"lds-dual-ring\"></div></div>").openOn(map);
-  popup.on('remove', function () {
-    map.removeLayer(layer);
-  });
-  gen_img([coords[0][0]['lat'], coords[0][0]['lng'], coords[0][2]['lat'], coords[0][2]['lng']], clicked);
+  gen_img([coords[0]['lat'], coords[0]['lng'], coords[2]['lat'], coords[2]['lng']], clicked);
   $('.leaflet-container').css('cursor', '');
   clicked = 0;
 });
 
-function gen_img(coords_array, clicked) {  
-  
+function gen_img(coords_array, clicked) {
+
   var lat0 = coords_array[0];
   var lon0 = coords_array[1];
   var lat1 = coords_array[2];
-  var lon1 = coords_array[3];
+  var lon1 = coords_array[3];  
 
-  //open popup to host to figure
-  if ([1, 2, 4, 5].includes(clicked)) {
-    popup = L.popup().setLatLng([lat0, lon0]).setContent("<div id='img_div'><div class=\"lds-dual-ring\"></div></div>").openOn(map);
-  }
+  // POP UP IS NOT A GOOD IDEA, WE SHOULD ADD A MARKER/RECTANGLE AND PLOT IN A SIDE OR BOTTOM PANEL INSTEAD
+  //MARKER
+  marker = L.marker([(lat0+lat1)/2, (lon0+lon1)/2]).addTo(tempLayer);
+  //SET PANEL CONTENT
+  winc.content("<div id='img_div'><div class=\"lds-dual-ring\"></div></div>");  
+  winc.show();
 
-
-  reqstring = 'lat0=' + lat0.toString() + '&lon0=' + lon0.toString() + '&lat1=' + lat1.toString() + '&lon1=' + lon1.toString() +
-    '&operation=' + clicked.toString() + '&user_selection=' + JSON.stringify(user_selection);
+  reqstring = 'lat0=' + lat0.toString() + '&lon0=' + lon0.toString() +
+    '&lat1=' + lat1.toString() + '&lon1=' + lon1.toString() +
+    '&operation=' + clicked.toString() + '&dataset=' + user_selection['dataset'] +
+    '&variable=' + user_selection['variable'] + '&depth=' + user_selection['depth'].toString() +
+    '&time=' + user_selection['time'] + '&lowval=' + user_selection['lowval'].toString() +
+    '&highval=' + user_selection['highval'].toString()
 
   $.ajax({
     type: "GET",
@@ -209,9 +215,10 @@ function gen_img(coords_array, clicked) {
     contentType: 'application/json;charset=UTF-8',
     success: function (data) {
       dataarray = JSON.parse(data)
-      console.log(dataarray);
+      //console.log(dataarray);
       // EDIT POPUP
-      document.getElementById("img_div").innerText = dataarray;
+      console.log("routed through flask")      
+      winc.content("<img src=\"" + dataarray + "\" alt=\"img\"></img>");
     }
   });
 

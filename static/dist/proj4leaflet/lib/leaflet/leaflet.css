@@ -467,7 +467,7 @@
 	width: 40px;
 	height: 20px;
 	position: absolute;
-	left: 50%;
+	left: 20px;
 	margin-left: -20px;
 	overflow: hidden;
 	pointer-events: none;
