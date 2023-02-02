@@ -131,7 +131,7 @@ var RectDrawer = new L.Draw.Rectangle(map);
 var clicked = 0;
 var tempLayer = L.layerGroup().addTo(map);
 
-var winc = L.control.window(map, {position: 'topLeft'}).on('hide', function() {          
+var winc = L.control.window(map, { title: '', position: 'topLeft' }).on('hide', function () {
   tempLayer.clearLayers();
 });
 
@@ -180,7 +180,7 @@ map.on('draw:created', function (e) {
   var type = e.layerType,
     layer = e.layer;
   layer.addTo(tempLayer);
-  var coords = layer.getLatLngs();      
+  var coords = layer.getLatLngs();
 
   gen_img([coords[0]['lat'], coords[0]['lng'], coords[2]['lat'], coords[2]['lng']], clicked);
   $('.leaflet-container').css('cursor', '');
@@ -192,13 +192,27 @@ function gen_img(coords_array, clicked) {
   var lat0 = coords_array[0];
   var lon0 = coords_array[1];
   var lat1 = coords_array[2];
-  var lon1 = coords_array[3];  
+  var lon1 = coords_array[3];
 
   // POP UP IS NOT A GOOD IDEA, WE SHOULD ADD A MARKER/RECTANGLE AND PLOT IN A SIDE OR BOTTOM PANEL INSTEAD
   //MARKER
-  marker = L.marker([(lat0+lat1)/2, (lon0+lon1)/2]).addTo(tempLayer);
+  if ([1, 2, 4, 5].includes(clicked)) {
+    marker = L.marker([(lat0 + lat1) / 2, (lon0 + lon1) / 2]).addTo(tempLayer);
+  }
   //SET PANEL CONTENT
-  winc.content("<div id='img_div'><div class=\"lds-dual-ring\"></div></div>");  
+  winc.content("<div id='img_div'><center><div class=\"lds-dual-ring\"></div></center></div>");
+
+  if ([1,4].includes(clicked)){
+    winc.title("<a style=\"font-size:20px; font-weight:bold;\">"+lat0.toFixed(2)+','+lon0.toFixed(2)+" / "+user_selection['depth'].toString()+"m</a>");
+  }
+  else if ([2,5].includes(clicked)){
+    winc.title("<a style=\"font-size:20px; font-weight:bold;\">"+lat0.toFixed(2)+','+lon0.toFixed(2)+" / "+user_selection['time'].substr(0,10)+"</a>");
+  }
+  else {
+    winc.title("<a style=\"font-size:20px; font-weight:bold;\">"+user_selection['time'].substr(0,10)+
+    ' / '+user_selection['depth'].toString()+"m</a>");
+  }
+  
   winc.show();
 
   reqstring = 'lat0=' + lat0.toString() + '&lon0=' + lon0.toString() +
@@ -214,10 +228,8 @@ function gen_img(coords_array, clicked) {
     data: reqstring,
     contentType: 'application/json;charset=UTF-8',
     success: function (data) {
-      dataarray = JSON.parse(data)
-      //console.log(dataarray);
-      // EDIT POPUP
-      console.log("routed through flask")      
+      dataarray = JSON.parse(data)      
+      // EDIT IMG WINDOW      
       winc.content("<img src=\"" + dataarray + "\" alt=\"img\"></img>");
     }
   });

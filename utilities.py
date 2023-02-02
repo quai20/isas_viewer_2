@@ -10,7 +10,7 @@ land_feature=cfeature.NaturalEarthFeature(category='physical',name='land',scale=
 import xarray as xr
 import numpy as np
 import json
-import os, sys
+import os, sys, glob
 
 # Datasets configurations
 jsonfile=open('static/dataset.json')
@@ -49,9 +49,12 @@ def time_serie_on_point(lat, lon, dataset, variable, depth):
         murl = dataset_config[ix]['opendap'] + f"longitude[{lon_index}],latitude[{lat_index}],depth[{dep_index}],time[0:1:{len(time_array)-1}],{variable}[0:1:{len(time_array)-1}][{dep_index}][{lat_index}][{lon_index}]"
         ds = xr.open_dataset(murl,decode_times=True)
         my_dpi=100
-        f,ax = plt.subplots(1,1,figsize=(400/my_dpi, 150/my_dpi), dpi=my_dpi)
+        f,ax = plt.subplots(1,1,figsize=(700/my_dpi, 250/my_dpi), dpi=my_dpi)
         ds[variable].plot(linewidth=2,ax=ax)    
         # ax.set_title(dataset+' - '+variable+' - '+str(depth)+' at '+'%.2f'%lat+'/%.2f'%lon,fontsize = 10)
+        ax.set_title('')
+        ax.set_ylabel(variable)
+        ax.set_xlabel('')
         ax.grid(linestyle=':')
 
         plt.savefig(filename, bbox_inches='tight')    
@@ -87,8 +90,10 @@ def profile_on_point(lat, lon, dataset, variable, date):
         murl = dataset_config[ix]['opendap'] + f"longitude[{lon_index}],latitude[{lat_index}],depth[0:1:{len(depth_array)-1}],time[{time_index}],{variable}[{time_index}][0:1:{len(depth_array)-1}][{lat_index}][{lon_index}]"
         ds = xr.open_dataset(murl,decode_times=True)
         my_dpi=100
-        f,ax = plt.subplots(1,1,figsize=(175/my_dpi, 350/my_dpi), dpi=my_dpi)
+        f,ax = plt.subplots(1,1,figsize=(250/my_dpi, 600/my_dpi), dpi=my_dpi)
         ds[variable].plot(linewidth=2,y='depth',ax=ax)    
+        ax.set_title('')
+        ax.set_xlabel(variable)
         # ax.set_title(dataset+' - '+variable+' - '+str(date)+' at '+'%.2f'%lat+'/%.2f'%lon,rotation=90,y=-0.0,x=1.1,fontsize = 10)
         ax.grid(linestyle=':')
         ax.invert_yaxis()
@@ -114,4 +119,33 @@ def snapshot(lat0, lon0, lat1, lon1, dataset, variable, depth, date, lowval, hig
     Returns:
         _type_: _description_
     """
-    return None
+    filename = 'static/img/'+dataset+'_'+variable+'_'+str(date)[:10]+'_'+str(depth)+'_'+'%.2f'%lat0+'_%.2f'%lon0+'to'+'%.2f'%lat1+'_%.2f'%lon1+'.png'
+    print(filename)
+    if ((os.path.exists(filename))&(lowval is None)):
+        print("file already exists", file=sys.stdout)
+    else:
+        ix = [dataset==dataset_config[i]['name'] for i in range(len(dataset_config))]
+        ix = np.argmax(ix)
+        depth_array = np.array(dataset_config[ix]['levels'])
+        time_array = np.array(dataset_config[ix]['daterange'],dtype='datetime64')
+
+        lat0_index = np.abs(lat_array-lat0).argmin()
+        lat1_index = np.abs(lat_array-lat1).argmin()
+        lon0_index = np.abs(lon_array-lon0).argmin()    
+        lon1_index = np.abs(lon_array-lon1).argmin()        
+        time_index = np.abs(time_array - np.datetime64(date)).argmin()
+        dep_index = np.abs(depth_array-depth).argmin()
+        murl = dataset_config[ix]['opendap'] + f"longitude[{lon0_index}:{lon1_index}],latitude[{lat0_index}:{lat1_index}],depth[{dep_index}],time[{time_index}],{variable}[{time_index}][{dep_index}][{lat0_index}:{lat1_index}][{lon0_index}:{lon1_index}]"
+        ds = xr.open_dataset(murl,decode_times=True)    
+
+        fig = plt.figure(figsize=(9,9),dpi=100)
+        ax = fig.add_subplot(1,1,1,projection=ccrs.Miller())    
+        ds[variable].plot(cmap=plt.get_cmap('jet'),vmin=lowval,vmax=highval,ax=ax,cbar_kwargs={'orientation':'horizontal','pad':0.05,'shrink':0.5,'label':variable},transform=ccrs.PlateCarree())    
+        ax.set_title('')
+        #ax.coastlines()   
+        ax.add_feature(land_feature)
+        gl = ax.gridlines(linestyle=':',draw_labels=True)
+        gl.right_labels = None
+        gl.top_labels = None
+        plt.savefig(filename, bbox_inches='tight')
+    return filename        
