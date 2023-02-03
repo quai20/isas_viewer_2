@@ -7,6 +7,8 @@ import cartopy
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 land_feature=cfeature.NaturalEarthFeature(category='physical',name='land',scale='50m',facecolor=[120/255, 108/255, 92/255])
+from cartopy.geodesic import Geodesic
+geode = Geodesic()
 import xarray as xr
 import numpy as np
 import json
@@ -119,8 +121,8 @@ def snapshot(lat0, lon0, lat1, lon1, dataset, variable, depth, date, lowval, hig
     Returns:
         _type_: _description_
     """
-    filename = 'static/img/'+dataset+'_'+variable+'_'+str(date)[:10]+'_'+str(depth)+'_'+'%.2f'%lat0+'_%.2f'%lon0+'to'+'%.2f'%lat1+'_%.2f'%lon1+'.png'
-    print(filename)
+    filename = 'static/img/'+dataset+'_'+variable+'_'+str(date)[:10]+'_'+str(depth)+'_'+'%.2f'%lat0+'_%.2f'%lon0+'to'+'%.2f'%lat1+'_%.2f'%lon1+'_sna.png'    
+    
     if ((os.path.exists(filename))&(lowval is None)):
         print("file already exists", file=sys.stdout)
     else:
@@ -140,7 +142,7 @@ def snapshot(lat0, lon0, lat1, lon1, dataset, variable, depth, date, lowval, hig
 
         fig = plt.figure(figsize=(9,9),dpi=100)
         ax = fig.add_subplot(1,1,1,projection=ccrs.Miller())    
-        ds[variable].plot(cmap=plt.get_cmap('jet'),vmin=lowval,vmax=highval,ax=ax,cbar_kwargs={'orientation':'horizontal','pad':0.05,'shrink':0.5,'label':variable},transform=ccrs.PlateCarree())    
+        ds[variable].plot(cmap=plt.get_cmap('turbo'),vmin=lowval,vmax=highval,ax=ax,cbar_kwargs={'orientation':'horizontal','pad':0.05,'shrink':0.5,'label':variable},transform=ccrs.PlateCarree())    
         ax.set_title('')
         #ax.coastlines()   
         ax.add_feature(land_feature)
@@ -149,3 +151,59 @@ def snapshot(lat0, lon0, lat1, lon1, dataset, variable, depth, date, lowval, hig
         gl.top_labels = None
         plt.savefig(filename, bbox_inches='tight')
     return filename        
+
+def section(lat0, lon0, lat1, lon1, dataset, variable, date, lowval, highval):
+    """_summary_
+
+    Args:
+        lat0 (_type_): _description_
+        lon0 (_type_): _description_
+        lat1 (_type_): _description_
+        lon1 (_type_): _description_
+        dataset (_type_): _description_
+        variable (_type_): _description_
+        date (_type_): _description_
+        lowval (_type_): _description_
+        highval (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+    filename = 'static/img/'+dataset+'_'+variable+'_'+str(date)[:10]+'_'+'%.2f'%lat0+'_%.2f'%lon0+'to'+'%.2f'%lat1+'_%.2f'%lon1+'_sec.png'    
+    
+    if ((os.path.exists(filename))&(lowval is None)):
+        print("file already exists")
+    else:        
+        ix = [dataset==dataset_config[i]['name'] for i in range(len(dataset_config))]
+        ix = np.argmax(ix)
+        time_array = np.array(dataset_config[ix]['daterange'],dtype='datetime64')
+        depth_array = np.array(dataset_config[ix]['levels'])
+
+        lat0_index = np.abs(lat_array-(lat0-1)).argmin()
+        lat1_index = np.abs(lat_array-(lat1+1)).argmin()
+        lon0_index = np.abs(lon_array-(lon0-1)).argmin()    
+        lon1_index = np.abs(lon_array-(lon1+1)).argmin()        
+        time_index = np.abs(time_array - np.datetime64(date)).argmin()
+        murl = dataset_config[ix]['opendap'] + f"longitude[{lon0_index}:{lon1_index}],latitude[{lat0_index}:{lat1_index}],depth[0:1:{len(depth_array)-1}],time[{time_index}],{variable}[{time_index}][0:1:{len(depth_array)-1}][{lat0_index}:{lat1_index}][{lon0_index}:{lon1_index}]"
+        ds = xr.open_dataset(murl,decode_times=True)   
+        
+        drt = geode.inverse((lon0,lat0),(lon1,lat1))
+        d = drt[0][0]
+        a = drt[0][1]
+        distances = np.arange(0,d,50000) #step in meters, here 50km
+        points = geode.direct((lon0,lat0),a.repeat(len(distances)),distances)
+        seclon_array = points[:,0]
+        seclat_array = points[:,1]
+        secx = xr.DataArray(seclon_array, coords={"distance":distances/1e3})
+        secy = xr.DataArray(seclat_array, coords={"distance":distances/1e3})
+        dsi = ds.interp(longitude=secx,latitude=secy)        
+        
+        my_dpi=100
+        f,ax = plt.subplots(1,1,figsize=(900/my_dpi, 350/my_dpi), dpi=my_dpi)        
+        dsi[variable].squeeze().plot.contourf(y='depth',levels=30,cmap=plt.get_cmap('turbo'),ax=ax,vmin=lowval,vmax=highval)
+        ax.set_title('')                
+        ax.grid(linestyle=':')
+        ax.invert_yaxis()
+        ax.set_xlabel('distance along section (km)')
+        plt.savefig(filename, bbox_inches='tight')
+    return filename       

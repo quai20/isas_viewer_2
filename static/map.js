@@ -128,6 +128,7 @@ var map = mapStuff.map;
 var marker = L.marker();
 var layerControl = mapStuff.layerControl;
 var RectDrawer = new L.Draw.Rectangle(map);
+var LineDrawer = new L.Draw.Polyline(map);
 var clicked = 0;
 var tempLayer = L.layerGroup().addTo(map);
 
@@ -150,28 +151,42 @@ function gen_snapshot() {
   map.fireEvent('click');
 }
 
-function ano_timeserie() {
+function gen_section() {
   clicked = 4;
   $('.leaflet-container').css('cursor', 'crosshair');
+  map.fireEvent('click');
 }
-function ano_profile() {
+
+function ano_timeserie() {
   clicked = 5;
   $('.leaflet-container').css('cursor', 'crosshair');
 }
-function ano_snapshot() {
+function ano_profile() {
   clicked = 6;
+  $('.leaflet-container').css('cursor', 'crosshair');
+}
+function ano_snapshot() {
+  clicked = 7;
+  $('.leaflet-container').css('cursor', 'crosshair');
+  map.fireEvent('click');
+}
+function ano_section() {
+  clicked = 8;
   $('.leaflet-container').css('cursor', 'crosshair');
   map.fireEvent('click');
 }
 
 map.on('click', function (e) {
-  if ([1, 2, 4, 5].includes(clicked)) {
+  if ([1, 2, 5, 6].includes(clicked)) {
     gen_img([e.latlng.lat, e.latlng.lng, e.latlng.lat, e.latlng.lng], clicked)
     $('.leaflet-container').css('cursor', '');
     clicked = 0;
   }
-  else if ([3, 6].includes(clicked)) {
+  else if ([3, 7].includes(clicked)) {
     RectDrawer.enable();
+  }
+  else if ([4, 8].includes(clicked)) {
+    LineDrawer.enable();
   }
 });
 
@@ -181,8 +196,13 @@ map.on('draw:created', function (e) {
     layer = e.layer;
   layer.addTo(tempLayer);
   var coords = layer.getLatLngs();
-
-  gen_img([coords[0]['lat'], coords[0]['lng'], coords[2]['lat'], coords[2]['lng']], clicked);
+  if ([3, 7].includes(clicked)) {
+    gen_img([coords[0]['lat'], coords[0]['lng'], coords[2]['lat'], coords[2]['lng']], clicked);
+  }
+  else if ([4, 8].includes(clicked)) {
+    gen_img([coords[0]['lat'], coords[0]['lng'], coords[1]['lat'], coords[1]['lng']], clicked);
+  }
+  
   $('.leaflet-container').css('cursor', '');
   clicked = 0;
 });
@@ -196,21 +216,24 @@ function gen_img(coords_array, clicked) {
 
   // POP UP IS NOT A GOOD IDEA, WE SHOULD ADD A MARKER/RECTANGLE AND PLOT IN A SIDE OR BOTTOM PANEL INSTEAD
   //MARKER
-  if ([1, 2, 4, 5].includes(clicked)) {
+  if ([1, 2, 5, 6].includes(clicked)) {
     marker = L.marker([(lat0 + lat1) / 2, (lon0 + lon1) / 2]).addTo(tempLayer);
   }
   //SET PANEL CONTENT
   winc.content("<div id='img_div'><center><div class=\"lds-dual-ring\"></div></center></div>");
 
-  if ([1,4].includes(clicked)){
+  if ([1,5].includes(clicked)){
     winc.title("<a style=\"font-size:20px; font-weight:bold;\">"+lat0.toFixed(2)+','+lon0.toFixed(2)+" / "+user_selection['depth'].toString()+"m</a>");
   }
-  else if ([2,5].includes(clicked)){
+  else if ([2,6].includes(clicked)){
     winc.title("<a style=\"font-size:20px; font-weight:bold;\">"+lat0.toFixed(2)+','+lon0.toFixed(2)+" / "+user_selection['time'].substr(0,10)+"</a>");
   }
-  else {
+  else if ([3,7].includes(clicked)){
     winc.title("<a style=\"font-size:20px; font-weight:bold;\">"+user_selection['time'].substr(0,10)+
     ' / '+user_selection['depth'].toString()+"m</a>");
+  }
+  else {
+    winc.title("<a style=\"font-size:20px; font-weight:bold;\">"+user_selection['time'].substr(0,10)+"</a>");
   }
   
   winc.show();

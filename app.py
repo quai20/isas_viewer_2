@@ -47,14 +47,14 @@ def gen_img_route():
     date = request.args.get('time')
     try:
         lowval = float(request.args.get('lowval'))
-        highval = float(request.args.get('highval'))        
+        highval = float(request.args.get('highval'))
         if(np.isnan(lowval)):
-            lowval=None
+            lowval = None
         if(np.isnan(highval)):
-            highval=None            
+            highval = None
     except:
         lowval = None
-        highval = None        
+        highval = None
 
     # test on operation
     if (operation == 1):
@@ -64,6 +64,9 @@ def gen_img_route():
     elif (operation == 3):
         img_path = snapshot(lat0, lon0, lat1, lon1, dataset,
                             variable, depth, date, lowval, highval)
+    elif (operation == 4):
+        img_path = section(lat0, lon0, lat1, lon1, dataset,
+                            variable, date, lowval, highval)
     else:
         img_path = url_for("static", filename='dist/unavailable.png')
 
