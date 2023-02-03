@@ -123,6 +123,11 @@ def snapshot(lat0, lon0, lat1, lon1, dataset, variable, depth, date, lowval, hig
     """
     filename = 'static/img/'+dataset+'_'+variable+'_'+str(date)[:10]+'_'+str(depth)+'_'+'%.2f'%lat0+'_%.2f'%lon0+'to'+'%.2f'%lat1+'_%.2f'%lon1+'_sna.png'    
     
+    if (lat0>lat1):
+        lat0,lat1 = lat1,lat0
+    if (lon0>lon1):
+        lon0,lon1 = lon1,lon0        
+
     if ((os.path.exists(filename))&(lowval is None)):
         print("file already exists", file=sys.stdout)
     else:
@@ -142,7 +147,7 @@ def snapshot(lat0, lon0, lat1, lon1, dataset, variable, depth, date, lowval, hig
 
         fig = plt.figure(figsize=(9,9),dpi=100)
         ax = fig.add_subplot(1,1,1,projection=ccrs.Miller())    
-        ds[variable].plot(cmap=plt.get_cmap('turbo'),vmin=lowval,vmax=highval,ax=ax,cbar_kwargs={'orientation':'horizontal','pad':0.05,'shrink':0.5,'label':variable},transform=ccrs.PlateCarree())    
+        ds[variable].squeeze().plot(cmap=plt.get_cmap('turbo'),vmin=lowval,vmax=highval,ax=ax,cbar_kwargs={'orientation':'horizontal','pad':0.05,'shrink':0.5,'label':variable},transform=ccrs.PlateCarree())    
         ax.set_title('')
         #ax.coastlines()   
         ax.add_feature(land_feature)
@@ -181,10 +186,15 @@ def section(lat0, lon0, lat1, lon1, dataset, variable, date, lowval, highval):
 
         lat0_index = np.abs(lat_array-(lat0-1)).argmin()
         lat1_index = np.abs(lat_array-(lat1+1)).argmin()
+        lai0 = min(lat0_index,lat1_index)
+        lai1 = max(lat0_index,lat1_index)        
         lon0_index = np.abs(lon_array-(lon0-1)).argmin()    
         lon1_index = np.abs(lon_array-(lon1+1)).argmin()        
+        loi0 = min(lon0_index,lon1_index)
+        loi1 = max(lon0_index,lon1_index)
+
         time_index = np.abs(time_array - np.datetime64(date)).argmin()
-        murl = dataset_config[ix]['opendap'] + f"longitude[{lon0_index}:{lon1_index}],latitude[{lat0_index}:{lat1_index}],depth[0:1:{len(depth_array)-1}],time[{time_index}],{variable}[{time_index}][0:1:{len(depth_array)-1}][{lat0_index}:{lat1_index}][{lon0_index}:{lon1_index}]"
+        murl = dataset_config[ix]['opendap'] + f"longitude[{loi0}:{loi1}],latitude[{lai0}:{lai1}],depth[0:1:{len(depth_array)-1}],time[{time_index}],{variable}[{time_index}][0:1:{len(depth_array)-1}][{lai0}:{lai1}][{loi0}:{loi1}]"
         ds = xr.open_dataset(murl,decode_times=True)   
         
         drt = geode.inverse((lon0,lat0),(lon1,lat1))
@@ -200,7 +210,7 @@ def section(lat0, lon0, lat1, lon1, dataset, variable, date, lowval, highval):
         
         my_dpi=100
         f,ax = plt.subplots(1,1,figsize=(900/my_dpi, 350/my_dpi), dpi=my_dpi)        
-        dsi[variable].squeeze().plot.contourf(y='depth',levels=30,cmap=plt.get_cmap('turbo'),ax=ax,vmin=lowval,vmax=highval)
+        dsi[variable].squeeze().plot(y='depth',cmap=plt.get_cmap('turbo'),ax=ax,vmin=lowval,vmax=highval)
         ax.set_title('')                
         ax.grid(linestyle=':')
         ax.invert_yaxis()

@@ -66,7 +66,7 @@ def gen_img_route():
                             variable, depth, date, lowval, highval)
     elif (operation == 4):
         img_path = section(lat0, lon0, lat1, lon1, dataset,
-                            variable, date, lowval, highval)
+                           variable, date, lowval, highval)
     else:
         img_path = url_for("static", filename='dist/unavailable.png')
 

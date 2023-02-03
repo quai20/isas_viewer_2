@@ -195,8 +195,8 @@ map.on('draw:created', function (e) {
   var type = e.layerType,
     layer = e.layer;
   layer.addTo(tempLayer);
-  var coords = layer.getLatLngs();
-  if ([3, 7].includes(clicked)) {
+  var coords = layer.getLatLngs();  
+  if ([3, 7].includes(clicked)) {    
     gen_img([coords[0]['lat'], coords[0]['lng'], coords[2]['lat'], coords[2]['lng']], clicked);
   }
   else if ([4, 8].includes(clicked)) {
