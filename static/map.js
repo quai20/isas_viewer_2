@@ -125,16 +125,11 @@ function initDemoMap() {
 // MAP CREATION
 var mapStuff = initDemoMap();
 var map = mapStuff.map;
-var marker = L.marker();
 var layerControl = mapStuff.layerControl;
 var RectDrawer = new L.Draw.Rectangle(map);
 var LineDrawer = new L.Draw.Polyline(map);
 var clicked = 0;
-var tempLayer = L.layerGroup().addTo(map);
-
-var winc = L.control.window(map, { title: '', position: 'topLeft' }).on('hide', function () {
-  tempLayer.clearLayers();
-});
+var tempLayer = L.layerGroup().addTo(map); //FOR INTERACTIVE PURPOSE
 
 
 function gen_timeserie() {
@@ -213,10 +208,32 @@ function gen_img(coords_array, clicked) {
   var lon0 = coords_array[1];
   var lat1 = coords_array[2];
   var lon1 = coords_array[3];
-    
-  //MARKER
+  
+  //CLEAR TEMPLAYER
+  tempLayer.clearLayers();
+
+  //CREATE ONESHOTLAYER with a random name 
+  var oneshotname = "l"+(Math.floor(Math.random()*1e6)).toString();
+  window[oneshotname] =  L.layerGroup().addTo(map);  
+
+  //CREATE WINDOW OBJ
+  var winc = L.control.window(map, { title: '', position: 'topLeft' }).on('hide', function () {
+  window[oneshotname].clearLayers();
+  });
+
+  //MARKER FOR POINT OPERATIONS
   if ([1, 2, 5, 6].includes(clicked)) {
-    marker = L.marker([(lat0 + lat1) / 2, (lon0 + lon1) / 2]).addTo(tempLayer);
+    var marker = L.marker([(lat0 + lat1) / 2, (lon0 + lon1) / 2]).addTo(window[oneshotname]);
+  }
+
+  //RECTANGLE FOR SNAPSHOT
+  if ([3,7].includes(clicked)) {
+    var rectangle = L.rectangle([[lat0, lon0], [lat1, lon1]],  {color: 'Red', weight: 1}).addTo(window[oneshotname]);
+  }
+
+  //LINE FOR SECTION
+  if ([4,8].includes(clicked)) {
+    var line = L.polyline([[lat0, lon0], [lat1, lon1]],  {color: 'Red'}).addTo(window[oneshotname]);
   }
   
   //SET WINDOW CONTENT
