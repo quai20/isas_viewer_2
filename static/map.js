@@ -213,13 +213,13 @@ function gen_img(coords_array, clicked) {
   var lon0 = coords_array[1];
   var lat1 = coords_array[2];
   var lon1 = coords_array[3];
-
-  // POP UP IS NOT A GOOD IDEA, WE SHOULD ADD A MARKER/RECTANGLE AND PLOT IN A SIDE OR BOTTOM PANEL INSTEAD
+    
   //MARKER
   if ([1, 2, 5, 6].includes(clicked)) {
     marker = L.marker([(lat0 + lat1) / 2, (lon0 + lon1) / 2]).addTo(tempLayer);
   }
-  //SET PANEL CONTENT
+  
+  //SET WINDOW CONTENT
   winc.content("<div id='img_div'><center><div class=\"lds-dual-ring\"></div></center></div>");
 
   if ([1,5].includes(clicked)){

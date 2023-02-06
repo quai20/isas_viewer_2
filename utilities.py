@@ -136,10 +136,10 @@ def snapshot(lat0, lon0, lat1, lon1, dataset, variable, depth, date, lowval, hig
         depth_array = np.array(dataset_config[ix]['levels'])
         time_array = np.array(dataset_config[ix]['daterange'],dtype='datetime64')
 
-        lat0_index = np.abs(lat_array-lat0).argmin()
-        lat1_index = np.abs(lat_array-lat1).argmin()
-        lon0_index = np.abs(lon_array-lon0).argmin()    
-        lon1_index = np.abs(lon_array-lon1).argmin()        
+        lat0_index = np.abs(lat_array-lat0).argmin() - 1
+        lat1_index = np.abs(lat_array-lat1).argmin() + 1 
+        lon0_index = np.abs(lon_array-lon0).argmin() - 1   
+        lon1_index = np.abs(lon_array-lon1).argmin() + 1       
         time_index = np.abs(time_array - np.datetime64(date)).argmin()
         dep_index = np.abs(depth_array-depth).argmin()
         murl = dataset_config[ix]['opendap'] + f"longitude[{lon0_index}:{lon1_index}],latitude[{lat0_index}:{lat1_index}],depth[{dep_index}],time[{time_index}],{variable}[{time_index}][{dep_index}][{lat0_index}:{lat1_index}][{lon0_index}:{lon1_index}]"
@@ -186,12 +186,12 @@ def section(lat0, lon0, lat1, lon1, dataset, variable, date, lowval, highval):
 
         lat0_index = np.abs(lat_array-(lat0-1)).argmin()
         lat1_index = np.abs(lat_array-(lat1+1)).argmin()
-        lai0 = min(lat0_index,lat1_index)
-        lai1 = max(lat0_index,lat1_index)        
+        lai0 = min(lat0_index,lat1_index)-10
+        lai1 = max(lat0_index,lat1_index)+10        
         lon0_index = np.abs(lon_array-(lon0-1)).argmin()    
         lon1_index = np.abs(lon_array-(lon1+1)).argmin()        
-        loi0 = min(lon0_index,lon1_index)
-        loi1 = max(lon0_index,lon1_index)
+        loi0 = min(lon0_index,lon1_index)-10
+        loi1 = max(lon0_index,lon1_index)+10
 
         time_index = np.abs(time_array - np.datetime64(date)).argmin()
         murl = dataset_config[ix]['opendap'] + f"longitude[{loi0}:{loi1}],latitude[{lai0}:{lai1}],depth[0:1:{len(depth_array)-1}],time[{time_index}],{variable}[{time_index}][0:1:{len(depth_array)-1}][{lai0}:{lai1}][{loi0}:{loi1}]"
