@@ -2,4 +2,4 @@ __pychache__
 isasViewer_plots.ipynb
 .ipynb_checkpoints
 static/img/*
-static/img/.gitkeep 
+!static/img/.gitkeep 
