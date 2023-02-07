@@ -56,7 +56,7 @@ def gen_img_route():
         lowval = None
         highval = None
 
-    # test on operation
+    # tests on operation
     if (operation == 1):
         img_path = time_serie_on_point(lat0, lon0, dataset, variable, depth)
     elif (operation == 2):

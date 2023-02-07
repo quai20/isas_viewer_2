@@ -98,9 +98,21 @@ function initDemoMap() {
     attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
   });
 
+  var OpenStreetMap_Mapnik = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+  });
+
+  var Esri_WorldGrayCanvas = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+    attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ',
+    maxZoom: 16
+  });
+
   //BASE TILE GROUP LAYER
   var baseLayers = {
-    'Base': Esri_WorldImagery
+    'Esri': Esri_WorldImagery,
+    'Open': OpenStreetMap_Mapnik,
+    'Gray': Esri_WorldGrayCanvas
   };
 
   var map = L.map('map', {
@@ -190,14 +202,14 @@ map.on('draw:created', function (e) {
   var type = e.layerType,
     layer = e.layer;
   layer.addTo(tempLayer);
-  var coords = layer.getLatLngs();  
-  if ([3, 7].includes(clicked)) {    
+  var coords = layer.getLatLngs();
+  if ([3, 7].includes(clicked)) {
     gen_img([coords[0]['lat'], coords[0]['lng'], coords[2]['lat'], coords[2]['lng']], clicked);
   }
   else if ([4, 8].includes(clicked)) {
     gen_img([coords[0]['lat'], coords[0]['lng'], coords[1]['lat'], coords[1]['lng']], clicked);
   }
-  
+
   $('.leaflet-container').css('cursor', '');
   clicked = 0;
 });
@@ -208,17 +220,17 @@ function gen_img(coords_array, clicked) {
   var lon0 = coords_array[1];
   var lat1 = coords_array[2];
   var lon1 = coords_array[3];
-  
+
   //CLEAR TEMPLAYER
   tempLayer.clearLayers();
 
   //CREATE ONESHOTLAYER with a random name 
-  var oneshotname = "l"+(Math.floor(Math.random()*1e6)).toString();
-  window[oneshotname] =  L.layerGroup().addTo(map);  
+  var oneshotname = "l" + (Math.floor(Math.random() * 1e6)).toString();
+  window[oneshotname] = L.layerGroup().addTo(map);
 
   //CREATE WINDOW OBJ
   var winc = L.control.window(map, { title: '', position: 'topLeft' }).on('hide', function () {
-  window[oneshotname].clearLayers();
+    window[oneshotname].clearLayers();
   });
 
   //MARKER FOR POINT OPERATIONS
@@ -227,32 +239,32 @@ function gen_img(coords_array, clicked) {
   }
 
   //RECTANGLE FOR SNAPSHOT
-  if ([3,7].includes(clicked)) {
-    var rectangle = L.rectangle([[lat0, lon0], [lat1, lon1]],  {color: 'Red', weight: 1}).addTo(window[oneshotname]);
+  if ([3, 7].includes(clicked)) {
+    var rectangle = L.rectangle([[lat0, lon0], [lat1, lon1]], { color: 'Red', weight: 1 }).addTo(window[oneshotname]);
   }
 
   //LINE FOR SECTION
-  if ([4,8].includes(clicked)) {
-    var line = L.polyline([[lat0, lon0], [lat1, lon1]],  {color: 'Red'}).addTo(window[oneshotname]);
+  if ([4, 8].includes(clicked)) {
+    var line = L.polyline([[lat0, lon0], [lat1, lon1]], { color: 'Red' }).addTo(window[oneshotname]);
   }
-  
+
   //SET WINDOW CONTENT
   winc.content("<div id='img_div'><center><div class=\"lds-dual-ring\"></div></center></div>");
 
-  if ([1,5].includes(clicked)){
-    winc.title("<a style=\"font-size:20px; font-weight:bold;\">"+lat0.toFixed(2)+','+lon0.toFixed(2)+" / "+user_selection['depth'].toString()+"m</a>");
+  if ([1, 5].includes(clicked)) {
+    winc.title("<a style=\"font-size:20px; font-weight:bold;\">" + lat0.toFixed(2) + ',' + lon0.toFixed(2) + " / " + user_selection['depth'].toString() + "m</a>");
   }
-  else if ([2,6].includes(clicked)){
-    winc.title("<a style=\"font-size:20px; font-weight:bold;\">"+lat0.toFixed(2)+','+lon0.toFixed(2)+" / "+user_selection['time'].substr(0,10)+"</a>");
+  else if ([2, 6].includes(clicked)) {
+    winc.title("<a style=\"font-size:20px; font-weight:bold;\">" + lat0.toFixed(2) + ',' + lon0.toFixed(2) + " / " + user_selection['time'].substr(0, 10) + "</a>");
   }
-  else if ([3,7].includes(clicked)){
-    winc.title("<a style=\"font-size:20px; font-weight:bold;\">"+user_selection['time'].substr(0,10)+
-    ' / '+user_selection['depth'].toString()+"m</a>");
+  else if ([3, 7].includes(clicked)) {
+    winc.title("<a style=\"font-size:20px; font-weight:bold;\">" + user_selection['time'].substr(0, 10) +
+      ' / ' + user_selection['depth'].toString() + "m</a>");
   }
   else {
-    winc.title("<a style=\"font-size:20px; font-weight:bold;\">"+user_selection['time'].substr(0,10)+"</a>");
+    winc.title("<a style=\"font-size:20px; font-weight:bold;\">" + user_selection['time'].substr(0, 10) + "</a>");
   }
-  
+
   winc.show();
 
   reqstring = 'lat0=' + lat0.toString() + '&lon0=' + lon0.toString() +
@@ -268,7 +280,7 @@ function gen_img(coords_array, clicked) {
     data: reqstring,
     contentType: 'application/json;charset=UTF-8',
     success: function (data) {
-      dataarray = JSON.parse(data)      
+      dataarray = JSON.parse(data)
       // EDIT IMG WINDOW      
       winc.content("<img src=\"" + dataarray + "\" alt=\"img\"></img>");
     }
