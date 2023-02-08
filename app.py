@@ -58,15 +58,22 @@ def gen_img_route():
 
     # tests on operation
     if (operation == 1):
-        img_path = time_serie_on_point(lat0, lon0, dataset, variable, depth)
+        img_path = time_serie_on_point(lat0, lon0, dataset, variable, depth,0)
     elif (operation == 2):
-        img_path = profile_on_point(lat0, lon0, dataset, variable, date)
+        img_path = profile_on_point(lat0, lon0, dataset, variable, date,0)
     elif (operation == 3):
         img_path = snapshot(lat0, lon0, lat1, lon1, dataset,
-                            variable, depth, date, lowval, highval)
+                            variable, depth, date, lowval, highval,0)
     elif (operation == 4):
         img_path = section(lat0, lon0, lat1, lon1, dataset,
-                           variable, date, lowval, highval)
+                           variable, date, lowval, highval,0)
+    elif (operation == 5):
+        img_path = time_serie_on_point(lat0, lon0, dataset, variable, depth,1)                           
+    elif (operation == 6):
+        img_path = profile_on_point(lat0, lon0, dataset, variable, date,1)       
+    elif (operation == 7):
+        img_path = snapshot(lat0, lon0, lat1, lon1, dataset,
+                            variable, depth, date, lowval, highval,1)                   
     else:
         img_path = url_for("static", filename='dist/unavailable.png')
 
