@@ -257,8 +257,30 @@ def section(lat0, lon0, lat1, lon1, dataset, variable, date, lowval, highval, pt
         loi1 = max(lon0_index,lon1_index)+10
 
         time_index = np.abs(time_array - np.datetime64(date)).argmin()
-        murl = dataset_config[ix]['opendap'] + f"longitude[{loi0}:{loi1}],latitude[{lai0}:{lai1}],depth[0:1:{len(depth_array)-1}],time[{time_index}],{variable}[{time_index}][0:1:{len(depth_array)-1}][{lai0}:{lai1}][{loi0}:{loi1}]"
-        ds = xr.open_dataset(murl,decode_times=True)   
+
+        if (ptype==1):
+            if (('climato' in dataset_config[ix])):
+                iz = [dataset_config[ix]['climato']==dataset_config[i]['name'] for i in range(len(dataset_config))]
+                iz = np.argmax(iz)
+                time_array_a = np.array(dataset_config[iz]['daterange'],dtype='datetime64')
+
+                murla = dataset_config[iz]['opendap'] + f"longitude[{loi0}:{loi1}],latitude[{lai0}:{lai1}],depth[0:1:{len(depth_array)-1}],time[0:1:{len(time_array_a)-1}],{variable}[0:1:{len(time_array_a)-1}][0:1:{len(depth_array)-1}][{lai0}:{lai1}][{loi0}:{loi1}]"
+                dsa = xr.open_dataset(murla,decode_times=True)
+                dsa['time'] = np.arange(1,13)
+                dsa = dsa.rename({'time':'month'})
+
+                murlb = dataset_config[ix]['opendap'] + f"longitude[{loi0}:{loi1}],latitude[{lai0}:{lai1}],depth[0:1:{len(depth_array)-1}],time[{time_index}],{variable}[{time_index}][0:1:{len(depth_array)-1}][{lai0}:{lai1}][{loi0}:{loi1}]"
+                dsb = xr.open_dataset(murlb,decode_times=True)   
+
+                ds = dsb.groupby('time.month') - dsa
+                clabel=variable+' anomaly'
+
+            else :
+                return "static/dist/unavailable.png"
+        else :    
+            murl = dataset_config[ix]['opendap'] + f"longitude[{loi0}:{loi1}],latitude[{lai0}:{lai1}],depth[0:1:{len(depth_array)-1}],time[{time_index}],{variable}[{time_index}][0:1:{len(depth_array)-1}][{lai0}:{lai1}][{loi0}:{loi1}]"
+            ds = xr.open_dataset(murl,decode_times=True)   
+            clabel=variable
         
         drt = geode.inverse((lon0,lat0),(lon1,lat1))
         d = drt[0][0]
@@ -273,7 +295,7 @@ def section(lat0, lon0, lat1, lon1, dataset, variable, date, lowval, highval, pt
         
         my_dpi=100
         f,ax = plt.subplots(1,1,figsize=(900/my_dpi, 350/my_dpi), dpi=my_dpi)        
-        dsi[variable].squeeze().plot(y='depth',cmap=plt.get_cmap('turbo'),ax=ax,vmin=lowval,vmax=highval)
+        dsi[variable].squeeze().plot(y='depth',cmap=plt.get_cmap('turbo'),cbar_kwargs={'shrink':0.6,'label':clabel},ax=ax,vmin=lowval,vmax=highval)
         ax.set_title('')                
         ax.grid(linestyle=':')
         ax.invert_yaxis()

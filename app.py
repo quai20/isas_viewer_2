@@ -73,7 +73,10 @@ def gen_img_route():
         img_path = profile_on_point(lat0, lon0, dataset, variable, date,1)       
     elif (operation == 7):
         img_path = snapshot(lat0, lon0, lat1, lon1, dataset,
-                            variable, depth, date, lowval, highval,1)                   
+                            variable, depth, date, None, None,1)          
+    elif (operation == 8):
+        img_path = section(lat0, lon0, lat1, lon1, dataset,
+                           variable, date, None, None,1)
     else:
         img_path = url_for("static", filename='dist/unavailable.png')
 
