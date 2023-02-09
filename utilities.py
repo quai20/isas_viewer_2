@@ -165,8 +165,11 @@ def snapshot(lat0, lon0, lat1, lon1, dataset, variable, depth, date, lowval, hig
     Returns:
         _type_: _description_
     """
-    filename = 'static/img/'+dataset+'_'+variable+str(ptype)+'_'+str(date)[:10]+'_'+str(depth)+'_'+'%.2f'%lat0+'_%.2f'%lon0+'to'+'%.2f'%lat1+'_%.2f'%lon1+'_sna.png'    
-    
+    if((lowval==None)&(highval==None)):
+        filename = 'static/img/'+dataset+'_'+variable+str(ptype)+'_'+str(date)[:10]+'_'+str(depth)+'_'+'%.2f'%lat0+'_%.2f'%lon0+'to'+'%.2f'%lat1+'_%.2f'%lon1+'_sna.png'    
+    else:
+        filename = 'static/img/'+dataset+'_'+variable+str(ptype)+'_'+str(date)[:10]+'_'+str(depth)+'_'+'%.2f'%lat0+'_%.2f'%lon0+'to'+'%.2f'%lat1+'_%.2f'%lon1+'_'+str(lowval)+'-'+str(highval)+'_sna.png'    
+
     if (lat0>lat1):
         lat0,lat1 = lat1,lat0
     if (lon0>lon1):
@@ -237,8 +240,11 @@ def section(lat0, lon0, lat1, lon1, dataset, variable, date, lowval, highval, pt
     Returns:
         _type_: _description_
     """
-    filename = 'static/img/'+dataset+'_'+variable+str(ptype)+'_'+str(date)[:10]+'_'+'%.2f'%lat0+'_%.2f'%lon0+'to'+'%.2f'%lat1+'_%.2f'%lon1+'_sec.png'    
-    
+    if((lowval==None)&(highval==None)):
+        filename = 'static/img/'+dataset+'_'+variable+str(ptype)+'_'+str(date)[:10]+'_'+'%.2f'%lat0+'_%.2f'%lon0+'to'+'%.2f'%lat1+'_%.2f'%lon1+'_sec.png'    
+    else:
+        filename = 'static/img/'+dataset+'_'+variable+str(ptype)+'_'+str(date)[:10]+'_'+'%.2f'%lat0+'_%.2f'%lon0+'to'+'%.2f'%lat1+'_%.2f'%lon1+'_'+str(lowval)+'-'+str(highval)+'_sec.png'    
+
     if ((os.path.exists(filename))&(lowval is None)):
         print("file already exists")
     else:        
@@ -295,7 +301,7 @@ def section(lat0, lon0, lat1, lon1, dataset, variable, date, lowval, highval, pt
         
         my_dpi=100
         f,ax = plt.subplots(1,1,figsize=(900/my_dpi, 350/my_dpi), dpi=my_dpi)        
-        dsi[variable].squeeze().plot(y='depth',cmap=plt.get_cmap('turbo'),cbar_kwargs={'shrink':0.6,'label':clabel},ax=ax,vmin=lowval,vmax=highval)
+        dsi[variable].squeeze().plot(y='depth',cmap=plt.get_cmap('turbo'),cbar_kwargs={'shrink':0.8,'label':clabel},ax=ax,vmin=lowval,vmax=highval)
         ax.set_title('')                
         ax.grid(linestyle=':')
         ax.invert_yaxis()
