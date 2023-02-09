@@ -5,3 +5,6 @@ dask==2022.12.1
 pandas==1.5.2
 erddapy==1.2.1
 flask==2.2.2
+curl=7.87.0
+netcdf4=1.6.0
+libcurl=7.87.0
