@@ -251,17 +251,21 @@ function gen_img(coords_array, clicked) {
   //SET WINDOW CONTENT
   winc.content("<div id='img_div'><center><div class=\"lds-dual-ring\"></div></center></div>");
 
+  //time series
   if ([1, 5].includes(clicked)) {
     winc.title("<a style=\"font-size:20px; font-weight:bold;\">" + lat0.toFixed(2) + ',' + lon0.toFixed(2) + " / " + user_selection['depth'].toString() + "m</a>");
   }
-  else if ([2, 6].includes(clicked)) {
+  //profile
+  else if ([2, 6].includes(clicked)) {  
     winc.title("<a style=\"font-size:20px; font-weight:bold;\">" + lat0.toFixed(2) + ',' + lon0.toFixed(2) + " / " + user_selection['time'].substr(0, 10) + "</a>");
   }
-  else if ([3, 7].includes(clicked)) {
+  //snap  
+  else if ([3, 7].includes(clicked)) {    
     winc.title("<a style=\"font-size:20px; font-weight:bold;\">" + user_selection['time'].substr(0, 10) +
       ' / ' + user_selection['depth'].toString() + "m</a>");
   }
-  else {
+  //section  
+  else if ([4, 8].includes(clicked)){
     winc.title("<a style=\"font-size:20px; font-weight:bold;\">" + user_selection['time'].substr(0, 10) + "</a>");
   }
 
@@ -287,4 +291,3 @@ function gen_img(coords_array, clicked) {
   });
 
 }
-
