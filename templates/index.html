@@ -127,8 +127,7 @@
                 for (let i = 0; i < dataset_config.length; i++) {
                     const opt0 = document.createElement("option");
                     opt0.value = String(i);
-                    opt0.text = dataset_config[i]['name'];
-                    opt0.selected = true;
+                    opt0.text = dataset_config[i]['name'];                    
                     sel0.add(opt0, sel0.options[i]);
                 }
 
@@ -137,8 +136,7 @@
                 for (let i = 0; i < dataset_config[dataset_config.length - 1]['vars'].length; i++) {
                     const opt1 = document.createElement("option");
                     opt1.value = String(i);
-                    opt1.text = dataset_config[dataset_config.length - 1]['vars'][i];
-                    opt1.selected = true;
+                    opt1.text = dataset_config[dataset_config.length - 1]['vars'][i];                    
                     sel1.add(opt1, sel1.options[i]);
                 }
 
@@ -147,8 +145,7 @@
                 for (let i = 0; i < dataset_config[dataset_config.length - 1]['levels'].length; i++) {
                     const opt2 = document.createElement("option");
                     opt2.value = String(i);
-                    opt2.text = String(dataset_config[dataset_config.length - 1]['levels'][i]).substr(0, 5) + " m";
-                    opt2.selected = true;
+                    opt2.text = String(dataset_config[dataset_config.length - 1]['levels'][i]).substr(0, 5) + " m";                    
                     sel2.add(opt2, sel2.options[i]);
                 }
 
@@ -157,10 +154,11 @@
                 for (let i = 0; i < dataset_config[dataset_config.length - 1]['daterange'].length; i++) {
                     const opt3 = document.createElement("option");
                     opt3.value = String(i);
-                    opt3.text = dataset_config[dataset_config.length - 1]['daterange'][i].substr(0, 10);
-                    opt3.selected = true;
+                    opt3.text = dataset_config[dataset_config.length - 1]['daterange'][i].substr(0, 10);                    
                     sel3.add(opt3, sel3.options[i]);
                 }
+
+                updateSelectors();
 
             });
 
@@ -173,8 +171,7 @@
                 for (let i = 0; i < dataset_config[dx]['vars'].length; i++) {
                     const opt1 = document.createElement("option");
                     opt1.value = String(i);
-                    opt1.text = dataset_config[dx]['vars'][i];
-                    opt1.selected = true;
+                    opt1.text = dataset_config[dx]['vars'][i];                    
                     sel1.add(opt1, sel1.options[i]);
                 }
 
@@ -184,8 +181,7 @@
                 for (let i = 0; i < dataset_config[dx]['levels'].length; i++) {
                     const opt2 = document.createElement("option");
                     opt2.value = String(i);
-                    opt2.text = String(dataset_config[dx]['levels'][i]).substr(0, 5) + " m";
-                    opt2.selected = true;
+                    opt2.text = String(dataset_config[dx]['levels'][i]).substr(0, 5) + " m";                    
                     sel2.add(opt2, sel2.options[i]);
                 }
 
@@ -195,8 +191,7 @@
                 for (let i = 0; i < dataset_config[dx]['daterange'].length; i++) {
                     const opt3 = document.createElement("option");
                     opt3.value = String(i);
-                    opt3.text = dataset_config[dx]['daterange'][i].substr(0, 10);
-                    opt3.selected = true;
+                    opt3.text = dataset_config[dx]['daterange'][i].substr(0, 10);                    
                     sel3.add(opt3, sel3.options[i]);
                 }
 
