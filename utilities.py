@@ -173,7 +173,9 @@ def snapshot(lat0, lon0, lat1, lon1, dataset, variable, depth, date, lowval, hig
     if (lat0>lat1):
         lat0,lat1 = lat1,lat0
     if (lon0>lon1):
-        lon0,lon1 = lon1,lon0        
+        lon0,lon1 = lon1,lon0
+        # if lon1 is > 180, this is not the same pb ...
+        
 
     if ((os.path.exists(filename))&(lowval is None)):
         print("file already exists", file=sys.stdout)
@@ -309,8 +311,8 @@ def section(lat0, lon0, lat1, lon1, dataset, variable, date, lowval, highval, pt
         f,ax = plt.subplots(1,1,figsize=(900/my_dpi, 350/my_dpi), dpi=my_dpi) 
         
         if((lowval==None)&(highval==None)):
-            lowval = ds[variable].squeeze().min().values
-            highval = ds[variable].squeeze().max().values
+            lowval = dsi[variable].squeeze().min().values
+            highval = dsi[variable].squeeze().max().values
 
         dsi[variable].squeeze().plot(y='depth',cmap=plt.get_cmap('turbo'),cbar_kwargs={'shrink':0.8,'label':clabel},ax=ax,vmin=lowval,vmax=highval)
         #dsi[variable].squeeze().plot.contourf(levels=50,y='depth',cmap=plt.get_cmap('turbo'),cbar_kwargs={'shrink':0.8,'label':clabel},ax=ax,vmin=lowval,vmax=highval)
