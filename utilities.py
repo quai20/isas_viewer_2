@@ -213,6 +213,10 @@ def snapshot(lat0, lon0, lat1, lon1, dataset, variable, depth, date, lowval, hig
 
         fig = plt.figure(figsize=(9,9),dpi=100)
         ax = fig.add_subplot(1,1,1,projection=ccrs.Miller())    
+        if((lowval==None)&(highval==None)):
+            lowval = ds[variable].squeeze().min().values
+            highval = ds[variable].squeeze().max().values
+
         ds[variable].squeeze().plot(cmap=plt.get_cmap('turbo'),vmin=lowval,vmax=highval,ax=ax,cbar_kwargs={'orientation':'horizontal','pad':0.05,'shrink':0.5,'label':clabel},transform=ccrs.PlateCarree())    
         #ds[variable].squeeze().plot.contourf(levels=50,cmap=plt.get_cmap('turbo'),vmin=lowval,vmax=highval,ax=ax,cbar_kwargs={'spacing':'uniform','orientation':'horizontal','pad':0.05,'shrink':0.5,'label':clabel},transform=ccrs.PlateCarree())    
         ax.set_title('')
@@ -302,7 +306,12 @@ def section(lat0, lon0, lat1, lon1, dataset, variable, date, lowval, highval, pt
         dsi = ds.interp(longitude=secx,latitude=secy)        
         
         my_dpi=100
-        f,ax = plt.subplots(1,1,figsize=(900/my_dpi, 350/my_dpi), dpi=my_dpi)        
+        f,ax = plt.subplots(1,1,figsize=(900/my_dpi, 350/my_dpi), dpi=my_dpi) 
+        
+        if((lowval==None)&(highval==None)):
+            lowval = ds[variable].squeeze().min().values
+            highval = ds[variable].squeeze().max().values
+
         dsi[variable].squeeze().plot(y='depth',cmap=plt.get_cmap('turbo'),cbar_kwargs={'shrink':0.8,'label':clabel},ax=ax,vmin=lowval,vmax=highval)
         #dsi[variable].squeeze().plot.contourf(levels=50,y='depth',cmap=plt.get_cmap('turbo'),cbar_kwargs={'shrink':0.8,'label':clabel},ax=ax,vmin=lowval,vmax=highval)
         ax.set_title('')                
