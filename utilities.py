@@ -169,7 +169,7 @@ def snapshot(lat0, lon0, lat1, lon1, dataset, variable, depth, date, lowval, hig
         filename = 'static/img/'+dataset+'_'+variable+str(ptype)+'_'+str(date)[:10]+'_'+str(depth)+'_'+'%.2f'%lat0+'_%.2f'%lon0+'to'+'%.2f'%lat1+'_%.2f'%lon1+'_sna.png'    
     else:
         filename = 'static/img/'+dataset+'_'+variable+str(ptype)+'_'+str(date)[:10]+'_'+str(depth)+'_'+'%.2f'%lat0+'_%.2f'%lon0+'to'+'%.2f'%lat1+'_%.2f'%lon1+'_'+str(lowval)+'-'+str(highval)+'_sna.png'    
-
+    
     if (lat0>lat1):
         lat0,lat1 = lat1,lat0
     if (lon0>lon1):

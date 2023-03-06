@@ -137,6 +137,7 @@ function initDemoMap() {
 // MAP CREATION
 var mapStuff = initDemoMap();
 var map = mapStuff.map;
+
 var layerControl = mapStuff.layerControl;
 var RectDrawer = new L.Draw.Rectangle(map);
 var LineDrawer = new L.Draw.Polyline(map);
@@ -266,7 +267,7 @@ function gen_img(coords_array, clicked) {
   }
 
   winc.show();
-
+  console.log(lon1);
   reqstring = 'lat0=' + lat0.toString() + '&lon0=' + lon0.toString() +
     '&lat1=' + lat1.toString() + '&lon1=' + lon1.toString() +
     '&operation=' + clicked.toString() + '&dataset=' + user_selection['dataset'] +
