@@ -281,11 +281,22 @@ function gen_img(coords_array, clicked) {
     data: reqstring,
     contentType: 'application/json;charset=UTF-8',
     success: function (data) {
-      dataarray = JSON.parse(data)
-      // EDIT IMG WINDOW      
-      winc.content("<img src=\"" + dataarray + "\" alt=\"img\"></img>");
+      dataarray = JSON.parse(data)      
+      // EDIT IMG WINDOW (Add clim inputs for map plots)
+      clim_input = "<input type=\"number\" id=\"lowval2\" name=\"lowval2\" style=\"width:70px; margin-left: 10px; float: left;\">"+
+                   "<input type=\"number\" id=\"highval2\" name=\"highval2\" style=\"width:70px; margin-left: 10px; float:left;\">"+
+                   "<input type=\"button\" value = \"Redraw\" onclick=\"redrawMap()\" style=\"width:60px; margin-left: 10px;\" />";
+
+      if ([3, 7, 4, 8].includes(clicked)) {
+        winc.content("<img src=\"" + dataarray + "\" alt=\"img\"></img><br>"+clim_input);
+      }
+      else {
+        winc.content("<img src=\"" + dataarray + "\" alt=\"img\"></img>");
+      }      
+
     }
   });
 
 }
 
+//redrawMap ???
