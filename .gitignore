@@ -4,3 +4,5 @@ isasViewer_plots.ipynb
 .ipynb_checkpoints
 static/img/*
 !static/img/.gitkeep 
+static/nc_cache/*
+!static/nc_cache/.gitkeep 

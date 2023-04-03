@@ -40,6 +40,9 @@
 
 .control-window{
     border-radius: 10px;
+    border: solid;
+    border-width: 2px;
+    border-color: #000000;
     background-color: #ffffff;
     color: #353535;
     font: 13px/1.0 "Helvetica Neue", Arial, Helvetica, sans-serif;    
