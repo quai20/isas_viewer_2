@@ -267,7 +267,7 @@ function gen_img(coords_array, clicked) {
   }
 
   winc.show();
-  console.log(lon1);
+  //console.log(lon1);
   reqstring = 'lat0=' + lat0.toString() + '&lon0=' + lon0.toString() +
     '&lat1=' + lat1.toString() + '&lon1=' + lon1.toString() +
     '&operation=' + clicked.toString() + '&dataset=' + user_selection['dataset'] +

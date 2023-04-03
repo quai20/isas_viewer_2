@@ -55,12 +55,12 @@ def time_serie_on_point(lat, lon, dataset, variable, depth,ptype):
             if (('climato' in dataset_config[ix])):
                 iz = [dataset_config[ix]['climato']==dataset_config[i]['name'] for i in range(len(dataset_config))]
                 iz = np.argmax(iz)
-                time_array_a = np.array(dataset_config[iz]['daterange'],dtype='datetime64')
-                murla = dataset_config[iz]['opendap'] + f"longitude[{lon_index}],latitude[{lat_index}],depth[{dep_index}],time[0:1:{len(time_array_a)-1}],{variable}[0:1:{len(time_array_a)-1}][{dep_index}][{lat_index}][{lon_index}]"
-                
-                dsa = xr.open_dataset(murla,decode_times=True)
+                # time_array_a = np.array(dataset_config[iz]['daterange'],dtype='datetime64')
+                murla = dataset_config[iz]['opendap'] + f"longitude[{lon_index}],latitude[{lat_index}],depth[{dep_index}],time[0:1:11],{variable}[0:1:11][{dep_index}][{lat_index}][{lon_index}]"
+                dsa = xr.open_dataset(murla,decode_times=False)
                 dsa['time'] = np.arange(1,13)
                 dsa = dsa.rename({'time':'month'})
+
                 murlb = dataset_config[ix]['opendap'] + f"longitude[{lon_index}],latitude[{lat_index}],depth[{dep_index}],time[0:1:{len(time_array)-1}],{variable}[0:1:{len(time_array)-1}][{dep_index}][{lat_index}][{lon_index}]"
                 dsb = xr.open_dataset(murlb,decode_times=True)
                 ds = dsb.groupby('time.month') - dsa    
@@ -117,10 +117,10 @@ def profile_on_point(lat, lon, dataset, variable, date, ptype):
             if (('climato' in dataset_config[ix])):
                 iz = [dataset_config[ix]['climato']==dataset_config[i]['name'] for i in range(len(dataset_config))]
                 iz = np.argmax(iz)
-                time_array_a = np.array(dataset_config[iz]['daterange'],dtype='datetime64')
+                #time_array_a = np.array(dataset_config[iz]['daterange'],dtype='datetime64')
                 depth_array_a = np.array(dataset_config[iz]['levels'])
-                murla = dataset_config[iz]['opendap'] + f"longitude[{lon_index}],latitude[{lat_index}],depth[0:1:{len(depth_array_a)-1}],time[0:1:{len(time_array_a)-1}],{variable}[0:1:{len(time_array_a)-1}][0:1:{len(depth_array_a)-1}][{lat_index}][{lon_index}]"
-                dsa = xr.open_dataset(murla,decode_times=True)
+                murla = dataset_config[iz]['opendap'] + f"longitude[{lon_index}],latitude[{lat_index}],depth[0:1:{len(depth_array_a)-1}],time[0:1:11],{variable}[0:1:11][0:1:{len(depth_array_a)-1}][{lat_index}][{lon_index}]"
+                dsa = xr.open_dataset(murla,decode_times=False)
                 dsa['time'] = np.arange(1,13)
                 dsa = dsa.rename({'time':'month'})
                 murlb = dataset_config[ix]['opendap'] + f"longitude[{lon_index}],latitude[{lat_index}],depth[0:1:{len(depth_array)-1}],time[{time_index}],{variable}[{time_index}][0:1:{len(depth_array)-1}][{lat_index}][{lon_index}]"
@@ -196,9 +196,9 @@ def snapshot(lat0, lon0, lat1, lon1, dataset, variable, depth, date, lowval, hig
             if (('climato' in dataset_config[ix])):
                 iz = [dataset_config[ix]['climato']==dataset_config[i]['name'] for i in range(len(dataset_config))]
                 iz = np.argmax(iz)
-                time_array_a = np.array(dataset_config[iz]['daterange'],dtype='datetime64')
-                murla = dataset_config[iz]['opendap'] + f"longitude[{lon0_index}:{lon1_index}],latitude[{lat0_index}:{lat1_index}],depth[{dep_index}],time[0:1:{len(time_array_a)-1}],{variable}[0:1:{len(time_array_a)-1}][{dep_index}][{lat0_index}:{lat1_index}][{lon0_index}:{lon1_index}]"
-                dsa = xr.open_dataset(murla,decode_times=True)
+                #time_array_a = np.array(dataset_config[iz]['daterange'],dtype='datetime64')
+                murla = dataset_config[iz]['opendap'] + f"longitude[{lon0_index}:{lon1_index}],latitude[{lat0_index}:{lat1_index}],depth[{dep_index}],time[0:1:11],{variable}[0:1:11][{dep_index}][{lat0_index}:{lat1_index}][{lon0_index}:{lon1_index}]"
+                dsa = xr.open_dataset(murla,decode_times=False)
                 dsa['time'] = np.arange(1,13)
                 dsa = dsa.rename({'time':'month'})
                 murlb = dataset_config[ix]['opendap'] + f"longitude[{lon0_index}:{lon1_index}],latitude[{lat0_index}:{lat1_index}],depth[{dep_index}],time[{time_index}],{variable}[{time_index}][{dep_index}][{lat0_index}:{lat1_index}][{lon0_index}:{lon1_index}]"
@@ -276,10 +276,9 @@ def section(lat0, lon0, lat1, lon1, dataset, variable, date, lowval, highval, pt
             if (('climato' in dataset_config[ix])):
                 iz = [dataset_config[ix]['climato']==dataset_config[i]['name'] for i in range(len(dataset_config))]
                 iz = np.argmax(iz)
-                time_array_a = np.array(dataset_config[iz]['daterange'],dtype='datetime64')
-
-                murla = dataset_config[iz]['opendap'] + f"longitude[{loi0}:{loi1}],latitude[{lai0}:{lai1}],depth[0:1:{len(depth_array)-1}],time[0:1:{len(time_array_a)-1}],{variable}[0:1:{len(time_array_a)-1}][0:1:{len(depth_array)-1}][{lai0}:{lai1}][{loi0}:{loi1}]"
-                dsa = xr.open_dataset(murla,decode_times=True)
+                #time_array_a = np.array(dataset_config[iz]['daterange'],dtype='datetime64')
+                murla = dataset_config[iz]['opendap'] + f"longitude[{loi0}:{loi1}],latitude[{lai0}:{lai1}],depth[0:1:{len(depth_array)-1}],time[0:1:11],{variable}[0:1:11][0:1:{len(depth_array)-1}][{lai0}:{lai1}][{loi0}:{loi1}]"
+                dsa = xr.open_dataset(murla,decode_times=False)
                 dsa['time'] = np.arange(1,13)
                 dsa = dsa.rename({'time':'month'})
 
