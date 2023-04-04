@@ -268,7 +268,7 @@ def section(lat0, lon0, lat1, lon1, dataset, variable, date, lowval, highval, pt
         _type_: _description_
     """
     
-    nc_filename = 'static/img/'+dataset+'_'+variable+str(ptype)+'_'+str(date)[:10]+'_'+'%.2f'%lat0+'_%.2f'%lon0+'to'+'%.2f'%lat1+'_%.2f'%lon1+'_sec.nc'    
+    nc_filename = 'static/nc_cache/'+dataset+'_'+variable+str(ptype)+'_'+str(date)[:10]+'_'+'%.2f'%lat0+'_%.2f'%lon0+'to'+'%.2f'%lat1+'_%.2f'%lon1+'_sec.nc'    
     png_filename = 'static/img/a'+str(int(time.time()))+".png"   
     
     if (os.path.exists(nc_filename)):
