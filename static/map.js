@@ -232,6 +232,12 @@ function gen_img(coords_array, clicked) {
   //CREATE WINDOW OBJ
   var winc = L.control.window(map, { title: '', position: 'topLeft' }).on('hide', function () {
     window[oneshotname].clearLayers();
+
+    //When closing the window, we also need to remove the div element to avoid any issue with the clim function
+    mapd = document.getElementById('map');
+    trm = mapd.lastElementChild; 
+    trm.parentNode.removeChild(trm);    
+    
   });
 
   //MARKER FOR POINT OPERATIONS
@@ -302,7 +308,7 @@ function gen_img(coords_array, clicked) {
   });
 
   function redrawMap(e) {
-    console.log(e);
+    //console.log(e);
     reqstring1 = e.target.cparam;
     //parsing reqstring
     to_parse = new URL("http://toto.fr/?" + reqstring1);
