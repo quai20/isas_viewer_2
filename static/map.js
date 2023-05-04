@@ -232,6 +232,12 @@ function gen_img(coords_array, clicked) {
   //CREATE WINDOW OBJ
   var winc = L.control.window(map, { title: '', position: 'topLeft' }).on('hide', function () {
     window[oneshotname].clearLayers();
+
+    //When closing the window, we also need to remove the div element to avoid any issue with the clim function
+    mapd = document.getElementById('map');
+    trm = mapd.lastElementChild; 
+    trm.parentNode.removeChild(trm);    
+    
   });
 
   //MARKER FOR POINT OPERATIONS
@@ -282,10 +288,89 @@ function gen_img(coords_array, clicked) {
     contentType: 'application/json;charset=UTF-8',
     success: function (data) {
       dataarray = JSON.parse(data)
-      // EDIT IMG WINDOW      
-      winc.content("<img src=\"" + dataarray + "\" alt=\"img\"></img>");
+      // EDIT IMG WINDOW (Add clim inputs for map plots)
+      clim_input = "<a style=\"margin-left: 10px; float: left;\">Color range :</a>" +
+        "<input type=\"number\" id=\"lowval2\" name=\"lowval2\" style=\"width:70px; margin-left: 10px; float: left;\">" +
+        "<input type=\"number\" id=\"highval2\" name=\"highval2\" style=\"width:70px; margin-left: 10px; float:left;\">" +
+        "<input type=\"button\" id=\"Redraw\" value=\"Redraw\" style=\"width:60px; margin-left: 10px;\" />";
+
+      if ([3, 7, 4, 8].includes(clicked)) {
+        winc.content("<img src=\"" + dataarray + "\" alt=\"img\"></img><br>" + clim_input);
+        redraw_button = document.getElementById("Redraw");
+        redraw_button.cparam = reqstring;
+        redraw_button.addEventListener("click", redrawMap, false);
+      }
+      else {
+        winc.content("<img src=\"" + dataarray + "\" alt=\"img\"></img>");
+      }
+
     }
   });
 
+  function redrawMap(e) {
+    //console.log(e);
+    reqstring1 = e.target.cparam;
+    //parsing reqstring
+    to_parse = new URL("http://toto.fr/?" + reqstring1);
+    plat0 = parseFloat(to_parse.searchParams.get("lat0"));
+    plon0 = parseFloat(to_parse.searchParams.get("lon0"));
+    plat1 = parseFloat(to_parse.searchParams.get("lat1"));
+    plon1 = parseFloat(to_parse.searchParams.get("lon1"));
+    pclicked = parseInt(to_parse.searchParams.get("operation"));
+    pdataset = to_parse.searchParams.get("dataset");
+    pvariable = to_parse.searchParams.get("variable");
+    pdepth = parseFloat(to_parse.searchParams.get("depth"));
+    ptime = to_parse.searchParams.get("time");
+
+    //Get new color range
+    lowval2 = parseFloat(document.getElementById('lowval2').value);
+    highval2 = parseFloat(document.getElementById('highval2').value);
+
+    // New reqstring 
+    if (isNaN(lowval2) || isNaN(highval2) || (lowval2 > highval2)) {
+      reqstring2 = reqstring1;
+    }
+    else {
+      reqstring2 = 'lat0=' + plat0.toString() + '&lon0=' + plon0.toString() +
+        '&lat1=' + plat1.toString() + '&lon1=' + plon1.toString() +
+        '&operation=' + pclicked.toString() + '&dataset=' + pdataset +
+        '&variable=' + pvariable + '&depth=' + pdepth.toString() +
+        '&time=' + ptime + '&lowval=' + lowval2.toString() +
+        '&highval=' + highval2.toString()
+    }
+
+    //Loading
+    winc.content("<div id='img_div'><center><div class=\"lds-dual-ring\"></div></center></div>");
+
+    //Re run the ajax call for /get_img and reset winc content
+    $.ajax({
+      type: "GET",
+      url: '/get_img',
+      data: reqstring2,
+      contentType: 'application/json;charset=UTF-8',
+      success: function (data) {
+        dataarray = JSON.parse(data)
+        // EDIT IMG WINDOW (Add clim inputs for map plots)
+        clim_input = "<a style=\"margin-left: 10px; float: left;\">Color range :</a>" +
+          "<input type=\"number\" id=\"lowval2\" name=\"lowval2\" style=\"width:70px; margin-left: 10px; float: left;\">" +
+          "<input type=\"number\" id=\"highval2\" name=\"highval2\" style=\"width:70px; margin-left: 10px; float:left;\">" +
+          "<input type=\"button\" id=\"Redraw\" value=\"Redraw\" style=\"width:60px; margin-left: 10px;\" />";
+
+        if ([3, 7, 4, 8].includes(pclicked)) {
+          winc.content("<img src=\"" + dataarray + "\" alt=\"img\"></img><br>" + clim_input);
+          redraw_button = document.getElementById("Redraw");
+          redraw_button.cparam = reqstring2;
+          redraw_button.addEventListener("click", redrawMap, false);
+        }
+        else {
+          winc.content("<img src=\"" + dataarray + "\" alt=\"img\"></img>");
+        }
+
+      }
+    });
+  }
+
 }
+
+
 

@@ -12,7 +12,7 @@ geode = Geodesic()
 import xarray as xr
 import numpy as np
 import json
-import os, sys, glob
+import os, sys, glob, time
 
 # Datasets configurations
 jsonfile=open('static/dataset.json')
@@ -37,12 +37,18 @@ def time_serie_on_point(lat, lon, dataset, variable, depth,ptype):
         _type_: _description_
     """    
 
-    filename = 'static/img/'+dataset+'_'+variable+str(ptype)+'_'+str(depth)+'_'+'%.2f'%lat+'_%.2f'%lon+'.png'    
+    # Saving netcdf in cache dir
+    nc_filename = 'static/nc_cache/'+dataset+'_'+variable+str(ptype)+'_'+str(depth)+'_'+'%.2f'%lat+'_%.2f'%lon+'.nc'
+    # Gen random img filename
+    png_filename = 'static/img/a'+str(int(time.time()))+".png"    
 
-    if (os.path.exists(filename)):
-        print("file already exists", file=sys.stdout)
-    else:           
-
+    if (os.path.exists(nc_filename)):
+        ds = xr.open_dataset(nc_filename)
+        if (ptype==1):
+            ylabel=variable+' anomaly'
+        else:
+            ylabel=variable
+    else :               
         ix = [dataset==dataset_config[i]['name'] for i in range(len(dataset_config))]
         ix = np.argmax(ix)
         depth_array = np.array(dataset_config[ix]['levels'])        
@@ -71,18 +77,19 @@ def time_serie_on_point(lat, lon, dataset, variable, depth,ptype):
             murl = dataset_config[ix]['opendap'] + f"longitude[{lon_index}],latitude[{lat_index}],depth[{dep_index}],time[0:1:{len(time_array)-1}],{variable}[0:1:{len(time_array)-1}][{dep_index}][{lat_index}][{lon_index}]"
             ds = xr.open_dataset(murl,decode_times=True)
             ylabel=variable
-    
-        my_dpi=100
-        f,ax = plt.subplots(1,1,figsize=(700/my_dpi, 250/my_dpi), dpi=my_dpi)
-        ds[variable].plot(linewidth=2,ax=ax)    
-        # ax.set_title(dataset+' - '+variable+' - '+str(depth)+' at '+'%.2f'%lat+'/%.2f'%lon,fontsize = 10)
-        ax.set_title('')
-        ax.set_ylabel(ylabel)
-        ax.set_xlabel('')
-        ax.grid(linestyle=':')
+        ds.to_netcdf(nc_filename)    
 
-        plt.savefig(filename, bbox_inches='tight')    
-    return filename
+    my_dpi=100
+    f,ax = plt.subplots(1,1,figsize=(700/my_dpi, 250/my_dpi), dpi=my_dpi)
+    ds[variable].plot(linewidth=2,ax=ax)    
+    # ax.set_title(dataset+' - '+variable+' - '+str(depth)+' at '+'%.2f'%lat+'/%.2f'%lon,fontsize = 10)
+    ax.set_title('')
+    ax.set_ylabel(ylabel)
+    ax.set_xlabel('')
+    ax.grid(linestyle=':')
+
+    plt.savefig(png_filename, bbox_inches='tight')    
+    return png_filename
 
 
 def profile_on_point(lat, lon, dataset, variable, date, ptype):
@@ -99,10 +106,15 @@ def profile_on_point(lat, lon, dataset, variable, date, ptype):
     Returns:
         _type_: _description_
     """    
-    filename = 'static/img/'+dataset+'_'+variable+str(ptype)+'_'+str(date)+'_'+'%.2f'%lat+'_%.2f'%lon+'.png'
+    nc_filename = 'static/nc_cache/'+dataset+'_'+variable+str(ptype)+'_'+str(date)[:10]+'_'+'%.2f'%lat+'_%.2f'%lon+'.nc'
+    png_filename = 'static/img/a'+str(int(time.time()))+".png"    
     
-    if (os.path.exists(filename)):
-        print("file already exists", file=sys.stdout)
+    if (os.path.exists(nc_filename)):
+        ds = xr.open_dataset(nc_filename)
+        if (ptype==1):
+            xlabel=variable+' anomaly'
+        else:
+            xlabel=variable
     else:
         ix = [dataset==dataset_config[i]['name'] for i in range(len(dataset_config))]
         ix = np.argmax(ix)
@@ -133,17 +145,19 @@ def profile_on_point(lat, lon, dataset, variable, date, ptype):
             murl = dataset_config[ix]['opendap'] + f"longitude[{lon_index}],latitude[{lat_index}],depth[0:1:{len(depth_array)-1}],time[{time_index}],{variable}[{time_index}][0:1:{len(depth_array)-1}][{lat_index}][{lon_index}]"
             ds = xr.open_dataset(murl,decode_times=True)
             xlabel = variable
+        ds.to_netcdf(nc_filename) 
+        
+    my_dpi=100
+    f,ax = plt.subplots(1,1,figsize=(250/my_dpi, 600/my_dpi), dpi=my_dpi)
+    ds[variable].plot(linewidth=2,y='depth',ax=ax)    
+    ax.set_title('')
+    ax.set_xlabel(xlabel)
+    # ax.set_title(dataset+' - '+variable+' - '+str(date)+' at '+'%.2f'%lat+'/%.2f'%lon,rotation=90,y=-0.0,x=1.1,fontsize = 10)
+    ax.grid(linestyle=':')
+    ax.invert_yaxis()
+    plt.savefig(png_filename, bbox_inches='tight')    
 
-        my_dpi=100
-        f,ax = plt.subplots(1,1,figsize=(250/my_dpi, 600/my_dpi), dpi=my_dpi)
-        ds[variable].plot(linewidth=2,y='depth',ax=ax)    
-        ax.set_title('')
-        ax.set_xlabel(xlabel)
-        # ax.set_title(dataset+' - '+variable+' - '+str(date)+' at '+'%.2f'%lat+'/%.2f'%lon,rotation=90,y=-0.0,x=1.1,fontsize = 10)
-        ax.grid(linestyle=':')
-        ax.invert_yaxis()
-        plt.savefig(filename, bbox_inches='tight')    
-    return filename
+    return png_filename
 
 
 def snapshot(lat0, lon0, lat1, lon1, dataset, variable, depth, date, lowval, highval, ptype):
@@ -165,10 +179,9 @@ def snapshot(lat0, lon0, lat1, lon1, dataset, variable, depth, date, lowval, hig
     Returns:
         _type_: _description_
     """
-    if((lowval==None)&(highval==None)):
-        filename = 'static/img/'+dataset+'_'+variable+str(ptype)+'_'+str(date)[:10]+'_'+str(depth)+'_'+'%.2f'%lat0+'_%.2f'%lon0+'to'+'%.2f'%lat1+'_%.2f'%lon1+'_sna.png'    
-    else:
-        filename = 'static/img/'+dataset+'_'+variable+str(ptype)+'_'+str(date)[:10]+'_'+str(depth)+'_'+'%.2f'%lat0+'_%.2f'%lon0+'to'+'%.2f'%lat1+'_%.2f'%lon1+'_'+str(lowval)+'-'+str(highval)+'_sna.png'    
+
+    nc_filename = 'static/nc_cache/'+dataset+'_'+variable+str(ptype)+'_'+str(date)[:10]+'_'+str(depth)+'_'+'%.2f'%lat0+'_%.2f'%lon0+'to'+'%.2f'%lat1+'_%.2f'%lon1+'_sna.nc'    
+    png_filename = 'static/img/a'+str(int(time.time()))+".png"    
     
     if (lat0>lat1):
         lat0,lat1 = lat1,lat0
@@ -177,8 +190,13 @@ def snapshot(lat0, lon0, lat1, lon1, dataset, variable, depth, date, lowval, hig
         # if lon1 is > 180, this is not the same pb ...
         
 
-    if ((os.path.exists(filename))&(lowval is None)):
-        print("file already exists", file=sys.stdout)
+    if (os.path.exists(nc_filename)):
+        ds = xr.open_dataset(nc_filename)
+        if (ptype==1):
+            clabel=variable+' anomaly'
+        else:
+            clabel=variable
+
     else:
         ix = [dataset==dataset_config[i]['name'] for i in range(len(dataset_config))]
         ix = np.argmax(ix)
@@ -212,23 +230,24 @@ def snapshot(lat0, lon0, lat1, lon1, dataset, variable, depth, date, lowval, hig
             print(murl,file=sys.stderr)
             ds = xr.open_dataset(murl,decode_times=True)    
             clabel=variable
+        ds.to_netcdf(nc_filename)    
 
-        fig = plt.figure(figsize=(9,9),dpi=100)
-        ax = fig.add_subplot(1,1,1,projection=ccrs.Miller())    
-        if((lowval==None)&(highval==None)):
-            lowval = ds[variable].squeeze().min().values
-            highval = ds[variable].squeeze().max().values
+    fig = plt.figure(figsize=(9,9),dpi=100)
+    ax = fig.add_subplot(1,1,1,projection=ccrs.Miller())    
+    if((lowval==None)&(highval==None)):
+        lowval = ds[variable].squeeze().min().values
+        highval = ds[variable].squeeze().max().values
 
-        ds[variable].squeeze().plot(cmap=plt.get_cmap('turbo'),vmin=lowval,vmax=highval,ax=ax,cbar_kwargs={'orientation':'horizontal','pad':0.05,'shrink':0.5,'label':clabel},transform=ccrs.PlateCarree())    
-        #ds[variable].squeeze().plot.contourf(levels=50,cmap=plt.get_cmap('turbo'),vmin=lowval,vmax=highval,ax=ax,cbar_kwargs={'spacing':'uniform','orientation':'horizontal','pad':0.05,'shrink':0.5,'label':clabel},transform=ccrs.PlateCarree())    
-        ax.set_title('')
-        #ax.coastlines()   
-        ax.add_feature(land_feature)
-        gl = ax.gridlines(linestyle=':',draw_labels=True)
-        gl.right_labels = None
-        gl.top_labels = None
-        plt.savefig(filename, bbox_inches='tight')
-    return filename        
+    ds[variable].squeeze().plot(cmap=plt.get_cmap('turbo'),vmin=lowval,vmax=highval,ax=ax,cbar_kwargs={'orientation':'horizontal','pad':0.05,'shrink':0.5,'label':clabel},transform=ccrs.PlateCarree())    
+    #ds[variable].squeeze().plot.contourf(levels=50,cmap=plt.get_cmap('turbo'),vmin=lowval,vmax=highval,ax=ax,cbar_kwargs={'spacing':'uniform','orientation':'horizontal','pad':0.05,'shrink':0.5,'label':clabel},transform=ccrs.PlateCarree())    
+    ax.set_title('')
+    #ax.coastlines()   
+    ax.add_feature(land_feature)
+    gl = ax.gridlines(linestyle=':',draw_labels=True)
+    gl.right_labels = None
+    gl.top_labels = None
+    plt.savefig(png_filename, bbox_inches='tight')
+    return png_filename        
 
 def section(lat0, lon0, lat1, lon1, dataset, variable, date, lowval, highval, ptype):
     """_summary_
@@ -248,13 +267,17 @@ def section(lat0, lon0, lat1, lon1, dataset, variable, date, lowval, highval, pt
     Returns:
         _type_: _description_
     """
-    if((lowval==None)&(highval==None)):
-        filename = 'static/img/'+dataset+'_'+variable+str(ptype)+'_'+str(date)[:10]+'_'+'%.2f'%lat0+'_%.2f'%lon0+'to'+'%.2f'%lat1+'_%.2f'%lon1+'_sec.png'    
-    else:
-        filename = 'static/img/'+dataset+'_'+variable+str(ptype)+'_'+str(date)[:10]+'_'+'%.2f'%lat0+'_%.2f'%lon0+'to'+'%.2f'%lat1+'_%.2f'%lon1+'_'+str(lowval)+'-'+str(highval)+'_sec.png'    
+    
+    nc_filename = 'static/nc_cache/'+dataset+'_'+variable+str(ptype)+'_'+str(date)[:10]+'_'+'%.2f'%lat0+'_%.2f'%lon0+'to'+'%.2f'%lat1+'_%.2f'%lon1+'_sec.nc'    
+    png_filename = 'static/img/a'+str(int(time.time()))+".png"   
+    
+    if (os.path.exists(nc_filename)):
+        ds = xr.open_dataset(nc_filename)
+        if (ptype==1):
+            clabel=variable+' anomaly'
+        else:
+            clabel=variable
 
-    if ((os.path.exists(filename))&(lowval is None)):
-        print("file already exists")
     else:        
         ix = [dataset==dataset_config[i]['name'] for i in range(len(dataset_config))]
         ix = np.argmax(ix)
@@ -294,30 +317,31 @@ def section(lat0, lon0, lat1, lon1, dataset, variable, date, lowval, highval, pt
             murl = dataset_config[ix]['opendap'] + f"longitude[{loi0}:{loi1}],latitude[{lai0}:{lai1}],depth[0:1:{len(depth_array)-1}],time[{time_index}],{variable}[{time_index}][0:1:{len(depth_array)-1}][{lai0}:{lai1}][{loi0}:{loi1}]"
             ds = xr.open_dataset(murl,decode_times=True)   
             clabel=variable
+        ds.to_netcdf(nc_filename)    
         
-        drt = geode.inverse((lon0,lat0),(lon1,lat1))
-        d = drt[0][0]
-        a = drt[0][1]
-        distances = np.arange(0,d,50000) #step in meters, here 50km
-        points = geode.direct((lon0,lat0),a.repeat(len(distances)),distances)
-        seclon_array = points[:,0]
-        seclat_array = points[:,1]
-        secx = xr.DataArray(seclon_array, coords={"distance":distances/1e3})
-        secy = xr.DataArray(seclat_array, coords={"distance":distances/1e3})
-        dsi = ds.interp(longitude=secx,latitude=secy)        
-        
-        my_dpi=100
-        f,ax = plt.subplots(1,1,figsize=(900/my_dpi, 350/my_dpi), dpi=my_dpi) 
-        
-        if((lowval==None)&(highval==None)):
-            lowval = dsi[variable].squeeze().min().values
-            highval = dsi[variable].squeeze().max().values
+    drt = geode.inverse((lon0,lat0),(lon1,lat1))
+    d = drt[0][0]
+    a = drt[0][1]
+    distances = np.arange(0,d,50000) #step in meters, here 50km
+    points = geode.direct((lon0,lat0),a.repeat(len(distances)),distances)
+    seclon_array = points[:,0]
+    seclat_array = points[:,1]
+    secx = xr.DataArray(seclon_array, coords={"distance":distances/1e3})
+    secy = xr.DataArray(seclat_array, coords={"distance":distances/1e3})
+    dsi = ds.interp(longitude=secx,latitude=secy)        
+    
+    my_dpi=100
+    f,ax = plt.subplots(1,1,figsize=(900/my_dpi, 350/my_dpi), dpi=my_dpi) 
+    
+    if((lowval==None)&(highval==None)):
+        lowval = dsi[variable].squeeze().min().values
+        highval = dsi[variable].squeeze().max().values
 
-        dsi[variable].squeeze().plot(y='depth',cmap=plt.get_cmap('turbo'),cbar_kwargs={'shrink':0.8,'label':clabel},ax=ax,vmin=lowval,vmax=highval)
-        #dsi[variable].squeeze().plot.contourf(levels=50,y='depth',cmap=plt.get_cmap('turbo'),cbar_kwargs={'shrink':0.8,'label':clabel},ax=ax,vmin=lowval,vmax=highval)
-        ax.set_title('')                
-        ax.grid(linestyle=':')
-        ax.invert_yaxis()
-        ax.set_xlabel('distance along section (km)')
-        plt.savefig(filename, bbox_inches='tight')
-    return filename       
+    dsi[variable].squeeze().plot(y='depth',cmap=plt.get_cmap('turbo'),cbar_kwargs={'shrink':0.8,'label':clabel},ax=ax,vmin=lowval,vmax=highval)
+    #dsi[variable].squeeze().plot.contourf(levels=50,y='depth',cmap=plt.get_cmap('turbo'),cbar_kwargs={'shrink':0.8,'label':clabel},ax=ax,vmin=lowval,vmax=highval)
+    ax.set_title('')                
+    ax.grid(linestyle=':')
+    ax.invert_yaxis()
+    ax.set_xlabel('distance along section (km)')
+    plt.savefig(png_filename, bbox_inches='tight')
+    return png_filename       
