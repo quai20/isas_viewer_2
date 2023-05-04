@@ -117,7 +117,7 @@ def profile_on_point(lat, lon, dataset, variable, date, ptype):
             xlabel=variable
     else:
         ix = [dataset==dataset_config[i]['name'] for i in range(len(dataset_config))]
-        ix = np.argmax(ix)
+        ix = np.argmax(ix)        
         depth_array = np.array(dataset_config[ix]['levels'])
         time_array = np.array(dataset_config[ix]['daterange'],dtype='datetime64')
 
