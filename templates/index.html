@@ -76,12 +76,11 @@
                         </a>
                         <div class="collapse" id="timeseriemenu">
                             <div class="card card-body" style="color:black;">
-                              <form>Lon : <input type="number" id="lo0" name="lo0" style="width:40%; float: right;"></form>
-                              <form>Lat : <input type="number" id="la0" name="la0" style="width:40%; float: right;"></form>
-                              <button class="button-17" role="button" title="ts_coords" onclick="coords_timeserie();">
-                                <img src="{{ url_for('static', filename='/dist/icons/target_carbon.png')}}" width="30px"
-                                    height="30px"></img>
-                            </button>
+                              <form>Lon : <input type="number" id="ts_lo0" name="ts_lo0" style="width:40%; float: right; margin-top: 2px; margin-right: 2px;"></form>
+                              <form>Lat : <input type="number" id="ts_la0" name="ts_la0" style="width:40%; float: right; margin-top: 2px; margin-right: 2px;"></form>
+                              <img src="{{ url_for('static', filename='/dist/icons/target_carbon.png')}}" onclick="coords_timeserie();" width="30px"
+                              height="30px" title="Draw point">
+                                                            
                             <form> Anomaly <input type="checkbox" id="ts_ano" name="ts_ano" value="off">
                                 <input type="button"  value = "Plot" onclick="gen_timeserie();" style="float: right;">
                             </form>
@@ -95,7 +94,14 @@
                         </a>
                         <div class="collapse" id="profilemenu">
                             <div class="card card-body" style="color:black;">
-                              inputs, buttons & co
+                                <form>Lon : <input type="number" id="pr_lo0" name="pr_lo0" style="width:40%; float: right; margin-top: 2px; margin-right: 2px;"></form>
+                                <form>Lat : <input type="number" id="pr_la0" name="pr_la0" style="width:40%; float: right; margin-top: 2px; margin-right: 2px;"></form>
+                                <img src="{{ url_for('static', filename='/dist/icons/target_carbon.png')}}" onclick="coords_profile();" width="30px"
+                                height="30px" title="Draw point">
+                                                              
+                              <form> Anomaly <input type="checkbox" id="pr_ano" name="pr_ano" value="off">
+                                  <input type="button"  value = "Plot" onclick="gen_profile();" style="float: right;">
+                              </form>
                             </div>
                         </div></p>
 
@@ -106,7 +112,21 @@
                         </a>
                         <div class="collapse" id="snapshotmenu">
                             <div class="card card-body" style="color:black;">
-                              inputs, buttons & co
+                                <form>
+                                    Lon : <input type="number" id="sn_lo0" name="sn_lo0" style="width:40%; float: right; margin-top: 2px; margin-right: 2px;">
+                                    <input type="number" id="sn_lo1" name="sn_lo1" style="width:40%; float: right; margin-top: 2px; margin-right: 2px;">
+                                </form>
+
+                                <form>
+                                    Lat : <input type="number" id="sn_la0" name="sn_la0" style="width:40%; float: right; margin-top: 2px; margin-right: 2px;">
+                                    <input type="number" id="sn_la1" name="sn_la1" style="width:40%; float: right; margin-top: 2px; margin-right: 2px;">
+                                </form>
+                                <img src="{{ url_for('static', filename='/dist/icons/target_carbon.png')}}" onclick="coords_snapshot();" width="30px"
+                                height="30px" title="Draw rectangle">
+                                                              
+                              <form> Anomaly <input type="checkbox" id="sn_ano" name="sn_ano" value="off">
+                                  <input type="button"  value = "Plot" onclick="gen_snapshot();" style="float: right;">
+                              </form>
                             </div>
                         </div></p>
 
@@ -117,7 +137,21 @@
                         </a>
                         <div class="collapse" id="sectionmenu">
                             <div class="card card-body" style="color:black;">
-                              inputs, buttons & co
+                                <form>
+                                    Lon : <input type="number" id="se_lo0" name="se_lo0" style="width:40%; float: right; margin-top: 2px; margin-right: 2px;">
+                                    <input type="number" id="se_lo1" name="se_lo1" style="width:40%; float: right; margin-top: 2px; margin-right: 2px;">
+                                </form>
+
+                                <form>
+                                    Lat : <input type="number" id="se_la0" name="se_la0" style="width:40%; float: right;">
+                                    <input type="number" id="se_la1" name="se_la1" style="width:40%; float: right;">
+                                </form>
+                                <img src="{{ url_for('static', filename='/dist/icons/target_carbon.png')}}" onclick="coords_section();" width="30px"
+                                height="30px" title="Draw section">
+                                                              
+                              <form> Anomaly <input type="checkbox" id="se_ano" name="se_ano" value="off">
+                                  <input type="button"  value = "Plot" onclick="gen_section();" style="float: right;">
+                              </form>
                             </div>
                         </div></p>
 
