@@ -149,39 +149,33 @@ function coords_timeserie() {
   clicked = 1;
   $('.leaflet-container').css('cursor', 'crosshair');
 }
-function clear_timeserie() {
-  tempLayer.clearLayers();
-  document.getElementById('ts_lo0').value = "";
-  document.getElementById('ts_la0').value = "";    
-}
+
 function coords_profile() {
   clicked = 2;
   $('.leaflet-container').css('cursor', 'crosshair');
 }
-function clear_profile() {
-  tempLayer.clearLayers();
-  document.getElementById('pr_lo0').value = "";
-  document.getElementById('pr_la0').value = ""; 
-}
+
 function coords_snapshot() {
   clicked = 3;
   $('.leaflet-container').css('cursor', 'crosshair');
   map.fireEvent('click');
 }
-function clear_snapshot() {
-  tempLayer.clearLayers();
-  document.getElementById('sn_lo0').value = "";
-  document.getElementById('sn_la0').value = ""; 
-  document.getElementById('sn_lo1').value = "";
-  document.getElementById('sn_la1').value = "";   
-}
+
 function coords_section() {
   clicked = 4;
   $('.leaflet-container').css('cursor', 'crosshair');
   map.fireEvent('click');
 }
-function clear_section() {
+function clear_ip() {
   tempLayer.clearLayers();
+  document.getElementById('ts_lo0').value = "";
+  document.getElementById('ts_la0').value = ""; 
+  document.getElementById('pr_lo0').value = "";
+  document.getElementById('pr_la0').value = ""; 
+  document.getElementById('sn_lo0').value = "";
+  document.getElementById('sn_la0').value = ""; 
+  document.getElementById('sn_lo1').value = "";
+  document.getElementById('sn_la1').value = ""; 
   document.getElementById('se_lo0').value = "";
   document.getElementById('se_la0').value = ""; 
   document.getElementById('se_lo1').value = "";
@@ -189,8 +183,7 @@ function clear_section() {
 }
 
 map.on('click', function (e) {
-  //tempLayer.clearLayers();
-
+  
   if (clicked==1) {    
     //set values of inputs
     document.getElementById('ts_lo0').value = e.latlng.lng;
@@ -211,8 +204,8 @@ map.on('click', function (e) {
     $('.leaflet-container').css('cursor', '');
     clicked = 0; 
   }
-  else if (clicked==3) {
-    RectDrawer.enable();
+  else if (clicked==3) {    
+    RectDrawer.enable();    
   }
   else if (clicked==4) {
     LineDrawer.enable();
@@ -220,24 +213,22 @@ map.on('click', function (e) {
 });
 
 //for rectangle & line
-map.on('draw:created', function (e) {
-
-  //rm previous drawings
-  tempLayer.clearLayers();
+map.on('draw:created', function (e) {  
 
   var type = e.layerType,
     layer = e.layer;
   layer.addTo(tempLayer);
   var coords = layer.getLatLngs();
+  console.log(coords);
 
-  if (clicked==3) {
+  if (clicked==3) {    
     //set values of inputs
     document.getElementById('sn_lo0').value = coords[0]['lng'];
-    document.getElementById('sn_lo1').value = coords[1]['lng'];   
+    document.getElementById('sn_lo1').value = coords[2]['lng'];   
     document.getElementById('sn_la0').value = coords[0]['lat'];
-    document.getElementById('sn_la1').value = coords[1]['lat'];       
+    document.getElementById('sn_la1').value = coords[2]['lat'];       
   }
-  else if (clicked==4) {
+  else if (clicked==4) {    
     //set values of inputs
     document.getElementById('se_lo0').value = coords[0]['lng'];
     document.getElementById('se_lo1').value = coords[1]['lng'];   
