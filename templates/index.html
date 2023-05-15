@@ -68,6 +68,62 @@
                     </ul>
                     <hr>
                     <div>
+                        <p style="color:black; font-size: large; font-weight: bold;">Tools</p>
+                        <!-- Time Series -->
+                        <p>
+                        <a data-toggle="collapse" href="#timeseriemenu" role="button" aria-expanded="false" aria-controls="collapseExample" style="color:black; font-weight: bold;">
+                            &#128317; Time Serie
+                        </a>
+                        <div class="collapse" id="timeseriemenu">
+                            <div class="card card-body" style="color:black;">
+                              <form>Lon : <input type="number" id="lo0" name="lo0" style="width:40%; float: right;"></form>
+                              <form>Lat : <input type="number" id="la0" name="la0" style="width:40%; float: right;"></form>
+                              <button class="button-17" role="button" title="ts_coords" onclick="coords_timeserie();">
+                                <img src="{{ url_for('static', filename='/dist/icons/target_carbon.png')}}" width="30px"
+                                    height="30px"></img>
+                            </button>
+                            <form> Anomaly <input type="checkbox" id="ts_ano" name="ts_ano" value="off">
+                                <input type="button"  value = "Plot" onclick="gen_timeserie();" style="float: right;">
+                            </form>
+                            </div>
+                        </div></p>
+                        
+                        <!-- Profile -->
+                        <p>
+                        <a data-toggle="collapse" href="#profilemenu" role="button" aria-expanded="false" aria-controls="collapseExample" style="color:black; font-weight: bold;">
+                            &#128317; Profile
+                        </a>
+                        <div class="collapse" id="profilemenu">
+                            <div class="card card-body" style="color:black;">
+                              inputs, buttons & co
+                            </div>
+                        </div></p>
+
+                        <!-- Snapshot -->
+                        <p>
+                        <a data-toggle="collapse" href="#snapshotmenu" role="button" aria-expanded="false" aria-controls="collapseExample" style="color:black; font-weight: bold;">
+                            &#128317; Snapshot
+                        </a>
+                        <div class="collapse" id="snapshotmenu">
+                            <div class="card card-body" style="color:black;">
+                              inputs, buttons & co
+                            </div>
+                        </div></p>
+
+                        <!-- Section -->
+                        <p>
+                        <a data-toggle="collapse" href="#sectionmenu" role="button" aria-expanded="false" aria-controls="collapseExample" style="color:black; font-weight: bold;">
+                            &#128317; Section
+                        </a>
+                        <div class="collapse" id="sectionmenu">
+                            <div class="card card-body" style="color:black;">
+                              inputs, buttons & co
+                            </div>
+                        </div></p>
+
+                        <hr>
+
+
                         <p style="color:black;"><b>Full data</b></p>
                         <button class="button-17" role="button" title="time serie" onclick="gen_timeserie();">
                             <img src="{{ url_for('static', filename='/dist/icons/timeserie_carbon.png')}}" width="40px"
