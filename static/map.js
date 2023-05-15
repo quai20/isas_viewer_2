@@ -145,75 +145,110 @@ var clicked = 0;
 var tempLayer = L.layerGroup().addTo(map); //FOR INTERACTIVE PURPOSE
 
 
-function gen_timeserie() {
+function coords_timeserie() {
   clicked = 1;
   $('.leaflet-container').css('cursor', 'crosshair');
 }
-function gen_profile() {
+function clear_timeserie() {
+  tempLayer.clearLayers();
+  document.getElementById('ts_lo0').value = "";
+  document.getElementById('ts_la0').value = "";    
+}
+function coords_profile() {
   clicked = 2;
   $('.leaflet-container').css('cursor', 'crosshair');
 }
-function gen_snapshot() {
+function clear_profile() {
+  tempLayer.clearLayers();
+  document.getElementById('pr_lo0').value = "";
+  document.getElementById('pr_la0').value = ""; 
+}
+function coords_snapshot() {
   clicked = 3;
   $('.leaflet-container').css('cursor', 'crosshair');
   map.fireEvent('click');
 }
-
-function gen_section() {
+function clear_snapshot() {
+  tempLayer.clearLayers();
+  document.getElementById('sn_lo0').value = "";
+  document.getElementById('sn_la0').value = ""; 
+  document.getElementById('sn_lo1').value = "";
+  document.getElementById('sn_la1').value = "";   
+}
+function coords_section() {
   clicked = 4;
   $('.leaflet-container').css('cursor', 'crosshair');
   map.fireEvent('click');
 }
-
-function ano_timeserie() {
-  clicked = 5;
-  $('.leaflet-container').css('cursor', 'crosshair');
-}
-function ano_profile() {
-  clicked = 6;
-  $('.leaflet-container').css('cursor', 'crosshair');
-}
-function ano_snapshot() {
-  clicked = 7;
-  $('.leaflet-container').css('cursor', 'crosshair');
-  map.fireEvent('click');
-}
-function ano_section() {
-  clicked = 8;
-  $('.leaflet-container').css('cursor', 'crosshair');
-  map.fireEvent('click');
+function clear_section() {
+  tempLayer.clearLayers();
+  document.getElementById('se_lo0').value = "";
+  document.getElementById('se_la0').value = ""; 
+  document.getElementById('se_lo1').value = "";
+  document.getElementById('se_la1').value = ""; 
 }
 
 map.on('click', function (e) {
-  if ([1, 2, 5, 6].includes(clicked)) {
-    gen_img([e.latlng.lat, e.latlng.lng, e.latlng.lat, e.latlng.lng], clicked)
+  //tempLayer.clearLayers();
+
+  if (clicked==1) {    
+    //set values of inputs
+    document.getElementById('ts_lo0').value = e.latlng.lng;
+    document.getElementById('ts_la0').value = e.latlng.lat;    
+    //marker
+    var marker = L.marker([e.latlng.lat, e.latlng.lng]).addTo(tempLayer);
+    //reset clicked
     $('.leaflet-container').css('cursor', '');
-    clicked = 0;
+    clicked = 0;    
   }
-  else if ([3, 7].includes(clicked)) {
+  else if (clicked==2) {
+    //set values of inputs
+    document.getElementById('pr_lo0').value = e.latlng.lng;
+    document.getElementById('pr_la0').value = e.latlng.lat;    
+    //marker
+    var marker = L.marker([e.latlng.lat, e.latlng.lng]).addTo(tempLayer);
+    //reset clicked
+    $('.leaflet-container').css('cursor', '');
+    clicked = 0; 
+  }
+  else if (clicked==3) {
     RectDrawer.enable();
   }
-  else if ([4, 8].includes(clicked)) {
+  else if (clicked==4) {
     LineDrawer.enable();
   }
 });
 
+//for rectangle & line
 map.on('draw:created', function (e) {
+
+  //rm previous drawings
+  tempLayer.clearLayers();
 
   var type = e.layerType,
     layer = e.layer;
   layer.addTo(tempLayer);
   var coords = layer.getLatLngs();
-  if ([3, 7].includes(clicked)) {
-    gen_img([coords[0]['lat'], coords[0]['lng'], coords[2]['lat'], coords[2]['lng']], clicked);
+
+  if (clicked==3) {
+    //set values of inputs
+    document.getElementById('sn_lo0').value = coords[0]['lng'];
+    document.getElementById('sn_lo1').value = coords[1]['lng'];   
+    document.getElementById('sn_la0').value = coords[0]['lat'];
+    document.getElementById('sn_la1').value = coords[1]['lat'];       
   }
-  else if ([4, 8].includes(clicked)) {
-    gen_img([coords[0]['lat'], coords[0]['lng'], coords[1]['lat'], coords[1]['lng']], clicked);
+  else if (clicked==4) {
+    //set values of inputs
+    document.getElementById('se_lo0').value = coords[0]['lng'];
+    document.getElementById('se_lo1').value = coords[1]['lng'];   
+    document.getElementById('se_la0').value = coords[0]['lat'];
+    document.getElementById('se_la1').value = coords[1]['lat'];
   }
 
   $('.leaflet-container').css('cursor', '');
   clicked = 0;
 });
+
 
 function gen_img(coords_array, clicked) {
 
@@ -371,6 +406,3 @@ function gen_img(coords_array, clicked) {
   }
 
 }
-
-
-
