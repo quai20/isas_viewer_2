@@ -241,35 +241,35 @@ map.on('draw:created', function (e) {
 });
 
 
-function gen_img(coords_array, clicked) {
+function gen_img(clicked) {
 
   if (clicked==1) {
     var lat0 = parseFloat(document.getElementById('ts_la0').value);
     var lon0 = parseFloat(document.getElementById('ts_lo0').value);
     var lat1 = parseFloat(document.getElementById('ts_la0').value);
-    var lon1 = parseFloat(document.getElementById('ts_lo0').value);
-    var ano = parseInt(document.getElementById('ts_ano').value)
+    var lon1 = parseFloat(document.getElementById('ts_lo0').value);    
+    var ano = document.getElementById('ts_ano').checked == true ? 1 : 0;
   }
   else if(clicked==2) {
     var lat0 = parseFloat(document.getElementById('pr_la0').value);
     var lon0 = parseFloat(document.getElementById('pr_lo0').value);
     var lat1 = parseFloat(document.getElementById('pr_la0').value);
     var lon1 = parseFloat(document.getElementById('pr_lo0').value);
-    var ano = parseInt(document.getElementById('pr_ano').value)
+    var ano = document.getElementById('pr_ano').checked == true ? 1 : 0;
   }
   else if(clicked==3) {
     var lat0 = parseFloat(document.getElementById('sn_la0').value);
     var lon0 = parseFloat(document.getElementById('sn_lo0').value);
     var lat1 = parseFloat(document.getElementById('sn_la1').value);
     var lon1 = parseFloat(document.getElementById('sn_lo1').value);
-    var ano = parseInt(document.getElementById('sn_ano').value)
+    var ano = document.getElementById('sn_ano').checked == true ? 1 : 0;
   }
   else if(clicked==4) {
     var lat0 = parseFloat(document.getElementById('se_la0').value);
     var lon0 = parseFloat(document.getElementById('se_lo0').value);
     var lat1 = parseFloat(document.getElementById('se_la1').value);
     var lon1 = parseFloat(document.getElementById('se_lo1').value);
-    var ano = parseInt(document.getElementById('se_ano').value)   
+    var ano = document.getElementById('se_ano').checked == true ? 1 : 0; 
   }
 
   //CLEAR TEMPLAYER
@@ -367,6 +367,7 @@ function gen_img(coords_array, clicked) {
     plat1 = parseFloat(to_parse.searchParams.get("lat1"));
     plon1 = parseFloat(to_parse.searchParams.get("lon1"));
     pclicked = parseInt(to_parse.searchParams.get("operation"));
+    panomaly =  parseInt(to_parse.searchParams.get("anomaly"));
     pdataset = to_parse.searchParams.get("dataset");
     pvariable = to_parse.searchParams.get("variable");
     pdepth = parseFloat(to_parse.searchParams.get("depth"));
@@ -383,7 +384,7 @@ function gen_img(coords_array, clicked) {
     else {
       reqstring2 = 'lat0=' + plat0.toString() + '&lon0=' + plon0.toString() +
         '&lat1=' + plat1.toString() + '&lon1=' + plon1.toString() +
-        '&operation=' + pclicked.toString() + '&dataset=' + pdataset +
+        '&operation=' + clicked.toString() + '&anomaly=' + ano.toString() + '&dataset=' + user_selection['dataset'] +
         '&variable=' + pvariable + '&depth=' + pdepth.toString() +
         '&time=' + ptime + '&lowval=' + lowval2.toString() +
         '&highval=' + highval2.toString()

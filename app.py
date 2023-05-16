@@ -45,6 +45,7 @@ def gen_img_route():
     lat1 = float(request.args.get('lat1'))
     lon1 = float(request.args.get('lon1'))
     operation = int(request.args.get('operation'))
+    anomaly = int(request.args.get('anomaly'))
     dataset = request.args.get('dataset')
     variable = request.args.get('variable')
     depth = float(request.args.get('depth'))
@@ -62,25 +63,15 @@ def gen_img_route():
 
     # tests on operation
     if (operation == 1):
-        img_path = time_serie_on_point(lat0, lon0, dataset, variable, depth,0)
+        img_path = time_serie_on_point(lat0, lon0, dataset, variable, depth,anomaly)
     elif (operation == 2):
-        img_path = profile_on_point(lat0, lon0, dataset, variable, date,0)
+        img_path = profile_on_point(lat0, lon0, dataset, variable, date,anomaly)
     elif (operation == 3):
         img_path = snapshot(lat0, lon0, lat1, lon1, dataset,
-                            variable, depth, date, lowval, highval,0)
+                            variable, depth, date, lowval, highval,anomaly)
     elif (operation == 4):
         img_path = section(lat0, lon0, lat1, lon1, dataset,
-                           variable, date, lowval, highval,0)
-    elif (operation == 5):
-        img_path = time_serie_on_point(lat0, lon0, dataset, variable, depth,1)                           
-    elif (operation == 6):
-        img_path = profile_on_point(lat0, lon0, dataset, variable, date,1)       
-    elif (operation == 7):
-        img_path = snapshot(lat0, lon0, lat1, lon1, dataset,
-                            variable, depth, date, None, None,1)          
-    elif (operation == 8):
-        img_path = section(lat0, lon0, lat1, lon1, dataset,
-                           variable, date, None, None,1)
+                           variable, date, lowval, highval,anomaly)    
     else:
         img_path = url_for("static", filename='dist/unavailable.png')
 
