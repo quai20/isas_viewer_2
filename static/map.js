@@ -243,10 +243,34 @@ map.on('draw:created', function (e) {
 
 function gen_img(coords_array, clicked) {
 
-  var lat0 = coords_array[0];
-  var lon0 = coords_array[1];
-  var lat1 = coords_array[2];
-  var lon1 = coords_array[3];
+  if (clicked==1) {
+    var lat0 = parseFloat(document.getElementById('ts_la0').value);
+    var lon0 = parseFloat(document.getElementById('ts_lo0').value);
+    var lat1 = parseFloat(document.getElementById('ts_la0').value);
+    var lon1 = parseFloat(document.getElementById('ts_lo0').value);
+    var ano = parseInt(document.getElementById('ts_ano').value)
+  }
+  else if(clicked==2) {
+    var lat0 = parseFloat(document.getElementById('pr_la0').value);
+    var lon0 = parseFloat(document.getElementById('pr_lo0').value);
+    var lat1 = parseFloat(document.getElementById('pr_la0').value);
+    var lon1 = parseFloat(document.getElementById('pr_lo0').value);
+    var ano = parseInt(document.getElementById('pr_ano').value)
+  }
+  else if(clicked==3) {
+    var lat0 = parseFloat(document.getElementById('sn_la0').value);
+    var lon0 = parseFloat(document.getElementById('sn_lo0').value);
+    var lat1 = parseFloat(document.getElementById('sn_la1').value);
+    var lon1 = parseFloat(document.getElementById('sn_lo1').value);
+    var ano = parseInt(document.getElementById('sn_ano').value)
+  }
+  else if(clicked==4) {
+    var lat0 = parseFloat(document.getElementById('se_la0').value);
+    var lon0 = parseFloat(document.getElementById('se_lo0').value);
+    var lat1 = parseFloat(document.getElementById('se_la1').value);
+    var lon1 = parseFloat(document.getElementById('se_lo1').value);
+    var ano = parseInt(document.getElementById('se_ano').value)   
+  }
 
   //CLEAR TEMPLAYER
   tempLayer.clearLayers();
@@ -267,34 +291,34 @@ function gen_img(coords_array, clicked) {
   });
 
   //MARKER FOR POINT OPERATIONS
-  if ([1, 2, 5, 6].includes(clicked)) {
+  if (clicked<3) {
     var marker = L.marker([(lat0 + lat1) / 2, (lon0 + lon1) / 2]).addTo(window[oneshotname]);
   }
 
   //RECTANGLE FOR SNAPSHOT
-  if ([3, 7].includes(clicked)) {
+  if (clicked==3) {
     var rectangle = L.rectangle([[lat0, lon0], [lat1, lon1]], { color: 'Red', weight: 1 }).addTo(window[oneshotname]);
   }
 
   //LINE FOR SECTION
-  if ([4, 8].includes(clicked)) {
+  if (clicked==4) {
     var line = L.polyline([[lat0, lon0], [lat1, lon1]], { color: 'Red' }).addTo(window[oneshotname]);
   }
 
   //SET WINDOW CONTENT
   winc.content("<div id='img_div'><center><div class=\"lds-dual-ring\"></div></center></div>");
 
-  if ([1, 5].includes(clicked)) {
+  if (clicked==1) {
     winc.title("<a style=\"font-size:20px; font-weight:bold;\">" + lat0.toFixed(2) + ',' + lon0.toFixed(2) + " / " + user_selection['depth'].toString() + "m</a>");
   }
-  else if ([2, 6].includes(clicked)) {
+  else if (clicked==2) {
     winc.title("<a style=\"font-size:20px; font-weight:bold;\">" + lat0.toFixed(2) + ',' + lon0.toFixed(2) + " / " + user_selection['time'].substr(0, 10) + "</a>");
   }
-  else if ([3, 7].includes(clicked)) {
+  else if (clicked==3) {
     winc.title("<a style=\"font-size:20px; font-weight:bold;\">" + user_selection['time'].substr(0, 10) +
       ' / ' + user_selection['depth'].toString() + "m</a>");
   }
-  else {
+  else if (clicked==4){
     winc.title("<a style=\"font-size:20px; font-weight:bold;\">" + user_selection['time'].substr(0, 10) + "</a>");
   }
 
@@ -302,7 +326,7 @@ function gen_img(coords_array, clicked) {
   //console.log(lon1);
   reqstring = 'lat0=' + lat0.toString() + '&lon0=' + lon0.toString() +
     '&lat1=' + lat1.toString() + '&lon1=' + lon1.toString() +
-    '&operation=' + clicked.toString() + '&dataset=' + user_selection['dataset'] +
+    '&operation=' + clicked.toString() + '&anomaly=' + ano.toString() + '&dataset=' + user_selection['dataset'] +
     '&variable=' + user_selection['variable'] + '&depth=' + user_selection['depth'].toString() +
     '&time=' + user_selection['time'] + '&lowval=' + user_selection['lowval'].toString() +
     '&highval=' + user_selection['highval'].toString()
