@@ -21,7 +21,7 @@
 
 <body>
 
-    <h1 style="padding-left: 90px;">ISAS Viewer</h2>
+    <h2 style="padding-left: 90px;">ISAS Viewer</h2>
 
         <div class="container d-md-flex align-items-stretch">
 
@@ -32,7 +32,7 @@
 
             <nav id="bssidebar">
                 <div class="p-4 pt-5" style="padding-top: 0rem !important;">
-                    <ul class="list-unstyled components mb-5">
+                    <ul class="list-unstyled components mb-5" style="margin-bottom: 0px !important;">
                         <li>
                             <a><b>Dataset</b></a>
                             <select name="dataset" id="dataset" style="width:95%;" onchange="updateSelectors()">
@@ -128,17 +128,17 @@
                         <div class="collapse" id="snapshotmenu">
                             <div class="card card-body" style="color:black;">
                                 <form>
-                                    Lon : <input type="number" id="sn_lo0" name="sn_lo0"
-                                        style="width:40%; float: right; margin-top: 2px; margin-right: 2px;">
-                                    <input type="number" id="sn_lo1" name="sn_lo1"
-                                        style="width:40%; float: right; margin-top: 2px; margin-right: 2px;">
+                                    Lon : <input type="number" id="sn_lo1" name="sn_lo1"
+                                        style="width:40%; float: right; margin-top: 2px; margin-right: 2px;" tabindex="2">
+                                    <input type="number" id="sn_lo0" name="sn_lo0"
+                                        style="width:40%; float: right; margin-top: 2px; margin-right: 2px;" tabindex="1">
                                 </form>
 
                                 <form>
-                                    Lat : <input type="number" id="sn_la0" name="sn_la0"
-                                        style="width:40%; float: right; margin-top: 2px; margin-right: 2px;">
-                                    <input type="number" id="sn_la1" name="sn_la1"
-                                        style="width:40%; float: right; margin-top: 2px; margin-right: 2px;">
+                                    Lat : <input type="number" id="sn_la1" name="sn_la1"
+                                        style="width:40%; float: right; margin-top: 2px; margin-right: 2px;" tabindex="4">
+                                    <input type="number" id="sn_la0" name="sn_la0"
+                                        style="width:40%; float: right; margin-top: 2px; margin-right: 2px;" tabindex="3">
                                 </form>
                                 <form> <img src="{{ url_for('static', filename='/dist/icons/target_carbon.png')}}"
                                         onclick="coords_snapshot();" width="30px" height="30px" title="Draw rectangle">
@@ -163,17 +163,17 @@
                         <div class="collapse" id="sectionmenu">
                             <div class="card card-body" style="color:black;">
                                 <form>
-                                    Lon : <input type="number" id="se_lo0" name="se_lo0"
-                                        style="width:40%; float: right; margin-top: 2px; margin-right: 2px;">
-                                    <input type="number" id="se_lo1" name="se_lo1"
-                                        style="width:40%; float: right; margin-top: 2px; margin-right: 2px;">
+                                    Lon : <input type="number" id="se_lo1" name="se_lo1"
+                                        style="width:40%; float: right; margin-top: 2px; margin-right: 2px;" tabindex="2">
+                                    <input type="number" id="se_lo0" name="se_lo0"
+                                        style="width:40%; float: right; margin-top: 2px; margin-right: 2px;" tabindex="1">
                                 </form>
 
                                 <form>
-                                    Lat : <input type="number" id="se_la0" name="se_la0"
-                                        style="width:40%; float: right; margin-top: 2px; margin-right: 2px;">
-                                    <input type="number" id="se_la1" name="se_la1"
-                                        style="width:40%; float: right; margin-top: 2px; margin-right: 2px;">
+                                    Lat : <input type="number" id="se_la1" name="se_la1"
+                                        style="width:40%; float: right; margin-top: 2px; margin-right: 2px;" tabindex="4">
+                                    <input type="number" id="se_la0" name="se_la0"
+                                        style="width:40%; float: right; margin-top: 2px; margin-right: 2px;" tabindex="3">
                                 </form>
                                 <form> <img src="{{ url_for('static', filename='/dist/icons/target_carbon.png')}}"
                                     onclick="coords_section();" width="30px" height="30px" title="Draw section">

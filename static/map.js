@@ -119,7 +119,7 @@ function initDemoMap() {
     crs: L.CRS.EPSG3857,
     minZoom: 1,
     maxZoom: 8,
-    layers: [Esri_WorldImagery],
+    layers: [Esri_WorldImagery]    
   });
 
   var layerControl = L.control.layers(baseLayers);
