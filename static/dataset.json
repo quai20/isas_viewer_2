@@ -3,7 +3,7 @@
         "name": "ISAS13",
         "url": "http://tds0.ifremer.fr/thredds/wms/LPO_GLOBANA_ISAS13_MNTH_TIME_SERIE?",        
         "opendap": "http://tds0.ifremer.fr/thredds/dodsC/LPO_GLOBANA_ISAS13_MNTH_TIME_SERIE?",
-        "climato": "CLIM-ISAS13",
+        "climato": "ISAS13-CLIM",
         "vars": ["TEMP", "PSAL"],
         "levels": [
             -1.0,-3.0,-5.0,-10.0,-15.0,-20.0,-25.0,-30.0,-35.0,-40.0,-45.0,-50.0,-55.0,-60.0,-65.0,-70.0,-75.0,-80.0,-85.0,-90.0,-95.0,-100.0,
@@ -72,7 +72,7 @@
         "name": "ISAS15",
         "url": "http://tds0.ifremer.fr/thredds/wms/LPO_GLOBANA_ISAS15_MNTH_TIME_SERIE?",        
         "opendap": "http://tds0.ifremer.fr/thredds/dodsC/LPO_GLOBANA_ISAS15_MNTH_TIME_SERIE?",
-        "climato": "CLIM-ISAS15",
+        "climato": "ISAS15-CLIM",
         "vars": ["TEMP", "PSAL","HSTR","SABS","SIG0"],
         "levels": [
             -1.0,-3.0,-5.0,-10.0,-15.0,-20.0,-25.0,-30.0,-35.0,-40.0,-45.0,-50.0,-55.0,-60.0,-65.0,-70.0,-75.0,-80.0,-85.0,-90.0,-95.0,-100.0,
@@ -147,7 +147,7 @@
         "name": "ISAS17",
         "url": "http://tds0.ifremer.fr/thredds/wms/LPO_GLOBANA_ISAS17_MNTH_TIME_SERIE?",        
         "opendap": "http://tds0.ifremer.fr/thredds/dodsC/LPO_GLOBANA_ISAS17_MNTH_TIME_SERIE?",
-        "climato": "CLIM-ISAS17",
+        "climato": "ISAS17-CLIM",
         "vars": ["TEMP", "PSAL","HSTR","SABS","SIG0"],
         "levels": [
             -1.0,-3.0,-5.0,-10.0,-15.0,-20.0,-25.0,-30.0,-35.0,-40.0,-45.0,-50.0,-55.0,-60.0,-65.0,-70.0,-75.0,-80.0,-85.0,-90.0,-95.0,-100.0,
