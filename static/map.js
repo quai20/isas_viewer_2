@@ -145,82 +145,132 @@ var clicked = 0;
 var tempLayer = L.layerGroup().addTo(map); //FOR INTERACTIVE PURPOSE
 
 
-function gen_timeserie() {
+function coords_timeserie() {
   clicked = 1;
   $('.leaflet-container').css('cursor', 'crosshair');
 }
-function gen_profile() {
+
+function coords_profile() {
   clicked = 2;
   $('.leaflet-container').css('cursor', 'crosshair');
 }
-function gen_snapshot() {
+
+function coords_snapshot() {
   clicked = 3;
   $('.leaflet-container').css('cursor', 'crosshair');
   map.fireEvent('click');
 }
 
-function gen_section() {
+function coords_section() {
   clicked = 4;
   $('.leaflet-container').css('cursor', 'crosshair');
   map.fireEvent('click');
 }
-
-function ano_timeserie() {
-  clicked = 5;
-  $('.leaflet-container').css('cursor', 'crosshair');
-}
-function ano_profile() {
-  clicked = 6;
-  $('.leaflet-container').css('cursor', 'crosshair');
-}
-function ano_snapshot() {
-  clicked = 7;
-  $('.leaflet-container').css('cursor', 'crosshair');
-  map.fireEvent('click');
-}
-function ano_section() {
-  clicked = 8;
-  $('.leaflet-container').css('cursor', 'crosshair');
-  map.fireEvent('click');
+function clear_ip() {
+  tempLayer.clearLayers();
+  document.getElementById('ts_lo0').value = "";
+  document.getElementById('ts_la0').value = ""; 
+  document.getElementById('pr_lo0').value = "";
+  document.getElementById('pr_la0').value = ""; 
+  document.getElementById('sn_lo0').value = "";
+  document.getElementById('sn_la0').value = ""; 
+  document.getElementById('sn_lo1').value = "";
+  document.getElementById('sn_la1').value = ""; 
+  document.getElementById('se_lo0').value = "";
+  document.getElementById('se_la0').value = ""; 
+  document.getElementById('se_lo1').value = "";
+  document.getElementById('se_la1').value = ""; 
 }
 
 map.on('click', function (e) {
-  if ([1, 2, 5, 6].includes(clicked)) {
-    gen_img([e.latlng.lat, e.latlng.lng, e.latlng.lat, e.latlng.lng], clicked)
+  
+  if (clicked==1) {    
+    //set values of inputs
+    document.getElementById('ts_lo0').value = e.latlng.lng;
+    document.getElementById('ts_la0').value = e.latlng.lat;    
+    //marker
+    var marker = L.marker([e.latlng.lat, e.latlng.lng]).addTo(tempLayer);
+    //reset clicked
     $('.leaflet-container').css('cursor', '');
-    clicked = 0;
+    clicked = 0;    
   }
-  else if ([3, 7].includes(clicked)) {
-    RectDrawer.enable();
+  else if (clicked==2) {
+    //set values of inputs
+    document.getElementById('pr_lo0').value = e.latlng.lng;
+    document.getElementById('pr_la0').value = e.latlng.lat;    
+    //marker
+    var marker = L.marker([e.latlng.lat, e.latlng.lng]).addTo(tempLayer);
+    //reset clicked
+    $('.leaflet-container').css('cursor', '');
+    clicked = 0; 
   }
-  else if ([4, 8].includes(clicked)) {
+  else if (clicked==3) {    
+    RectDrawer.enable();    
+  }
+  else if (clicked==4) {
     LineDrawer.enable();
   }
 });
 
-map.on('draw:created', function (e) {
+//for rectangle & line
+map.on('draw:created', function (e) {  
 
   var type = e.layerType,
     layer = e.layer;
   layer.addTo(tempLayer);
   var coords = layer.getLatLngs();
-  if ([3, 7].includes(clicked)) {
-    gen_img([coords[0]['lat'], coords[0]['lng'], coords[2]['lat'], coords[2]['lng']], clicked);
+  console.log(coords);
+
+  if (clicked==3) {    
+    //set values of inputs
+    document.getElementById('sn_lo0').value = coords[0]['lng'];
+    document.getElementById('sn_lo1').value = coords[2]['lng'];   
+    document.getElementById('sn_la0').value = coords[0]['lat'];
+    document.getElementById('sn_la1').value = coords[2]['lat'];       
   }
-  else if ([4, 8].includes(clicked)) {
-    gen_img([coords[0]['lat'], coords[0]['lng'], coords[1]['lat'], coords[1]['lng']], clicked);
+  else if (clicked==4) {    
+    //set values of inputs
+    document.getElementById('se_lo0').value = coords[0]['lng'];
+    document.getElementById('se_lo1').value = coords[1]['lng'];   
+    document.getElementById('se_la0').value = coords[0]['lat'];
+    document.getElementById('se_la1').value = coords[1]['lat'];
   }
 
   $('.leaflet-container').css('cursor', '');
   clicked = 0;
 });
 
-function gen_img(coords_array, clicked) {
 
-  var lat0 = coords_array[0];
-  var lon0 = coords_array[1];
-  var lat1 = coords_array[2];
-  var lon1 = coords_array[3];
+function gen_img(clicked) {
+
+  if (clicked==1) {
+    var lat0 = parseFloat(document.getElementById('ts_la0').value);
+    var lon0 = parseFloat(document.getElementById('ts_lo0').value);
+    var lat1 = parseFloat(document.getElementById('ts_la0').value);
+    var lon1 = parseFloat(document.getElementById('ts_lo0').value);    
+    var ano = document.getElementById('ts_ano').checked == true ? 1 : 0;
+  }
+  else if(clicked==2) {
+    var lat0 = parseFloat(document.getElementById('pr_la0').value);
+    var lon0 = parseFloat(document.getElementById('pr_lo0').value);
+    var lat1 = parseFloat(document.getElementById('pr_la0').value);
+    var lon1 = parseFloat(document.getElementById('pr_lo0').value);
+    var ano = document.getElementById('pr_ano').checked == true ? 1 : 0;
+  }
+  else if(clicked==3) {
+    var lat0 = parseFloat(document.getElementById('sn_la0').value);
+    var lon0 = parseFloat(document.getElementById('sn_lo0').value);
+    var lat1 = parseFloat(document.getElementById('sn_la1').value);
+    var lon1 = parseFloat(document.getElementById('sn_lo1').value);
+    var ano = document.getElementById('sn_ano').checked == true ? 1 : 0;
+  }
+  else if(clicked==4) {
+    var lat0 = parseFloat(document.getElementById('se_la0').value);
+    var lon0 = parseFloat(document.getElementById('se_lo0').value);
+    var lat1 = parseFloat(document.getElementById('se_la1').value);
+    var lon1 = parseFloat(document.getElementById('se_lo1').value);
+    var ano = document.getElementById('se_ano').checked == true ? 1 : 0; 
+  }
 
   //CLEAR TEMPLAYER
   tempLayer.clearLayers();
@@ -241,34 +291,34 @@ function gen_img(coords_array, clicked) {
   });
 
   //MARKER FOR POINT OPERATIONS
-  if ([1, 2, 5, 6].includes(clicked)) {
+  if (clicked<3) {
     var marker = L.marker([(lat0 + lat1) / 2, (lon0 + lon1) / 2]).addTo(window[oneshotname]);
   }
 
   //RECTANGLE FOR SNAPSHOT
-  if ([3, 7].includes(clicked)) {
+  if (clicked==3) {
     var rectangle = L.rectangle([[lat0, lon0], [lat1, lon1]], { color: 'Red', weight: 1 }).addTo(window[oneshotname]);
   }
 
   //LINE FOR SECTION
-  if ([4, 8].includes(clicked)) {
+  if (clicked==4) {
     var line = L.polyline([[lat0, lon0], [lat1, lon1]], { color: 'Red' }).addTo(window[oneshotname]);
   }
 
   //SET WINDOW CONTENT
   winc.content("<div id='img_div'><center><div class=\"lds-dual-ring\"></div></center></div>");
 
-  if ([1, 5].includes(clicked)) {
+  if (clicked==1) {
     winc.title("<a style=\"font-size:20px; font-weight:bold;\">" + lat0.toFixed(2) + ',' + lon0.toFixed(2) + " / " + user_selection['depth'].toString() + "m</a>");
   }
-  else if ([2, 6].includes(clicked)) {
+  else if (clicked==2) {
     winc.title("<a style=\"font-size:20px; font-weight:bold;\">" + lat0.toFixed(2) + ',' + lon0.toFixed(2) + " / " + user_selection['time'].substr(0, 10) + "</a>");
   }
-  else if ([3, 7].includes(clicked)) {
+  else if (clicked==3) {
     winc.title("<a style=\"font-size:20px; font-weight:bold;\">" + user_selection['time'].substr(0, 10) +
       ' / ' + user_selection['depth'].toString() + "m</a>");
   }
-  else {
+  else if (clicked==4){
     winc.title("<a style=\"font-size:20px; font-weight:bold;\">" + user_selection['time'].substr(0, 10) + "</a>");
   }
 
@@ -276,7 +326,7 @@ function gen_img(coords_array, clicked) {
   //console.log(lon1);
   reqstring = 'lat0=' + lat0.toString() + '&lon0=' + lon0.toString() +
     '&lat1=' + lat1.toString() + '&lon1=' + lon1.toString() +
-    '&operation=' + clicked.toString() + '&dataset=' + user_selection['dataset'] +
+    '&operation=' + clicked.toString() + '&anomaly=' + ano.toString() + '&dataset=' + user_selection['dataset'] +
     '&variable=' + user_selection['variable'] + '&depth=' + user_selection['depth'].toString() +
     '&time=' + user_selection['time'] + '&lowval=' + user_selection['lowval'].toString() +
     '&highval=' + user_selection['highval'].toString()
@@ -317,6 +367,7 @@ function gen_img(coords_array, clicked) {
     plat1 = parseFloat(to_parse.searchParams.get("lat1"));
     plon1 = parseFloat(to_parse.searchParams.get("lon1"));
     pclicked = parseInt(to_parse.searchParams.get("operation"));
+    panomaly =  parseInt(to_parse.searchParams.get("anomaly"));
     pdataset = to_parse.searchParams.get("dataset");
     pvariable = to_parse.searchParams.get("variable");
     pdepth = parseFloat(to_parse.searchParams.get("depth"));
@@ -333,7 +384,7 @@ function gen_img(coords_array, clicked) {
     else {
       reqstring2 = 'lat0=' + plat0.toString() + '&lon0=' + plon0.toString() +
         '&lat1=' + plat1.toString() + '&lon1=' + plon1.toString() +
-        '&operation=' + pclicked.toString() + '&dataset=' + pdataset +
+        '&operation=' + clicked.toString() + '&anomaly=' + ano.toString() + '&dataset=' + user_selection['dataset'] +
         '&variable=' + pvariable + '&depth=' + pdepth.toString() +
         '&time=' + ptime + '&lowval=' + lowval2.toString() +
         '&highval=' + highval2.toString()
@@ -371,6 +422,3 @@ function gen_img(coords_array, clicked) {
   }
 
 }
-
-
-
