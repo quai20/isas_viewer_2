@@ -227,7 +227,7 @@ def snapshot(lat0, lon0, lat1, lon1, dataset, variable, depth, date, lowval, hig
                 return "static/dist/unavailable.png"
         else :
             murl = dataset_config[ix]['opendap'] + f"longitude[{lon0_index}:{lon1_index}],latitude[{lat0_index}:{lat1_index}],depth[{dep_index}],time[{time_index}],{variable}[{time_index}][{dep_index}][{lat0_index}:{lat1_index}][{lon0_index}:{lon1_index}]"
-            print(murl,file=sys.stderr)
+            #print(murl,file=sys.stderr)
             ds = xr.open_dataset(murl,decode_times=True)    
             clabel=variable
         ds.to_netcdf(nc_filename)    
