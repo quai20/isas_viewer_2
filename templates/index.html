@@ -23,171 +23,171 @@
 
     <h2 style="padding-left: 90px;">ISAS Viewer</h2>
 
-        <div class="container d-md-flex align-items-stretch">
+    <div class="container d-md-flex align-items-stretch">
 
-            <div id="content" class="p-4 p-md-5 pt-5" style="display:flex; margin-top: 0; padding-top:1rem !important;">
-                <div id="map" style="width: 100%; height: 90%; position:relative; background-color: #ffffff;"></div>
-                <div id="colorbar"></div>
-            </div>
+        <div id="content" class="p-4 p-md-5 pt-5" style="display:flex; margin-top: 0; padding-top:1rem !important;">
+            <div id="map" style="width: 100%; height: 90%; position:relative; background-color: #ffffff;"></div>
+            <div id="colorbar"></div>
+        </div>
 
-            <nav id="bssidebar">
-                <div class="p-4 pt-5" style="padding-top: 0rem !important;">
-                    <ul class="list-unstyled components mb-5" style="margin-bottom: 0px !important;">
-                        <li>
-                            <a><b>Dataset</b></a>
-                            <select name="dataset" id="dataset" style="width:95%;" onchange="updateSelectors()">
-                                <!-- <option value="0">Select dataset</option> -->
-                            </select>
-                        </li>
-                        <li>
-                            <a><b>Variable</b></a>
-                            <select name="variable" id="variable" style="width:95%;">
-                                <!-- <option value="0">Select variable</option> -->
-                            </select>
-                        </li>
-                        <li>
-                            <a><b>Date</b></a>
-                            <select name="daterange" id="daterange" style="width:95%;">
-                                <!-- <option value="0">Select variable</option> -->
-                            </select>
-                        </li>
-                        <li>
-                            <a><b>Depth</b></a>
-                            <select name="depth" id="depth" style="width:95%;">
-                                <!-- <option value="0">Select z-level</option> -->
-                            </select>
-                        </li>
-                        <li>
-                            <a><b>CLim</b></a>
-                            <input type="number" id="lowval" name="lowval" style="width:40%; float: left;">
-                            <input type="number" id="highval" name="highval" style="width:40%; margin-left: 20px;">
-                        </li>
-                        <li>
-                            <center><button class="btn btn1" onclick="updateMap()">Plot</button></center>
-                        </li>
-                    </ul>
-                    <hr>
-                    <div>
-                        <p style="color:black; font-size: large; font-weight: bold;">Tools</p>
-                        <!-- Time Series -->
-                        <p>
-                            <a data-toggle="collapse" href="#timeseriemenu" role="button" aria-expanded="false"
-                                aria-controls="collapseExample" style="color:black; font-weight: bold;">
-                                &#128317; Time Serie
-                            </a>
-                        <div class="collapse" id="timeseriemenu">
-                            <div class="card card-body" style="color:black;">
-                                <form>Lon : <input type="number" id="ts_lo0" name="ts_lo0"
-                                        style="width:40%; float: right; margin-top: 2px; margin-right: 2px;"></form>
-                                <form>Lat : <input type="number" id="ts_la0" name="ts_la0"
-                                        style="width:40%; float: right; margin-top: 2px; margin-right: 2px;"></form>
-                                <form> <img src="{{ url_for('static', filename='/dist/icons/target_carbon.png')}}"
-                                        onclick="coords_timeserie();" width="30px" height="30px" title="Draw point">
-                                    <img src="{{ url_for('static', filename='/dist/icons/trash_carbon.png')}}"
-                                        onclick="clear_ip();" width="25px" height="25px" title="Clear">
-                                </form>
+        <nav id="bssidebar">
+            <div class="p-4 pt-5" style="padding-top: 0rem !important;">
+                <ul class="list-unstyled components mb-5" style="margin-bottom: 0px !important;">
+                    <li>
+                        <a><b>Dataset</b></a>
+                        <select name="dataset" id="dataset" style="width:95%;" onchange="updateSelectors()">
+                            <!-- <option value="0">Select dataset</option> -->
+                        </select>
+                    </li>
+                    <li>
+                        <a><b>Variable</b></a>
+                        <select name="variable" id="variable" style="width:95%;" onchange="updateUserSelection()">
+                            <!-- <option value="0">Select variable</option> -->
+                        </select>
+                    </li>
+                    <li>
+                        <a><b>Date</b></a>
+                        <select name="daterange" id="daterange" style="width:95%;" onchange="updateUserSelection()">
+                            <!-- <option value="0">Select variable</option> -->
+                        </select>
+                    </li>
+                    <li>
+                        <a><b>Depth</b></a>
+                        <select name="depth" id="depth" style="width:95%;" onchange="updateUserSelection()">
+                            <!-- <option value="0">Select z-level</option> -->
+                        </select>
+                    </li>
+                    <li>
+                        <a><b>CLim</b></a>
+                        <input type="number" id="lowval" name="lowval" style="width:40%; float: left;" onchange="updateUserSelection()">
+                        <input type="number" id="highval" name="highval" style="width:40%; margin-left: 20px;" onchange="updateUserSelection()">
+                    </li>
+                    <li>
+                        <center><button class="btn btn1" onclick="updateMap()">Plot</button></center>
+                    </li>
+                </ul>
+                <hr>
+                <div>
+                    <p style="color:black; font-size: large; font-weight: bold;">Tools</p>
+                    <!-- Time Series -->
+                    <p>
+                        <a data-toggle="collapse" href="#timeseriemenu" role="button" aria-expanded="false"
+                            aria-controls="collapseExample" style="color:black; font-weight: bold;">
+                            &#128317; Time Serie
+                        </a>
+                    <div class="collapse" id="timeseriemenu">
+                        <div class="card card-body" style="color:black;">
+                            <form>Lon : <input type="number" id="ts_lo0" name="ts_lo0"
+                                    style="width:40%; float: right; margin-top: 2px; margin-right: 2px;"></form>
+                            <form>Lat : <input type="number" id="ts_la0" name="ts_la0"
+                                    style="width:40%; float: right; margin-top: 2px; margin-right: 2px;"></form>
+                            <form> <img src="{{ url_for('static', filename='/dist/icons/target_carbon.png')}}"
+                                    onclick="coords_timeserie();" width="30px" height="30px" title="Draw point">
+                                <img src="{{ url_for('static', filename='/dist/icons/trash_carbon.png')}}"
+                                    onclick="clear_ip();" width="25px" height="25px" title="Clear">
+                            </form>
 
-                                <form> Anomaly <input type="checkbox" id="ts_ano" name="ts_ano" value="off">
-                                    <input type="button" value="Plot" onclick="gen_img(1);" style="float: right;">
-                                </form>
-                            </div>
+                            <form> Anomaly <input type="checkbox" id="ts_ano" name="ts_ano" value="off">
+                                <input type="button" value="Plot" onclick="gen_img(1);" style="float: right;">
+                            </form>
                         </div>
-                        </p>
+                    </div>
+                    </p>
 
-                        <!-- Profile -->
-                        <p>
-                            <a data-toggle="collapse" href="#profilemenu" role="button" aria-expanded="false"
-                                aria-controls="collapseExample" style="color:black; font-weight: bold;">
-                                &#128317; Profile
-                            </a>
-                        <div class="collapse" id="profilemenu">
-                            <div class="card card-body" style="color:black;">
-                                <form>Lon : <input type="number" id="pr_lo0" name="pr_lo0"
-                                        style="width:40%; float: right; margin-top: 2px; margin-right: 2px;"></form>
-                                <form>Lat : <input type="number" id="pr_la0" name="pr_la0"
-                                        style="width:40%; float: right; margin-top: 2px; margin-right: 2px;"></form>
-                                <form> <img src="{{ url_for('static', filename='/dist/icons/target_carbon.png')}}"
-                                        onclick="coords_profile();" width="30px" height="30px" title="Draw point">
-                                    <img src="{{ url_for('static', filename='/dist/icons/trash_carbon.png')}}"
-                                        onclick="clear_ip();" width="25px" height="25px" title="Clear">
-                                </form>
+                    <!-- Profile -->
+                    <p>
+                        <a data-toggle="collapse" href="#profilemenu" role="button" aria-expanded="false"
+                            aria-controls="collapseExample" style="color:black; font-weight: bold;">
+                            &#128317; Profile
+                        </a>
+                    <div class="collapse" id="profilemenu">
+                        <div class="card card-body" style="color:black;">
+                            <form>Lon : <input type="number" id="pr_lo0" name="pr_lo0"
+                                    style="width:40%; float: right; margin-top: 2px; margin-right: 2px;"></form>
+                            <form>Lat : <input type="number" id="pr_la0" name="pr_la0"
+                                    style="width:40%; float: right; margin-top: 2px; margin-right: 2px;"></form>
+                            <form> <img src="{{ url_for('static', filename='/dist/icons/target_carbon.png')}}"
+                                    onclick="coords_profile();" width="30px" height="30px" title="Draw point">
+                                <img src="{{ url_for('static', filename='/dist/icons/trash_carbon.png')}}"
+                                    onclick="clear_ip();" width="25px" height="25px" title="Clear">
+                            </form>
 
-                                <form> Anomaly <input type="checkbox" id="pr_ano" name="pr_ano" value="off">
-                                    <input type="button" value="Plot" onclick="gen_img(2);" style="float: right;">
-                                </form>
-                            </div>
+                            <form> Anomaly <input type="checkbox" id="pr_ano" name="pr_ano" value="off">
+                                <input type="button" value="Plot" onclick="gen_img(2);" style="float: right;">
+                            </form>
                         </div>
-                        </p>
+                    </div>
+                    </p>
 
-                        <!-- Snapshot -->
-                        <p>
-                            <a data-toggle="collapse" href="#snapshotmenu" role="button" aria-expanded="false"
-                                aria-controls="collapseExample" style="color:black; font-weight: bold;">
-                                &#128317; Snapshot
-                            </a>
-                        <div class="collapse" id="snapshotmenu">
-                            <div class="card card-body" style="color:black;">
-                                <form>
-                                    Lon : <input type="number" id="sn_lo1" name="sn_lo1"
-                                        style="width:40%; float: right; margin-top: 2px; margin-right: 2px;" tabindex="2">
-                                    <input type="number" id="sn_lo0" name="sn_lo0"
-                                        style="width:40%; float: right; margin-top: 2px; margin-right: 2px;" tabindex="1">
-                                </form>
+                    <!-- Snapshot -->
+                    <p>
+                        <a data-toggle="collapse" href="#snapshotmenu" role="button" aria-expanded="false"
+                            aria-controls="collapseExample" style="color:black; font-weight: bold;">
+                            &#128317; Snapshot
+                        </a>
+                    <div class="collapse" id="snapshotmenu">
+                        <div class="card card-body" style="color:black;">
+                            <form>
+                                Lon : <input type="number" id="sn_lo1" name="sn_lo1"
+                                    style="width:40%; float: right; margin-top: 2px; margin-right: 2px;" tabindex="2">
+                                <input type="number" id="sn_lo0" name="sn_lo0"
+                                    style="width:40%; float: right; margin-top: 2px; margin-right: 2px;" tabindex="1">
+                            </form>
 
-                                <form>
-                                    Lat : <input type="number" id="sn_la1" name="sn_la1"
-                                        style="width:40%; float: right; margin-top: 2px; margin-right: 2px;" tabindex="4">
-                                    <input type="number" id="sn_la0" name="sn_la0"
-                                        style="width:40%; float: right; margin-top: 2px; margin-right: 2px;" tabindex="3">
-                                </form>
-                                <form> <img src="{{ url_for('static', filename='/dist/icons/target_carbon.png')}}"
-                                        onclick="coords_snapshot();" width="30px" height="30px" title="Draw rectangle">
-                                    <img src="{{ url_for('static', filename='/dist/icons/trash_carbon.png')}}"
-                                        onclick="clear_ip();" width="25px" height="25px" title="Clear">
-                                </form>
+                            <form>
+                                Lat : <input type="number" id="sn_la1" name="sn_la1"
+                                    style="width:40%; float: right; margin-top: 2px; margin-right: 2px;" tabindex="4">
+                                <input type="number" id="sn_la0" name="sn_la0"
+                                    style="width:40%; float: right; margin-top: 2px; margin-right: 2px;" tabindex="3">
+                            </form>
+                            <form> <img src="{{ url_for('static', filename='/dist/icons/target_carbon.png')}}"
+                                    onclick="coords_snapshot();" width="30px" height="30px" title="Draw rectangle">
+                                <img src="{{ url_for('static', filename='/dist/icons/trash_carbon.png')}}"
+                                    onclick="clear_ip();" width="25px" height="25px" title="Clear">
+                            </form>
 
 
-                                <form> Anomaly <input type="checkbox" id="sn_ano" name="sn_ano" value="off">
-                                    <input type="button" value="Plot" onclick="gen_img(3);" style="float: right;">
-                                </form>
-                            </div>
+                            <form> Anomaly <input type="checkbox" id="sn_ano" name="sn_ano" value="off">
+                                <input type="button" value="Plot" onclick="gen_img(3);" style="float: right;">
+                            </form>
                         </div>
-                        </p>
+                    </div>
+                    </p>
 
-                        <!-- Section -->
-                        <p>
-                            <a data-toggle="collapse" href="#sectionmenu" role="button" aria-expanded="false"
-                                aria-controls="collapseExample" style="color:black; font-weight: bold;">
-                                &#128317; Section
-                            </a>
-                        <div class="collapse" id="sectionmenu">
-                            <div class="card card-body" style="color:black;">
-                                <form>
-                                    Lon : <input type="number" id="se_lo1" name="se_lo1"
-                                        style="width:40%; float: right; margin-top: 2px; margin-right: 2px;" tabindex="2">
-                                    <input type="number" id="se_lo0" name="se_lo0"
-                                        style="width:40%; float: right; margin-top: 2px; margin-right: 2px;" tabindex="1">
-                                </form>
+                    <!-- Section -->
+                    <p>
+                        <a data-toggle="collapse" href="#sectionmenu" role="button" aria-expanded="false"
+                            aria-controls="collapseExample" style="color:black; font-weight: bold;">
+                            &#128317; Section
+                        </a>
+                    <div class="collapse" id="sectionmenu">
+                        <div class="card card-body" style="color:black;">
+                            <form>
+                                Lon : <input type="number" id="se_lo1" name="se_lo1"
+                                    style="width:40%; float: right; margin-top: 2px; margin-right: 2px;" tabindex="2">
+                                <input type="number" id="se_lo0" name="se_lo0"
+                                    style="width:40%; float: right; margin-top: 2px; margin-right: 2px;" tabindex="1">
+                            </form>
 
-                                <form>
-                                    Lat : <input type="number" id="se_la1" name="se_la1"
-                                        style="width:40%; float: right; margin-top: 2px; margin-right: 2px;" tabindex="4">
-                                    <input type="number" id="se_la0" name="se_la0"
-                                        style="width:40%; float: right; margin-top: 2px; margin-right: 2px;" tabindex="3">
-                                </form>
-                                <form> <img src="{{ url_for('static', filename='/dist/icons/target_carbon.png')}}"
+                            <form>
+                                Lat : <input type="number" id="se_la1" name="se_la1"
+                                    style="width:40%; float: right; margin-top: 2px; margin-right: 2px;" tabindex="4">
+                                <input type="number" id="se_la0" name="se_la0"
+                                    style="width:40%; float: right; margin-top: 2px; margin-right: 2px;" tabindex="3">
+                            </form>
+                            <form> <img src="{{ url_for('static', filename='/dist/icons/target_carbon.png')}}"
                                     onclick="coords_section();" width="30px" height="30px" title="Draw section">
                                 <img src="{{ url_for('static', filename='/dist/icons/trash_carbon.png')}}"
                                     onclick="clear_ip();" width="25px" height="25px" title="Clear">
                             </form>
 
-                                <form> Anomaly <input type="checkbox" id="se_ano" name="se_ano" value="off">
-                                    <input type="button" value="Plot" onclick="gen_img(4);" style="float: right;">
-                                </form>
-                            </div>
+                            <form> Anomaly <input type="checkbox" id="se_ano" name="se_ano" value="off">
+                                <input type="button" value="Plot" onclick="gen_img(4);" style="float: right;">
+                            </form>
                         </div>
-                        </p>
-                        
+                    </div>
+                    </p>
+
                     <hr>
                     <div>
                         <p style="color:black;"><b>More informations</b></p>
@@ -195,133 +195,151 @@
                             target="_blank">ISAS-in-situ-T-S-gridded-fields</a>
                     </div>
                 </div>
-            </nav>
-        </div>
+        </nav>
+    </div>
 
-        <script>
-            var dataset_config;
-            $.getJSON("{{ url_for('static', filename='dataset.json')}}", function (data) {
-                dataset_config = data;
-                //load main js leaflet stuff 
-                $.getScript("{{ url_for('static', filename='map.js')}}");
+    <script>
+        var user_selection;
+        var dataset_config;
+        $.getJSON("{{ url_for('static', filename='dataset.json')}}", function (data) {
+            dataset_config = data;
+            //load main js leaflet stuff 
+            $.getScript("{{ url_for('static', filename='map.js')}}");
 
-                //FILL DATASET SELECTOR
-                const sel0 = document.getElementById("dataset");
-                for (let i = 0; i < dataset_config.length; i++) {
-                    const opt0 = document.createElement("option");
-                    opt0.value = String(i);
-                    opt0.text = dataset_config[i]['name'];
-                    sel0.add(opt0, sel0.options[i]);
-                }
-
-                //FILL VARIABLE SELECTOR
-                const sel1 = document.getElementById("variable");
-                for (let i = 0; i < dataset_config[dataset_config.length - 1]['vars'].length; i++) {
-                    const opt1 = document.createElement("option");
-                    opt1.value = String(i);
-                    opt1.text = dataset_config[dataset_config.length - 1]['vars'][i];
-                    sel1.add(opt1, sel1.options[i]);
-                }
-
-                //FILL DEPTH SELECTOR
-                const sel2 = document.getElementById("depth");
-                for (let i = 0; i < dataset_config[dataset_config.length - 1]['levels'].length; i++) {
-                    const opt2 = document.createElement("option");
-                    opt2.value = String(i);
-                    opt2.text = String(dataset_config[dataset_config.length - 1]['levels'][i]).substr(0, 5) + " m";
-                    sel2.add(opt2, sel2.options[i]);
-                }
-
-                //FILL DATE RANGE
-                const sel3 = document.getElementById("daterange");
-                var drange;
-                if (dataset_config[dataset_config.length - 1].hasOwnProperty('datedisplay')) {
-                    drange = dataset_config[dataset_config.length - 1]['datedisplay'];
-                }
-                else {
-                    drange = dataset_config[dataset_config.length - 1]['daterange'];
-                }
-
-                for (let i = 0; i < drange.length; i++) {
-                    const opt3 = document.createElement("option");
-                    opt3.value = String(i);
-                    opt3.text = drange[i].substr(0, 10);
-                    sel3.add(opt3, sel3.options[i]);
-                }
-
-                updateSelectors();
-
-            });
-
-            function updateSelectors() {
-                //
-                var dx = parseInt(document.getElementById('dataset').value);
-                //FILL VARIABLE SELECTOR            
-                const sel1 = document.getElementById("variable");
-                for (a in sel1.options) { sel1.options.remove(0); }
-                for (let i = 0; i < dataset_config[dx]['vars'].length; i++) {
-                    const opt1 = document.createElement("option");
-                    opt1.value = String(i);
-                    opt1.text = dataset_config[dx]['vars'][i];
-                    sel1.add(opt1, sel1.options[i]);
-                }
-
-                //FILL DEPTH SELECTOR
-                const sel2 = document.getElementById("depth");
-                for (a in sel2.options) { sel2.options.remove(0); }
-                for (let i = 0; i < dataset_config[dx]['levels'].length; i++) {
-                    const opt2 = document.createElement("option");
-                    opt2.value = String(i);
-                    opt2.text = String(dataset_config[dx]['levels'][i]).substr(0, 5) + " m";
-                    sel2.add(opt2, sel2.options[i]);
-                }
-
-                //DEFINE RANGE
-                const sel3 = document.getElementById("daterange");
-                for (a in sel3.options) { sel3.options.remove(0); }
-
-                var drange;
-                if (dataset_config[dx].hasOwnProperty('datedisplay')) {
-                    drange = dataset_config[dx]['datedisplay'];
-                }
-                else {
-                    drange = dataset_config[dx]['daterange'];
-                }
-
-                for (let i = 0; i < drange.length; i++) {
-                    const opt3 = document.createElement("option");
-                    opt3.value = String(i);
-                    opt3.text = drange[i].substr(0, 10);
-                    sel3.add(opt3, sel3.options[i]);
-                }
-
+            //FILL DATASET SELECTOR
+            const sel0 = document.getElementById("dataset");
+            for (let i = 0; i < dataset_config.length; i++) {
+                const opt0 = document.createElement("option");
+                opt0.value = String(i);
+                opt0.text = dataset_config[i]['name'];
+                sel0.add(opt0, sel0.options[i]);
             }
-        </script>
 
-        <link rel="stylesheet" href="{{ url_for('static', filename='dist/leaflet/leaflet.css')}}" />
-        <script src="{{ url_for('static', filename='dist/leaflet/leaflet.js')}}"></script>
-        <!-- Mouse position -->
-        <link rel="stylesheet"
-            href="{{ url_for('static', filename='dist/Leaflet.MousePosition-master/src/L.Control.MousePosition.css')}}" />
-        <script
-            src="{{ url_for('static', filename='dist/Leaflet.MousePosition-master/src/L.Control.MousePosition.js')}}"></script>
-        <!-- Spin -->
-        <script src="{{ url_for('static', filename='dist/Spin/spin.min.js')}}" charset="utf-8"></script>
-        <script src="{{ url_for('static', filename='dist/Spin/leaflet.spin.min.js')}}" charset="utf-8"></script>
+            //FILL VARIABLE SELECTOR
+            const sel1 = document.getElementById("variable");
+            for (let i = 0; i < dataset_config[dataset_config.length - 1]['vars'].length; i++) {
+                const opt1 = document.createElement("option");
+                opt1.value = String(i);
+                opt1.text = dataset_config[dataset_config.length - 1]['vars'][i];
+                sel1.add(opt1, sel1.options[i]);
+            }
 
-        <!-- Draw-->
-        <script src="{{ url_for('static', filename='dist/draw/leaflet.draw.js')}}" charset="utf-8"></script>
-        <link rel="stylesheet" href="{{ url_for('static', filename='dist/draw/leaflet.draw.css')}}" />
+            //FILL DEPTH SELECTOR
+            const sel2 = document.getElementById("depth");
+            for (let i = 0; i < dataset_config[dataset_config.length - 1]['levels'].length; i++) {
+                const opt2 = document.createElement("option");
+                opt2.value = String(i);
+                opt2.text = String(dataset_config[dataset_config.length - 1]['levels'][i]).substr(0, 5) + " m";
+                sel2.add(opt2, sel2.options[i]);
+            }
 
-        <!--SideBar-->
-        <link rel="stylesheet" href="{{ url_for('static', filename='dist/SideBar/L.Control.Sidebar.css')}}" />
-        <script src="{{ url_for('static', filename='dist/SideBar/L.Control.Sidebar.js')}}"></script>
+            //FILL DATE RANGE
+            const sel3 = document.getElementById("daterange");
+            var drange;
+            if (dataset_config[dataset_config.length - 1].hasOwnProperty('datedisplay')) {
+                drange = dataset_config[dataset_config.length - 1]['datedisplay'];
+            }
+            else {
+                drange = dataset_config[dataset_config.length - 1]['daterange'];
+            }
 
-        <!-- Window popup -->
-        <script
-            src="{{ url_for('static', filename='dist/leaflet-control-window-master/src/L.Control.Window.js')}}"></script>
-        <link rel="stylesheet"
-            href="{{ url_for('static', filename='dist/leaflet-control-window-master/src/L.Control.Window.css')}}" />
+            for (let i = 0; i < drange.length; i++) {
+                const opt3 = document.createElement("option");
+                opt3.value = String(i);
+                opt3.text = drange[i].substr(0, 10);
+                sel3.add(opt3, sel3.options[i]);
+            }
+
+            updateSelectors();
+
+        });
+
+        function updateSelectors() {
+            //
+            var dx = parseInt(document.getElementById('dataset').value);
+            //FILL VARIABLE SELECTOR            
+            const sel1 = document.getElementById("variable");
+            for (a in sel1.options) { sel1.options.remove(0); }
+            for (let i = 0; i < dataset_config[dx]['vars'].length; i++) {
+                const opt1 = document.createElement("option");
+                opt1.value = String(i);
+                opt1.text = dataset_config[dx]['vars'][i];
+                sel1.add(opt1, sel1.options[i]);
+            }
+
+            //FILL DEPTH SELECTOR
+            const sel2 = document.getElementById("depth");
+            for (a in sel2.options) { sel2.options.remove(0); }
+            for (let i = 0; i < dataset_config[dx]['levels'].length; i++) {
+                const opt2 = document.createElement("option");
+                opt2.value = String(i);
+                opt2.text = String(dataset_config[dx]['levels'][i]).substr(0, 5) + " m";
+                sel2.add(opt2, sel2.options[i]);
+            }
+
+            //DEFINE RANGE
+            const sel3 = document.getElementById("daterange");
+            for (a in sel3.options) { sel3.options.remove(0); }
+
+            var drange;
+            if (dataset_config[dx].hasOwnProperty('datedisplay')) {
+                drange = dataset_config[dx]['datedisplay'];
+            }
+            else {
+                drange = dataset_config[dx]['daterange'];
+            }
+
+            for (let i = 0; i < drange.length; i++) {
+                const opt3 = document.createElement("option");
+                opt3.value = String(i);
+                opt3.text = drange[i].substr(0, 10);
+                sel3.add(opt3, sel3.options[i]);
+            }
+
+            updateUserSelection();
+
+        }
+
+        function updateUserSelection() {
+            // Get user selection
+            var dst = parseInt(document.getElementById('dataset').value);
+            var variable = parseInt(document.getElementById('variable').value);
+            var level = parseInt(document.getElementById('depth').value);
+            var req_time = parseInt(document.getElementById('daterange').value);
+            var lowval = parseFloat(document.getElementById('lowval').value);
+            var highval = parseFloat(document.getElementById('highval').value);
+            user_selection = {
+                'dataset': dataset_config[dst]['name'], 'variable': dataset_config[dst]['vars'][variable], 'depth': dataset_config[dst]['levels'][level],
+                'time': dataset_config[dst]['daterange'][req_time], 'lowval': lowval, 'highval': highval
+            };
+            //console.log(user_selection);
+        }
+    </script>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='dist/leaflet/leaflet.css')}}" />
+    <script src="{{ url_for('static', filename='dist/leaflet/leaflet.js')}}"></script>
+    <!-- Mouse position -->
+    <link rel="stylesheet"
+        href="{{ url_for('static', filename='dist/Leaflet.MousePosition-master/src/L.Control.MousePosition.css')}}" />
+    <script
+        src="{{ url_for('static', filename='dist/Leaflet.MousePosition-master/src/L.Control.MousePosition.js')}}"></script>
+    <!-- Spin -->
+    <script src="{{ url_for('static', filename='dist/Spin/spin.min.js')}}" charset="utf-8"></script>
+    <script src="{{ url_for('static', filename='dist/Spin/leaflet.spin.min.js')}}" charset="utf-8"></script>
+
+    <!-- Draw-->
+    <script src="{{ url_for('static', filename='dist/draw/leaflet.draw.js')}}" charset="utf-8"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='dist/draw/leaflet.draw.css')}}" />
+
+    <!--SideBar-->
+    <link rel="stylesheet" href="{{ url_for('static', filename='dist/SideBar/L.Control.Sidebar.css')}}" />
+    <script src="{{ url_for('static', filename='dist/SideBar/L.Control.Sidebar.js')}}"></script>
+
+    <!-- Window popup -->
+    <script
+        src="{{ url_for('static', filename='dist/leaflet-control-window-master/src/L.Control.Window.js')}}"></script>
+    <link rel="stylesheet"
+        href="{{ url_for('static', filename='dist/leaflet-control-window-master/src/L.Control.Window.css')}}" />
 
 </body>
 

@@ -124,6 +124,7 @@ def profile_on_point(lat, lon, dataset, variable, date, ptype):
         lat_index = np.abs(lat_array-lat).argmin()
         lon_index = np.abs(lon_array-lon).argmin()    
         time_index = np.abs(time_array - np.datetime64(date)).argmin()
+        print(lat_index,lon_index,file=sys.stderr)
 
         if (ptype==1):
             if (('climato' in dataset_config[ix])):
@@ -209,7 +210,7 @@ def snapshot(lat0, lon0, lat1, lon1, dataset, variable, depth, date, lowval, hig
         lon1_index = np.abs(lon_array-lon1).argmin() + 1       
         time_index = np.abs(time_array - np.datetime64(date)).argmin()
         dep_index = np.abs(depth_array-depth).argmin()
-
+        
         if (ptype==1):
             if (('climato' in dataset_config[ix])):
                 iz = [dataset_config[ix]['climato']==dataset_config[i]['name'] for i in range(len(dataset_config))]

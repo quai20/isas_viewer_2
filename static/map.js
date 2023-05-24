@@ -8,7 +8,7 @@ var level = parseInt(document.getElementById('depth').value);
 var req_time = parseInt(document.getElementById('daterange').value);
 var lowval = parseFloat(document.getElementById('lowval').value);
 var highval = parseFloat(document.getElementById('highval').value);
-var user_selection = {
+user_selection = {
   'dataset': dataset_config[dst]['name'], 'variable': dataset_config[dst]['vars'][variable], 'depth': dataset_config[dst]['levels'][level],
   'time': dataset_config[dst]['daterange'][req_time], 'lowval': lowval, 'highval': highval
 };
