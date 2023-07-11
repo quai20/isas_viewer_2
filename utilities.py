@@ -10,9 +10,10 @@ land_feature=cfeature.NaturalEarthFeature(category='physical',name='land',scale=
 from cartopy.geodesic import Geodesic
 geode = Geodesic()
 import xarray as xr
+import pandas as pd
 import numpy as np
 import json
-import os, sys, glob, time
+import os, sys, glob, time, requests
 
 # Datasets configurations
 jsonfile=open('static/dataset.json')
@@ -21,6 +22,20 @@ dataset_config = json.load(jsonfile)
 grid = xr.open_dataset('static/isas_grid.nc')
 lon_array = grid.longitude.values
 lat_array = grid.latitude.values
+
+def open_dap_ds(ix,decode_times=True):
+    if (dataset_config[ix]['credentials']):
+        #open with cmems cred
+        user = os.environ['MOTU_USERNAME']
+        password = os.environ['MOTU_PASSWORD']
+        session = requests.Session()
+        session.auth = (user, password)
+        root = dataset_config[ix]['opendap']
+        store = xr.backends.PydapDataStore.open(root, session=session)
+        ds = xr.open_dataset(store,decode_times=decode_times)
+    else:
+        ds = xr.open_dataset(dataset_config[ix]['opendap'],decode_times=decode_times)
+    return ds
 
 def time_serie_on_point(lat, lon, dataset, variable, depth,ptype):    
     """_summary_
@@ -51,38 +66,34 @@ def time_serie_on_point(lat, lon, dataset, variable, depth,ptype):
     else :               
         ix = [dataset==dataset_config[i]['name'] for i in range(len(dataset_config))]
         ix = np.argmax(ix)
-        depth_array = np.array(dataset_config[ix]['levels'])        
-        time_array = np.array(dataset_config[ix]['daterange'],dtype='datetime64')
-        lat_index = np.abs(lat_array-lat).argmin()
-        lon_index = np.abs(lon_array-lon).argmin()
+        depth_array = np.array(dataset_config[ix]['levels'])                
         dep_index = np.abs(depth_array-depth).argmin()
         
         if (ptype==1):
             if (('climato' in dataset_config[ix])):
                 iz = [dataset_config[ix]['climato']==dataset_config[i]['name'] for i in range(len(dataset_config))]
-                iz = np.argmax(iz)
-                # time_array_a = np.array(dataset_config[iz]['daterange'],dtype='datetime64')
-                murla = dataset_config[iz]['opendap'] + f"longitude[{lon_index}],latitude[{lat_index}],depth[{dep_index}],time[0:1:11],{variable}[0:1:11][{dep_index}][{lat_index}][{lon_index}]"
-                dsa = xr.open_dataset(murla,decode_times=False)
+                iz = np.argmax(iz)      
+                                          
+                dsa = open_dap_ds(iz,decode_times=False)
+                dsa = dsa.sel(latitude=lat,longitude=lon,method='nearest').isel(depth=dep_index)
                 dsa['time'] = np.arange(1,13)
                 dsa = dsa.rename({'time':'month'})
-
-                murlb = dataset_config[ix]['opendap'] + f"longitude[{lon_index}],latitude[{lat_index}],depth[{dep_index}],time[0:1:{len(time_array)-1}],{variable}[0:1:{len(time_array)-1}][{dep_index}][{lat_index}][{lon_index}]"
-                dsb = xr.open_dataset(murlb,decode_times=True)
+                
+                dsb = open_dap_ds(ix,decode_times=True)
+                dsb = dsb.sel(latitude=lat,longitude=lon,method='nearest').isel(depth=dep_index)
                 ds = dsb.groupby('time.month') - dsa    
                 ylabel=variable+' anomaly'
             else :
                 return "static/dist/unavailable.png"
         else :
-            murl = dataset_config[ix]['opendap'] + f"longitude[{lon_index}],latitude[{lat_index}],depth[{dep_index}],time[0:1:{len(time_array)-1}],{variable}[0:1:{len(time_array)-1}][{dep_index}][{lat_index}][{lon_index}]"
-            ds = xr.open_dataset(murl,decode_times=True)
+            ds = open_dap_ds(ix,decode_times=True)
+            ds = ds.sel(latitude=lat,longitude=lon,method='nearest').isel(depth=dep_index)
             ylabel=variable
         ds.to_netcdf(nc_filename)    
 
     my_dpi=100
     f,ax = plt.subplots(1,1,figsize=(700/my_dpi, 250/my_dpi), dpi=my_dpi)
-    ds[variable].plot(linewidth=2,ax=ax)    
-    # ax.set_title(dataset+' - '+variable+' - '+str(depth)+' at '+'%.2f'%lat+'/%.2f'%lon,fontsize = 10)
+    ds[variable].plot(linewidth=2,ax=ax)        
     ax.set_title('')
     ax.set_ylabel(ylabel)
     ax.set_xlabel('')
@@ -117,34 +128,27 @@ def profile_on_point(lat, lon, dataset, variable, date, ptype):
             xlabel=variable
     else:
         ix = [dataset==dataset_config[i]['name'] for i in range(len(dataset_config))]
-        ix = np.argmax(ix)        
-        depth_array = np.array(dataset_config[ix]['levels'])
-        time_array = np.array(dataset_config[ix]['daterange'],dtype='datetime64')
-
-        lat_index = np.abs(lat_array-lat).argmin()
-        lon_index = np.abs(lon_array-lon).argmin()    
-        time_index = np.abs(time_array - np.datetime64(date)).argmin()
-        print(lat_index,lon_index,file=sys.stderr)
+        ix = np.argmax(ix)                
+        time_array = np.array(dataset_config[ix]['daterange'],dtype='datetime64')            
+        time_index = np.abs(time_array - np.datetime64(date)).argmin() 
+        month_index = pd.to_datetime(time_array[time_index]).month - 1       
 
         if (ptype==1):
             if (('climato' in dataset_config[ix])):
                 iz = [dataset_config[ix]['climato']==dataset_config[i]['name'] for i in range(len(dataset_config))]
-                iz = np.argmax(iz)
-                #time_array_a = np.array(dataset_config[iz]['daterange'],dtype='datetime64')
-                depth_array_a = np.array(dataset_config[iz]['levels'])
-                murla = dataset_config[iz]['opendap'] + f"longitude[{lon_index}],latitude[{lat_index}],depth[0:1:{len(depth_array_a)-1}],time[0:1:11],{variable}[0:1:11][0:1:{len(depth_array_a)-1}][{lat_index}][{lon_index}]"
-                dsa = xr.open_dataset(murla,decode_times=False)
-                dsa['time'] = np.arange(1,13)
-                dsa = dsa.rename({'time':'month'})
-                murlb = dataset_config[ix]['opendap'] + f"longitude[{lon_index}],latitude[{lat_index}],depth[0:1:{len(depth_array)-1}],time[{time_index}],{variable}[{time_index}][0:1:{len(depth_array)-1}][{lat_index}][{lon_index}]"
-                dsb = xr.open_dataset(murlb,decode_times=True)
-                ds = dsb.groupby('time.month') - dsa   
+                iz = np.argmax(iz)                                
+                dsa = open_dap_ds(iz,decode_times=False)
+                dsa = dsa.sel(latitude=lat,longitude=lon,method='nearest').isel(time=month_index).squeeze()                
+                
+                dsb = open_dap_ds(ix,decode_times=True)
+                dsb = dsb.sel(latitude=lat,longitude=lon,method='nearest').isel(time=time_index).squeeze()
+                ds = dsb - dsa                   
                 xlabel=variable+' anomaly'
             else :
                 return "static/dist/unavailable.png"
-        else :    
-            murl = dataset_config[ix]['opendap'] + f"longitude[{lon_index}],latitude[{lat_index}],depth[0:1:{len(depth_array)-1}],time[{time_index}],{variable}[{time_index}][0:1:{len(depth_array)-1}][{lat_index}][{lon_index}]"
-            ds = xr.open_dataset(murl,decode_times=True)
+        else :                
+            ds = open_dap_ds(ix,decode_times=True)
+            ds = ds.sel(latitude=lat,longitude=lon,method='nearest').isel(time=time_index)
             xlabel = variable
         ds.to_netcdf(nc_filename) 
         
@@ -152,8 +156,7 @@ def profile_on_point(lat, lon, dataset, variable, date, ptype):
     f,ax = plt.subplots(1,1,figsize=(250/my_dpi, 600/my_dpi), dpi=my_dpi)
     ds[variable].plot(linewidth=2,y='depth',ax=ax)    
     ax.set_title('')
-    ax.set_xlabel(xlabel)
-    # ax.set_title(dataset+' - '+variable+' - '+str(date)+' at '+'%.2f'%lat+'/%.2f'%lon,rotation=90,y=-0.0,x=1.1,fontsize = 10)
+    ax.set_xlabel(xlabel)    
     ax.grid(linestyle=':')
     ax.invert_yaxis()
     plt.savefig(png_filename, bbox_inches='tight')    
@@ -190,7 +193,6 @@ def snapshot(lat0, lon0, lat1, lon1, dataset, variable, depth, date, lowval, hig
         lon0,lon1 = lon1,lon0
         # if lon1 is > 180, this is not the same pb ...
         
-
     if (os.path.exists(nc_filename)):
         ds = xr.open_dataset(nc_filename)
         if (ptype==1):
@@ -202,34 +204,28 @@ def snapshot(lat0, lon0, lat1, lon1, dataset, variable, depth, date, lowval, hig
         ix = [dataset==dataset_config[i]['name'] for i in range(len(dataset_config))]
         ix = np.argmax(ix)
         depth_array = np.array(dataset_config[ix]['levels'])
-        time_array = np.array(dataset_config[ix]['daterange'],dtype='datetime64')
-
-        lat0_index = np.abs(lat_array-lat0).argmin() - 1
-        lat1_index = np.abs(lat_array-lat1).argmin() + 1 
-        lon0_index = np.abs(lon_array-lon0).argmin() - 1   
-        lon1_index = np.abs(lon_array-lon1).argmin() + 1       
+        time_array = np.array(dataset_config[ix]['daterange'],dtype='datetime64')        
         time_index = np.abs(time_array - np.datetime64(date)).argmin()
         dep_index = np.abs(depth_array-depth).argmin()
+        month_index = pd.to_datetime(time_array[time_index]).month - 1  
         
         if (ptype==1):
             if (('climato' in dataset_config[ix])):
                 iz = [dataset_config[ix]['climato']==dataset_config[i]['name'] for i in range(len(dataset_config))]
                 iz = np.argmax(iz)
-                #time_array_a = np.array(dataset_config[iz]['daterange'],dtype='datetime64')
-                murla = dataset_config[iz]['opendap'] + f"longitude[{lon0_index}:{lon1_index}],latitude[{lat0_index}:{lat1_index}],depth[{dep_index}],time[0:1:11],{variable}[0:1:11][{dep_index}][{lat0_index}:{lat1_index}][{lon0_index}:{lon1_index}]"
-                dsa = xr.open_dataset(murla,decode_times=False)
-                dsa['time'] = np.arange(1,13)
-                dsa = dsa.rename({'time':'month'})
-                murlb = dataset_config[ix]['opendap'] + f"longitude[{lon0_index}:{lon1_index}],latitude[{lat0_index}:{lat1_index}],depth[{dep_index}],time[{time_index}],{variable}[{time_index}][{dep_index}][{lat0_index}:{lat1_index}][{lon0_index}:{lon1_index}]"
-                dsb = xr.open_dataset(murlb,decode_times=True)    
-                ds = dsb.groupby('time.month') - dsa
+
+                dsa = open_dap_ds(iz,decode_times=False)
+                dsa = dsa.sel(latitude=slice(lat0,lat1),longitude=slice(lon0,lon1)).isel(depth=dep_index, time=month_index).squeeze()                
+                
+                dsb = open_dap_ds(ix,decode_times=True)    
+                dsb = dsb.sel(latitude=slice(lat0,lat1),longitude=slice(lon0,lon1)).isel(depth=dep_index,time=time_index).squeeze()                                
+                ds = dsb - dsa
                 clabel=variable+' anomaly'
             else :
                 return "static/dist/unavailable.png"
-        else :
-            murl = dataset_config[ix]['opendap'] + f"longitude[{lon0_index}:{lon1_index}],latitude[{lat0_index}:{lat1_index}],depth[{dep_index}],time[{time_index}],{variable}[{time_index}][{dep_index}][{lat0_index}:{lat1_index}][{lon0_index}:{lon1_index}]"
-            #print(murl,file=sys.stderr)
-            ds = xr.open_dataset(murl,decode_times=True)    
+        else :            
+            ds = open_dap_ds(ix,decode_times=True)    
+            ds = ds.sel(latitude=slice(lat0,lat1),longitude=slice(lon0,lon1)).isel(depth=dep_index,time=time_index)
             clabel=variable
         ds.to_netcdf(nc_filename)    
 
@@ -284,39 +280,38 @@ def section(lat0, lon0, lat1, lon1, dataset, variable, date, lowval, highval, pt
         ix = np.argmax(ix)
         time_array = np.array(dataset_config[ix]['daterange'],dtype='datetime64')
         depth_array = np.array(dataset_config[ix]['levels'])
-
-        lat0_index = np.abs(lat_array-(lat0-1)).argmin()
-        lat1_index = np.abs(lat_array-(lat1+1)).argmin()
-        lai0 = min(lat0_index,lat1_index)-10
-        lai1 = max(lat0_index,lat1_index)+10        
-        lon0_index = np.abs(lon_array-(lon0-1)).argmin()    
-        lon1_index = np.abs(lon_array-(lon1+1)).argmin()        
-        loi0 = min(lon0_index,lon1_index)-10
-        loi1 = max(lon0_index,lon1_index)+10
+        
+        lat0f, lat1f, lon0f, lon1f = lat0, lat1, lon0, lon1
+        if (lat0f>lat1f):
+            lat0f,lat1f = lat1f,lat0f
+        if (lon0f>lon1f):
+            lon0f,lon1f = lon1f,lon0f
+        lat0f=max(lat0f-1,-90)
+        lat1f=min(lat1f+1,90)
+        lon0f=max(lon0f-1,-180)
+        lon1f=min(lon1f+1,180)
 
         time_index = np.abs(time_array - np.datetime64(date)).argmin()
+        month_index = pd.to_datetime(time_array[time_index]).month - 1  
 
         if (ptype==1):
             if (('climato' in dataset_config[ix])):
                 iz = [dataset_config[ix]['climato']==dataset_config[i]['name'] for i in range(len(dataset_config))]
                 iz = np.argmax(iz)
-                #time_array_a = np.array(dataset_config[iz]['daterange'],dtype='datetime64')
-                murla = dataset_config[iz]['opendap'] + f"longitude[{loi0}:{loi1}],latitude[{lai0}:{lai1}],depth[0:1:{len(depth_array)-1}],time[0:1:11],{variable}[0:1:11][0:1:{len(depth_array)-1}][{lai0}:{lai1}][{loi0}:{loi1}]"
-                dsa = xr.open_dataset(murla,decode_times=False)
-                dsa['time'] = np.arange(1,13)
-                dsa = dsa.rename({'time':'month'})
 
-                murlb = dataset_config[ix]['opendap'] + f"longitude[{loi0}:{loi1}],latitude[{lai0}:{lai1}],depth[0:1:{len(depth_array)-1}],time[{time_index}],{variable}[{time_index}][0:1:{len(depth_array)-1}][{lai0}:{lai1}][{loi0}:{loi1}]"
-                dsb = xr.open_dataset(murlb,decode_times=True)   
-
-                ds = dsb.groupby('time.month') - dsa
+                dsa = open_dap_ds(iz,decode_times=False)
+                dsa = dsa.sel(latitude=slice(lat0f,lat1f),longitude=slice(lon0f,lon1f)).isel(time=month_index).squeeze()                
+                
+                dsb = open_dap_ds(ix,decode_times=True)   
+                dsb = dsb.sel(latitude=slice(lat0f,lat1f),longitude=slice(lon0f,lon1f)).isel(time=time_index).squeeze()                
+                ds = dsb - dsa
                 clabel=variable+' anomaly'
 
             else :
                 return "static/dist/unavailable.png"
-        else :    
-            murl = dataset_config[ix]['opendap'] + f"longitude[{loi0}:{loi1}],latitude[{lai0}:{lai1}],depth[0:1:{len(depth_array)-1}],time[{time_index}],{variable}[{time_index}][0:1:{len(depth_array)-1}][{lai0}:{lai1}][{loi0}:{loi1}]"
-            ds = xr.open_dataset(murl,decode_times=True)   
+        else :                
+            ds = open_dap_ds(ix,decode_times=True)   
+            ds = ds.sel(latitude=slice(lat0f,lat1f),longitude=slice(lon0f,lon1f)).isel(time=time_index)
             clabel=variable
         ds.to_netcdf(nc_filename)    
         
