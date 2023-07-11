@@ -8,9 +8,11 @@ var level = parseInt(document.getElementById('depth').value);
 var req_time = parseInt(document.getElementById('daterange').value);
 var lowval = parseFloat(document.getElementById('lowval').value);
 var highval = parseFloat(document.getElementById('highval').value);
+var clim = parseInt(document.getElementById('climatology').value);
+
 user_selection = {
   'dataset': dataset_config[dst]['name'], 'variable': dataset_config[dst]['vars'][variable], 'depth': dataset_config[dst]['levels'][level],
-  'time': dataset_config[dst]['daterange'][req_time], 'lowval': lowval, 'highval': highval
+  'time': dataset_config[dst]['daterange'][req_time], 'lowval': lowval, 'highval': highval, 'climatology':dataset_config[clim]['name']
 };
 
 // this function is called by the UPDATE button
@@ -26,16 +28,19 @@ function updateMap() {
     map.removeLayer(wms_layer);
   }
 
-  // Get user selection
-  dst = parseInt(document.getElementById('dataset').value);
-  variable = parseInt(document.getElementById('variable').value);
-  level = parseInt(document.getElementById('depth').value);
-  req_time = parseInt(document.getElementById('daterange').value);
-  lowval = parseFloat(document.getElementById('lowval').value);
-  highval = parseFloat(document.getElementById('highval').value);
+
+ // Get user selection
+  var dst = parseInt(document.getElementById('dataset').value);
+  var variable = parseInt(document.getElementById('variable').value);
+  var level = parseInt(document.getElementById('depth').value);
+  var req_time = parseInt(document.getElementById('daterange').value);
+  var lowval = parseFloat(document.getElementById('lowval').value);
+  var highval = parseFloat(document.getElementById('highval').value);
+  var clim = parseInt(document.getElementById('climatology').value);
+
   user_selection = {
     'dataset': dataset_config[dst]['name'], 'variable': dataset_config[dst]['vars'][variable], 'depth': dataset_config[dst]['levels'][level],
-    'time': dataset_config[dst]['daterange'][req_time], 'lowval': lowval, 'highval': highval
+    'time': dataset_config[dst]['daterange'][req_time], 'lowval': lowval, 'highval': highval, 'climatology':dataset_config[clim]['name']
   };
 
   if (isNaN(lowval) || isNaN(highval) || (lowval > highval)) {
@@ -218,8 +223,7 @@ map.on('draw:created', function (e) {
   var type = e.layerType,
     layer = e.layer;
   layer.addTo(tempLayer);
-  var coords = layer.getLatLngs();
-  console.log(coords);
+  var coords = layer.getLatLngs();  
 
   if (clicked==3) {    
     //set values of inputs
@@ -329,7 +333,9 @@ function gen_img(clicked) {
     '&operation=' + clicked.toString() + '&anomaly=' + ano.toString() + '&dataset=' + user_selection['dataset'] +
     '&variable=' + user_selection['variable'] + '&depth=' + user_selection['depth'].toString() +
     '&time=' + user_selection['time'] + '&lowval=' + user_selection['lowval'].toString() +
-    '&highval=' + user_selection['highval'].toString()
+    '&highval=' + user_selection['highval'].toString() + '&clim=' + user_selection['climatology']
+
+    console.log(reqstring);
 
   $.ajax({
     type: "GET",
@@ -368,7 +374,7 @@ function gen_img(clicked) {
     plon1 = parseFloat(to_parse.searchParams.get("lon1"));
     pclicked = parseInt(to_parse.searchParams.get("operation"));
     panomaly =  parseInt(to_parse.searchParams.get("anomaly"));
-    pdataset = to_parse.searchParams.get("dataset");
+    pdataset = to_parse.searchParams.get("dataset");    
     pvariable = to_parse.searchParams.get("variable");
     pdepth = parseFloat(to_parse.searchParams.get("depth"));
     ptime = to_parse.searchParams.get("time");
@@ -377,6 +383,9 @@ function gen_img(clicked) {
     lowval2 = parseFloat(document.getElementById('lowval2').value);
     highval2 = parseFloat(document.getElementById('highval2').value);
 
+    //climato
+    pclim = to_parse.searchParams.get("clim");
+
     // New reqstring 
     if (isNaN(lowval2) || isNaN(highval2) || (lowval2 > highval2)) {
       reqstring2 = reqstring1;
@@ -384,10 +393,10 @@ function gen_img(clicked) {
     else {
       reqstring2 = 'lat0=' + plat0.toString() + '&lon0=' + plon0.toString() +
         '&lat1=' + plat1.toString() + '&lon1=' + plon1.toString() +
-        '&operation=' + clicked.toString() + '&anomaly=' + ano.toString() + '&dataset=' + user_selection['dataset'] +
+        '&operation=' + clicked.toString() + '&anomaly=' + ano.toString() + '&dataset=' + pdataset +
         '&variable=' + pvariable + '&depth=' + pdepth.toString() +
         '&time=' + ptime + '&lowval=' + lowval2.toString() +
-        '&highval=' + highval2.toString()
+        '&highval=' + highval2.toString() + '&clim=' + pclim
     }
 
     //Loading
