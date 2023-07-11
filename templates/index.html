@@ -323,9 +323,10 @@
             var req_time = parseInt(document.getElementById('daterange').value);
             var lowval = parseFloat(document.getElementById('lowval').value);
             var highval = parseFloat(document.getElementById('highval').value);
+            var climatology = parseInt(document.getElementById('climatology').value);
             user_selection = {
                 'dataset': dataset_config[dst]['name'], 'variable': dataset_config[dst]['vars'][variable], 'depth': dataset_config[dst]['levels'][level],
-                'time': dataset_config[dst]['daterange'][req_time], 'lowval': lowval, 'highval': highval
+                'time': dataset_config[dst]['daterange'][req_time], 'lowval': lowval, 'highval': highval, 'climatology':climatology
             };
             //console.log(user_selection);
         }
