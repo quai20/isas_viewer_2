@@ -68,7 +68,11 @@
                 </ul>
                 <hr>
                 <div>
-                    <p style="color:black; font-size: large; font-weight: bold;">Tools</p>
+                    <p style="color:black; font-size: large; font-weight: bold; margin-bottom: 0px;">Tools</p>
+                    <!-- climatology selection -->
+                    <p style="color:black; font-size: small; margin-bottom: 0px;">Climatology</p>
+                    <select name="climatology" id="climatology" style="width:95%; margin-bottom: 15px;" onchange="updateUserSelection()"></select>
+
                     <!-- Time Series -->
                     <p>
                         <a data-toggle="collapse" href="#timeseriemenu" role="button" aria-expanded="false"
@@ -250,6 +254,17 @@
                 sel3.add(opt3, sel3.options[i]);
             }
 
+            //FILL CLIMATOLOGY SELECTOR
+            const sel4 = document.getElementById("climatology");
+            for (let i = 0; i < dataset_config.length; i++) {
+                if(dataset_config[i]['climato']){
+                    const opt4 = document.createElement("option");
+                    opt4.value = String(i);
+                    opt4.text = dataset_config[i]['name'];
+                    sel4.add(opt4, sel4.options[i]);
+                }
+            }
+
             updateSelectors();
 
         });
@@ -308,9 +323,10 @@
             var req_time = parseInt(document.getElementById('daterange').value);
             var lowval = parseFloat(document.getElementById('lowval').value);
             var highval = parseFloat(document.getElementById('highval').value);
+            var clim = parseInt(document.getElementById('climatology').value);
             user_selection = {
                 'dataset': dataset_config[dst]['name'], 'variable': dataset_config[dst]['vars'][variable], 'depth': dataset_config[dst]['levels'][level],
-                'time': dataset_config[dst]['daterange'][req_time], 'lowval': lowval, 'highval': highval
+                'time': dataset_config[dst]['daterange'][req_time], 'lowval': lowval, 'highval': highval, 'climatology':dataset_config[clim]['name']
             };
             //console.log(user_selection);
         }

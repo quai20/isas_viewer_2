@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from erddapy import ERDDAP
 import matplotlib.pyplot as plt
 import cartopy
 import cartopy.crs as ccrs
@@ -37,7 +36,7 @@ def open_dap_ds(ix,decode_times=True):
         ds = xr.open_dataset(dataset_config[ix]['opendap'],decode_times=decode_times)
     return ds
 
-def time_serie_on_point(lat, lon, dataset, variable, depth,ptype):    
+def time_serie_on_point(lat, lon, dataset, variable, depth,ptype, clim):    
     """_summary_
 
     Args:
@@ -53,7 +52,7 @@ def time_serie_on_point(lat, lon, dataset, variable, depth,ptype):
     """    
 
     # Saving netcdf in cache dir
-    nc_filename = 'static/nc_cache/'+dataset+'_'+variable+str(ptype)+'_'+str(depth)+'_'+'%.2f'%lat+'_%.2f'%lon+'.nc'
+    nc_filename = 'static/nc_cache/'+dataset+'_'+variable+str(ptype)+'_'+clim+'_'+str(depth)+'_'+'%.2f'%lat+'_%.2f'%lon+'.nc'
     # Gen random img filename
     png_filename = 'static/img/a'+str(int(time.time()))+".png"    
 
@@ -65,29 +64,26 @@ def time_serie_on_point(lat, lon, dataset, variable, depth,ptype):
             ylabel=variable
     else :               
         ix = [dataset==dataset_config[i]['name'] for i in range(len(dataset_config))]
-        ix = np.argmax(ix)
-        depth_array = np.array(dataset_config[ix]['levels'])                
-        dep_index = np.abs(depth_array-depth).argmin()
+        ix = np.argmax(ix)        
         
-        if (ptype==1):
-            if (('climato' in dataset_config[ix])):
-                iz = [dataset_config[ix]['climato']==dataset_config[i]['name'] for i in range(len(dataset_config))]
-                iz = np.argmax(iz)      
-                                          
+        if (ptype==1):           
+            iz = [clim==dataset_config[i]['name'] for i in range(len(dataset_config))]
+            iz = np.argmax(iz)      
+            if(variable in dataset_config[iz]['vars']):                            
                 dsa = open_dap_ds(iz,decode_times=False)
-                dsa = dsa.sel(latitude=lat,longitude=lon,method='nearest').isel(depth=dep_index)
+                dsa = dsa.sel(latitude=lat,longitude=lon,depth=np.abs(depth),method='nearest')
                 dsa['time'] = np.arange(1,13)
                 dsa = dsa.rename({'time':'month'})
                 
                 dsb = open_dap_ds(ix,decode_times=True)
-                dsb = dsb.sel(latitude=lat,longitude=lon,method='nearest').isel(depth=dep_index)
+                dsb = dsb.sel(latitude=lat,longitude=lon,depth=np.abs(depth),method='nearest')
                 ds = dsb.groupby('time.month') - dsa    
-                ylabel=variable+' anomaly'
-            else :
+                ylabel=variable+' anomaly'           
+            else:
                 return "static/dist/unavailable.png"
         else :
             ds = open_dap_ds(ix,decode_times=True)
-            ds = ds.sel(latitude=lat,longitude=lon,method='nearest').isel(depth=dep_index)
+            ds = ds.sel(latitude=lat,longitude=lon,depth=np.abs(depth),method='nearest')
             ylabel=variable
         ds.to_netcdf(nc_filename)    
 
@@ -103,7 +99,7 @@ def time_serie_on_point(lat, lon, dataset, variable, depth,ptype):
     return png_filename
 
 
-def profile_on_point(lat, lon, dataset, variable, date, ptype):
+def profile_on_point(lat, lon, dataset, variable, date, ptype, clim):
     """_summary_
 
     Args:
@@ -117,7 +113,7 @@ def profile_on_point(lat, lon, dataset, variable, date, ptype):
     Returns:
         _type_: _description_
     """    
-    nc_filename = 'static/nc_cache/'+dataset+'_'+variable+str(ptype)+'_'+str(date)[:10]+'_'+'%.2f'%lat+'_%.2f'%lon+'.nc'
+    nc_filename = 'static/nc_cache/'+dataset+'_'+variable+str(ptype)+'_'+clim+'_'+str(date)[:10]+'_'+'%.2f'%lat+'_%.2f'%lon+'.nc'
     png_filename = 'static/img/a'+str(int(time.time()))+".png"    
     
     if (os.path.exists(nc_filename)):
@@ -128,27 +124,25 @@ def profile_on_point(lat, lon, dataset, variable, date, ptype):
             xlabel=variable
     else:
         ix = [dataset==dataset_config[i]['name'] for i in range(len(dataset_config))]
-        ix = np.argmax(ix)                
-        time_array = np.array(dataset_config[ix]['daterange'],dtype='datetime64')            
-        time_index = np.abs(time_array - np.datetime64(date)).argmin() 
-        month_index = pd.to_datetime(time_array[time_index]).month - 1       
+        ix = np.argmax(ix)                        
+        month_index = pd.to_datetime(np.datetime64(date)).month - 1       
 
         if (ptype==1):
-            if (('climato' in dataset_config[ix])):
-                iz = [dataset_config[ix]['climato']==dataset_config[i]['name'] for i in range(len(dataset_config))]
-                iz = np.argmax(iz)                                
+            iz = [clim==dataset_config[i]['name'] for i in range(len(dataset_config))]
+            iz = np.argmax(iz)
+            if (variable in dataset_config[iz]['vars']):                
                 dsa = open_dap_ds(iz,decode_times=False)
                 dsa = dsa.sel(latitude=lat,longitude=lon,method='nearest').isel(time=month_index).squeeze()                
                 
                 dsb = open_dap_ds(ix,decode_times=True)
-                dsb = dsb.sel(latitude=lat,longitude=lon,method='nearest').isel(time=time_index).squeeze()
+                dsb = dsb.sel(latitude=lat,longitude=lon,time=np.datetime64(date),method='nearest').squeeze()
                 ds = dsb - dsa                   
                 xlabel=variable+' anomaly'
             else :
                 return "static/dist/unavailable.png"
         else :                
             ds = open_dap_ds(ix,decode_times=True)
-            ds = ds.sel(latitude=lat,longitude=lon,method='nearest').isel(time=time_index)
+            ds = ds.sel(latitude=lat,longitude=lon,time=np.datetime64(date),method='nearest')
             xlabel = variable
         ds.to_netcdf(nc_filename) 
         
@@ -164,7 +158,7 @@ def profile_on_point(lat, lon, dataset, variable, date, ptype):
     return png_filename
 
 
-def snapshot(lat0, lon0, lat1, lon1, dataset, variable, depth, date, lowval, highval, ptype):
+def snapshot(lat0, lon0, lat1, lon1, dataset, variable, depth, date, lowval, highval, ptype, clim):
     """_summary_
 
     Args:
@@ -184,7 +178,7 @@ def snapshot(lat0, lon0, lat1, lon1, dataset, variable, depth, date, lowval, hig
         _type_: _description_
     """
 
-    nc_filename = 'static/nc_cache/'+dataset+'_'+variable+str(ptype)+'_'+str(date)[:10]+'_'+str(depth)+'_'+'%.2f'%lat0+'_%.2f'%lon0+'to'+'%.2f'%lat1+'_%.2f'%lon1+'_sna.nc'    
+    nc_filename = 'static/nc_cache/'+dataset+'_'+variable+str(ptype)+'_'+clim+'_'+str(date)[:10]+'_'+str(depth)+'_'+'%.2f'%lat0+'_%.2f'%lon0+'to'+'%.2f'%lat1+'_%.2f'%lon1+'_sna.nc'    
     png_filename = 'static/img/a'+str(int(time.time()))+".png"    
     
     if (lat0>lat1):
@@ -202,30 +196,27 @@ def snapshot(lat0, lon0, lat1, lon1, dataset, variable, depth, date, lowval, hig
 
     else:
         ix = [dataset==dataset_config[i]['name'] for i in range(len(dataset_config))]
-        ix = np.argmax(ix)
-        depth_array = np.array(dataset_config[ix]['levels'])
-        time_array = np.array(dataset_config[ix]['daterange'],dtype='datetime64')        
-        time_index = np.abs(time_array - np.datetime64(date)).argmin()
-        dep_index = np.abs(depth_array-depth).argmin()
-        month_index = pd.to_datetime(time_array[time_index]).month - 1  
+        ix = np.argmax(ix)        
+        month_index = pd.to_datetime(np.datetime64(date)).month - 1  
         
         if (ptype==1):
-            if (('climato' in dataset_config[ix])):
-                iz = [dataset_config[ix]['climato']==dataset_config[i]['name'] for i in range(len(dataset_config))]
-                iz = np.argmax(iz)
+
+            iz = [clim==dataset_config[i]['name'] for i in range(len(dataset_config))]
+            iz = np.argmax(iz)
+            if (variable in dataset_config[iz]['vars']):               
 
                 dsa = open_dap_ds(iz,decode_times=False)
-                dsa = dsa.sel(latitude=slice(lat0,lat1),longitude=slice(lon0,lon1)).isel(depth=dep_index, time=month_index).squeeze()                
+                dsa = dsa.sel(latitude=slice(lat0,lat1),longitude=slice(lon0,lon1)).sel(depth=np.abs(depth),method='nearest').isel(time=month_index).squeeze()                
                 
                 dsb = open_dap_ds(ix,decode_times=True)    
-                dsb = dsb.sel(latitude=slice(lat0,lat1),longitude=slice(lon0,lon1)).isel(depth=dep_index,time=time_index).squeeze()                                
+                dsb = dsb.sel(latitude=slice(lat0,lat1),longitude=slice(lon0,lon1)).sel(depth=np.abs(depth),time=np.datetime64(date),method='nearest').squeeze()                                
                 ds = dsb - dsa
                 clabel=variable+' anomaly'
             else :
                 return "static/dist/unavailable.png"
         else :            
             ds = open_dap_ds(ix,decode_times=True)    
-            ds = ds.sel(latitude=slice(lat0,lat1),longitude=slice(lon0,lon1)).isel(depth=dep_index,time=time_index)
+            ds = ds.sel(latitude=slice(lat0,lat1),longitude=slice(lon0,lon1)).sel(depth=np.abs(depth),time=np.datetime64(date),method='nearest')
             clabel=variable
         ds.to_netcdf(nc_filename)    
 
@@ -246,7 +237,7 @@ def snapshot(lat0, lon0, lat1, lon1, dataset, variable, depth, date, lowval, hig
     plt.savefig(png_filename, bbox_inches='tight')
     return png_filename        
 
-def section(lat0, lon0, lat1, lon1, dataset, variable, date, lowval, highval, ptype):
+def section(lat0, lon0, lat1, lon1, dataset, variable, date, lowval, highval, ptype, clim):
     """_summary_
 
     Args:
@@ -265,7 +256,7 @@ def section(lat0, lon0, lat1, lon1, dataset, variable, date, lowval, highval, pt
         _type_: _description_
     """
     
-    nc_filename = 'static/nc_cache/'+dataset+'_'+variable+str(ptype)+'_'+str(date)[:10]+'_'+'%.2f'%lat0+'_%.2f'%lon0+'to'+'%.2f'%lat1+'_%.2f'%lon1+'_sec.nc'    
+    nc_filename = 'static/nc_cache/'+dataset+'_'+variable+str(ptype)+'_'+clim+'_'+str(date)[:10]+'_'+'%.2f'%lat0+'_%.2f'%lon0+'to'+'%.2f'%lat1+'_%.2f'%lon1+'_sec.nc'    
     png_filename = 'static/img/a'+str(int(time.time()))+".png"   
     
     if (os.path.exists(nc_filename)):
@@ -278,8 +269,6 @@ def section(lat0, lon0, lat1, lon1, dataset, variable, date, lowval, highval, pt
     else:        
         ix = [dataset==dataset_config[i]['name'] for i in range(len(dataset_config))]
         ix = np.argmax(ix)
-        time_array = np.array(dataset_config[ix]['daterange'],dtype='datetime64')
-        depth_array = np.array(dataset_config[ix]['levels'])
         
         lat0f, lat1f, lon0f, lon1f = lat0, lat1, lon0, lon1
         if (lat0f>lat1f):
@@ -290,20 +279,20 @@ def section(lat0, lon0, lat1, lon1, dataset, variable, date, lowval, highval, pt
         lat1f=min(lat1f+1,90)
         lon0f=max(lon0f-1,-180)
         lon1f=min(lon1f+1,180)
-
-        time_index = np.abs(time_array - np.datetime64(date)).argmin()
-        month_index = pd.to_datetime(time_array[time_index]).month - 1  
+        
+        month_index = pd.to_datetime(np.datetime64(date)).month - 1  
 
         if (ptype==1):
-            if (('climato' in dataset_config[ix])):
-                iz = [dataset_config[ix]['climato']==dataset_config[i]['name'] for i in range(len(dataset_config))]
-                iz = np.argmax(iz)
+            iz = [clim==dataset_config[i]['name'] for i in range(len(dataset_config))]
+            iz = np.argmax(iz)
+
+            if (variable in dataset_config[iz]['vars']):
 
                 dsa = open_dap_ds(iz,decode_times=False)
                 dsa = dsa.sel(latitude=slice(lat0f,lat1f),longitude=slice(lon0f,lon1f)).isel(time=month_index).squeeze()                
                 
                 dsb = open_dap_ds(ix,decode_times=True)   
-                dsb = dsb.sel(latitude=slice(lat0f,lat1f),longitude=slice(lon0f,lon1f)).isel(time=time_index).squeeze()                
+                dsb = dsb.sel(latitude=slice(lat0f,lat1f),longitude=slice(lon0f,lon1f)).sel(time=np.datetime64(date)).squeeze()                
                 ds = dsb - dsa
                 clabel=variable+' anomaly'
 
@@ -311,7 +300,7 @@ def section(lat0, lon0, lat1, lon1, dataset, variable, date, lowval, highval, pt
                 return "static/dist/unavailable.png"
         else :                
             ds = open_dap_ds(ix,decode_times=True)   
-            ds = ds.sel(latitude=slice(lat0f,lat1f),longitude=slice(lon0f,lon1f)).isel(time=time_index)
+            ds = ds.sel(latitude=slice(lat0f,lat1f),longitude=slice(lon0f,lon1f)).sel(time=np.datetime64(date))
             clabel=variable
         ds.to_netcdf(nc_filename)    
         
