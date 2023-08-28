@@ -1,5 +1,7 @@
 var wms_layer = new L.LayerGroup();
 var islayed = false;
+var prefill = 0;
+const regions = [[-180,180,-90,90],[-80,0,10,70],[-70,25,-60,15],[25,140,-60,25]]
 
 // Get user selection
 var dst = parseInt(document.getElementById('dataset').value);
@@ -185,6 +187,7 @@ function clear_ip() {
   document.getElementById('se_la0').value = ""; 
   document.getElementById('se_lo1').value = "";
   document.getElementById('se_la1').value = ""; 
+  prefill = 0;
 }
 
 map.on('click', function (e) {
@@ -220,8 +223,8 @@ map.on('click', function (e) {
 //for rectangle & line
 map.on('draw:created', function (e) {  
 
-  var type = e.layerType,
-    layer = e.layer;
+  //var type = e.layerType,
+  layer = e.layer;
   layer.addTo(tempLayer);
   var coords = layer.getLatLngs();  
 
@@ -243,6 +246,26 @@ map.on('draw:created', function (e) {
   $('.leaflet-container').css('cursor', '');
   clicked = 0;
 });
+
+
+function prefill_snapshot() {
+  
+  //console.log(prefill);
+  tempLayer.clearLayers();
+
+  //set values of inputs
+  document.getElementById('sn_lo0').value = regions[prefill][0];
+  document.getElementById('sn_lo1').value = regions[prefill][1];   
+  document.getElementById('sn_la0').value = regions[prefill][2];
+  document.getElementById('sn_la1').value = regions[prefill][3];
+  //draw temp layer
+  var rectangle = L.rectangle([[regions[prefill][2], regions[prefill][0]], 
+                               [regions[prefill][3], regions[prefill][1]]], 
+                               { color: '#6f42c1', weight: 1 }).addTo(tempLayer);  
+
+  //inc
+  prefill = prefill < regions.length-1 ? prefill+1 : 0;
+}
 
 
 function gen_img(clicked) {

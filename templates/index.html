@@ -144,8 +144,13 @@
                                 <input type="number" id="sn_la0" name="sn_la0"
                                     style="width:40%; float: right; margin-top: 2px; margin-right: 2px;" tabindex="3">
                             </form>
-                            <form> <img src="{{ url_for('static', filename='/dist/icons/target_carbon.png')}}"
+                            <form> 
+                                <img src="{{ url_for('static', filename='/dist/icons/select_carbon.png')}}"
                                     onclick="coords_snapshot();" width="30px" height="30px" title="Draw rectangle">
+                                
+                                <img src="{{ url_for('static', filename='/dist/icons/world_carbon.png')}}"
+                                    onclick="prefill_snapshot();" width="30px" height="30px" title="Predefined">    
+                                    
                                 <img src="{{ url_for('static', filename='/dist/icons/trash_carbon.png')}}"
                                     onclick="clear_ip();" width="25px" height="25px" title="Clear">
                             </form>
