@@ -182,10 +182,8 @@ def snapshot(lat0, lon0, lat1, lon1, dataset, variable, depth, date, lowval, hig
     nc_filename = 'static/nc_cache/'+dataset+'_'+variable+str(ptype)+'_'+clim+'_'+str(date)[:10]+'_'+str(depth)+'_'+'%.2f'%lat0+'_%.2f'%lon0+'to'+'%.2f'%lat1+'_%.2f'%lon1+'_sna.nc'    
     png_filename = 'static/img/a'+str(int(time.time()))+".png"    
     
-    if (lat0>lat1):
-        lat0,lat1 = lat1,lat0
-    if (lon0>lon1):
-        lon0,lon1 = lon1,lon0
+    #if (lon0>lon1):
+    #    lon0,lon1 = lon1,lon0
         # if lon1 is > 180, this is not the same pb ...
         
     if (os.path.exists(nc_filename)):

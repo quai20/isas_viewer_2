@@ -235,8 +235,9 @@ map.on('draw:created', function (e) {
   layer.addTo(tempLayer);
   var coords = layer.getLatLngs();
 
-  if (clicked == 3) {
-    //set values of inputs
+  if (clicked == 3) {    
+
+    //set values of inputs    
     var nlon0 = outlon(coords[0]['lng']);
     var nlon1 = outlon(coords[2]['lng']);
     var nlat0 = coords[0]['lat'];
@@ -246,13 +247,23 @@ map.on('draw:created', function (e) {
     document.getElementById('sn_lo1').value = nlon1;
     document.getElementById('sn_la0').value = nlat0;
     document.getElementById('sn_la1').value = nlat1;
+
   }
   else if (clicked == 4) {
-    //set values of inputs
-    var nlon0 = outlon(coords[0]['lng']);
-    var nlon1 = outlon(coords[1]['lng']);
-    var nlat0 = coords[0]['lat'];
-    var nlat1 = coords[1]['lat'];
+    //set values of inputs, sorting the line by longitude
+
+    if (coords[0]['lng']<coords[1]['lng']){
+      var nlon0 = outlon(coords[0]['lng']);
+      var nlon1 = outlon(coords[1]['lng']);
+      var nlat0 = coords[0]['lat'];
+      var nlat1 = coords[1]['lat'];
+    }
+    else {
+      var nlon0 = outlon(coords[1]['lng']);
+      var nlon1 = outlon(coords[0]['lng']);
+      var nlat0 = coords[1]['lat'];
+      var nlat1 = coords[0]['lat'];
+    }    
 
     document.getElementById('se_lo0').value = nlon0;
     document.getElementById('se_lo1').value = nlon1;
@@ -341,12 +352,25 @@ function gen_img(clicked) {
 
   //RECTANGLE FOR SNAPSHOT
   if (clicked == 3) {
-    var rectangle = L.rectangle([[lat0, lon0], [lat1, lon1]], { color: 'Red', weight: 1 }).addTo(window[oneshotname]);
+    if (lon0<lon1){
+      var rectangle = L.rectangle([[lat0, lon0], [lat1, lon1]], { color: 'Red', weight: 1 }).addTo(window[oneshotname]);
+    }
+    else { //crossing meridian
+      var rectangle = L.rectangle([[lat0, lon0], [lat1, lon1+360]], { color: 'Red', weight: 1 }).addTo(window[oneshotname]);
+      map.panTo([lat0, lon0]);
+    }
+
   }
 
   //LINE FOR SECTION
   if (clicked == 4) {
-    var line = L.polyline([[lat0, lon0], [lat1, lon1]], { color: 'Red' }).addTo(window[oneshotname]);
+    if (lon0<lon1){
+      var line = L.polyline([[lat0, lon0], [lat1, lon1]], { color: 'Red' }).addTo(window[oneshotname]);
+    }
+    else { //crossing meridian
+      var line = L.polyline([[lat0, lon0], [lat1, lon1+360]], { color: 'Red' }).addTo(window[oneshotname]);
+      map.panTo([lat0, lon0]);
+    }
   }
 
   //SET WINDOW CONTENT
