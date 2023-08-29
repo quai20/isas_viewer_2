@@ -207,7 +207,7 @@ def snapshot(lat0, lon0, lat1, lon1, dataset, variable, depth, date, lowval, hig
                 dsa = open_dap_ds(iz,decode_times=False)
                 if(lon0<lon1):
                     dsa = dsa.sel(latitude=slice(lat0,lat1),longitude=slice(lon0,lon1)).sel(depth=np.abs(depth),method='nearest').isel(time=month_index).squeeze()                
-                else:
+                else: #crossing meridian
                     dsa_1 = dsa.sel(latitude=slice(lat0,lat1),longitude=slice(lon0,180)).sel(depth=np.abs(depth),method='nearest').isel(time=month_index).squeeze()                
                     dsa_2 = dsa.sel(latitude=slice(lat0,lat1),longitude=slice(-180,lon1)).sel(depth=np.abs(depth),method='nearest').isel(time=month_index).squeeze()                
                     dsa_2['longitude'] = dsa_2['longitude']+360
@@ -216,7 +216,7 @@ def snapshot(lat0, lon0, lat1, lon1, dataset, variable, depth, date, lowval, hig
                 dsb = open_dap_ds(ix,decode_times=True)    
                 if(lon0<lon1):
                     dsb = dsb.sel(latitude=slice(lat0,lat1),longitude=slice(lon0,lon1)).sel(depth=np.abs(depth),time=np.datetime64(date),method='nearest').squeeze()                                
-                else :
+                else : #crossing meridian
                     dsb_1 = dsb.sel(latitude=slice(lat0,lat1),longitude=slice(lon0,180)).sel(depth=np.abs(depth),time=np.datetime64(date),method='nearest').squeeze()                                
                     dsb_2 = dsb.sel(latitude=slice(lat0,lat1),longitude=slice(-180,lon1)).sel(depth=np.abs(depth),time=np.datetime64(date),method='nearest').squeeze()                                
                     dsb_2['longitude'] = dsb_2['longitude']+360
@@ -229,7 +229,7 @@ def snapshot(lat0, lon0, lat1, lon1, dataset, variable, depth, date, lowval, hig
             ds = open_dap_ds(ix,decode_times=True)    
             if(lon0<lon1):
                 ds = ds.sel(latitude=slice(lat0,lat1),longitude=slice(lon0,lon1)).sel(depth=np.abs(depth),time=np.datetime64(date),method='nearest')
-            else:
+            else: #crossing meridian
                 ds_1 = ds.sel(latitude=slice(lat0,lat1),longitude=slice(lon0,180)).sel(depth=np.abs(depth),time=np.datetime64(date),method='nearest')
                 ds_2 = ds.sel(latitude=slice(lat0,lat1),longitude=slice(-180,lon1)).sel(depth=np.abs(depth),time=np.datetime64(date),method='nearest')
                 ds_2['longitude']=ds_2['longitude']+360
@@ -243,7 +243,7 @@ def snapshot(lat0, lon0, lat1, lon1, dataset, variable, depth, date, lowval, hig
         ax = fig.add_subplot(1,1,1,projection=ccrs.Miller(central_longitude=0))    
     else:
         ax = fig.add_subplot(1,1,1,projection=ccrs.Miller(central_longitude=180))
-            
+
     if((lowval==None)&(highval==None)):
         lowval = ds[variable].squeeze().min().values
         highval = ds[variable].squeeze().max().values
