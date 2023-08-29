@@ -49,7 +49,7 @@ def time_serie_on_point(lat, lon, dataset, variable, depth,ptype, clim):
 
     Returns:
         _type_: _description_
-    """    
+    """        
 
     # Saving netcdf in cache dir
     nc_filename = 'static/nc_cache/'+dataset+'_'+variable+str(ptype)+'_'+clim+'_'+str(depth)+'_'+'%.2f'%lat+'_%.2f'%lon+'.nc'
@@ -112,7 +112,8 @@ def profile_on_point(lat, lon, dataset, variable, date, ptype, clim):
 
     Returns:
         _type_: _description_
-    """    
+    """        
+
     nc_filename = 'static/nc_cache/'+dataset+'_'+variable+str(ptype)+'_'+clim+'_'+str(date)[:10]+'_'+'%.2f'%lat+'_%.2f'%lon+'.nc'
     png_filename = 'static/img/a'+str(int(time.time()))+".png"    
     

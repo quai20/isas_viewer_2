@@ -1,7 +1,7 @@
 var wms_layer = new L.LayerGroup();
 var islayed = false;
 var prefill = 0;
-const regions = [[-180,180,-90,90],[-80,0,10,70],[-70,25,-60,15],[25,140,-60,25]]
+const regions = [[-180, 180, -90, 90], [-80, 0, 10, 70], [-70, 25, -60, 15], [25, 140, -60, 25]]
 
 // Get user selection
 var dst = parseInt(document.getElementById('dataset').value);
@@ -14,7 +14,7 @@ var clim = parseInt(document.getElementById('climatology').value);
 
 user_selection = {
   'dataset': dataset_config[dst]['name'], 'variable': dataset_config[dst]['vars'][variable], 'depth': dataset_config[dst]['levels'][level],
-  'time': dataset_config[dst]['daterange'][req_time], 'lowval': lowval, 'highval': highval, 'climatology':dataset_config[clim]['name']
+  'time': dataset_config[dst]['daterange'][req_time], 'lowval': lowval, 'highval': highval, 'climatology': dataset_config[clim]['name']
 };
 
 // this function is called by the UPDATE button
@@ -31,7 +31,7 @@ function updateMap() {
   }
 
 
- // Get user selection
+  // Get user selection
   var dst = parseInt(document.getElementById('dataset').value);
   var variable = parseInt(document.getElementById('variable').value);
   var level = parseInt(document.getElementById('depth').value);
@@ -42,7 +42,7 @@ function updateMap() {
 
   user_selection = {
     'dataset': dataset_config[dst]['name'], 'variable': dataset_config[dst]['vars'][variable], 'depth': dataset_config[dst]['levels'][level],
-    'time': dataset_config[dst]['daterange'][req_time], 'lowval': lowval, 'highval': highval, 'climatology':dataset_config[clim]['name']
+    'time': dataset_config[dst]['daterange'][req_time], 'lowval': lowval, 'highval': highval, 'climatology': dataset_config[clim]['name']
   };
 
   if (isNaN(lowval) || isNaN(highval) || (lowval > highval)) {
@@ -126,7 +126,7 @@ function initDemoMap() {
     crs: L.CRS.EPSG3857,
     minZoom: 1,
     maxZoom: 8,
-    layers: [Esri_WorldImagery]    
+    layers: [Esri_WorldImagery]
   });
 
   var layerControl = L.control.layers(baseLayers);
@@ -176,71 +176,88 @@ function coords_section() {
 function clear_ip() {
   tempLayer.clearLayers();
   document.getElementById('ts_lo0').value = "";
-  document.getElementById('ts_la0').value = ""; 
+  document.getElementById('ts_la0').value = "";
   document.getElementById('pr_lo0').value = "";
-  document.getElementById('pr_la0').value = ""; 
+  document.getElementById('pr_la0').value = "";
   document.getElementById('sn_lo0').value = "";
-  document.getElementById('sn_la0').value = ""; 
+  document.getElementById('sn_la0').value = "";
   document.getElementById('sn_lo1').value = "";
-  document.getElementById('sn_la1').value = ""; 
+  document.getElementById('sn_la1').value = "";
   document.getElementById('se_lo0').value = "";
-  document.getElementById('se_la0').value = ""; 
+  document.getElementById('se_la0').value = "";
   document.getElementById('se_lo1').value = "";
-  document.getElementById('se_la1').value = ""; 
+  document.getElementById('se_la1').value = "";
   prefill = 0;
 }
 
 map.on('click', function (e) {
-  
-  if (clicked==1) {    
+
+  if (clicked == 1) {
     //set values of inputs
-    document.getElementById('ts_lo0').value = e.latlng.lng;
-    document.getElementById('ts_la0').value = e.latlng.lat;    
+    var nlat = e.latlng.lat;
+    var nlon = outlon(e.latlng.lng);
+    document.getElementById('ts_lo0').value = nlon;
+    document.getElementById('ts_la0').value = nlat;
     //marker
-    var marker = L.marker([e.latlng.lat, e.latlng.lng]).addTo(tempLayer);
+    var marker = L.marker([nlat, nlon]).addTo(tempLayer);
+    map.panTo([nlat, nlon]);
     //reset clicked
     $('.leaflet-container').css('cursor', '');
-    clicked = 0;    
+    clicked = 0;
   }
-  else if (clicked==2) {
+  else if (clicked == 2) {
     //set values of inputs
-    document.getElementById('pr_lo0').value = e.latlng.lng;
-    document.getElementById('pr_la0').value = e.latlng.lat;    
+    var nlat = e.latlng.lat;
+    var nlon = outlon(e.latlng.lng);
+
+    document.getElementById('pr_lo0').value = nlon;
+    document.getElementById('pr_la0').value = nlat;
     //marker
-    var marker = L.marker([e.latlng.lat, e.latlng.lng]).addTo(tempLayer);
+    var marker = L.marker([nlat, nlon]).addTo(tempLayer);
+    map.panTo([nlat, nlon]);
     //reset clicked
     $('.leaflet-container').css('cursor', '');
-    clicked = 0; 
+    clicked = 0;
   }
-  else if (clicked==3) {    
-    RectDrawer.enable();    
+  else if (clicked == 3) {
+    RectDrawer.enable();
   }
-  else if (clicked==4) {
+  else if (clicked == 4) {
     LineDrawer.enable();
   }
 });
 
 //for rectangle & line
-map.on('draw:created', function (e) {  
+map.on('draw:created', function (e) {
 
   //var type = e.layerType,
   layer = e.layer;
   layer.addTo(tempLayer);
-  var coords = layer.getLatLngs();  
+  var coords = layer.getLatLngs();
 
-  if (clicked==3) {    
+  if (clicked == 3) {
     //set values of inputs
-    document.getElementById('sn_lo0').value = coords[0]['lng'];
-    document.getElementById('sn_lo1').value = coords[2]['lng'];   
-    document.getElementById('sn_la0').value = coords[0]['lat'];
-    document.getElementById('sn_la1').value = coords[2]['lat'];       
+    var nlon0 = outlon(coords[0]['lng']);
+    var nlon1 = outlon(coords[2]['lng']);
+    var nlat0 = coords[0]['lat'];
+    var nlat1 = coords[2]['lat'];
+
+    document.getElementById('sn_lo0').value = nlon0;
+    document.getElementById('sn_lo1').value = nlon1;
+    document.getElementById('sn_la0').value = nlat0;
+    document.getElementById('sn_la1').value = nlat1;
   }
-  else if (clicked==4) {    
+  else if (clicked == 4) {
     //set values of inputs
-    document.getElementById('se_lo0').value = coords[0]['lng'];
-    document.getElementById('se_lo1').value = coords[1]['lng'];   
-    document.getElementById('se_la0').value = coords[0]['lat'];
-    document.getElementById('se_la1').value = coords[1]['lat'];
+    var nlon0 = outlon(coords[0]['lng']);
+    var nlon1 = outlon(coords[1]['lng']);
+    var nlat0 = coords[0]['lat'];
+    var nlat1 = coords[1]['lat'];
+
+    document.getElementById('se_lo0').value = nlon0;
+    document.getElementById('se_lo1').value = nlon1;
+    document.getElementById('se_la0').value = nlat0;
+    document.getElementById('se_la1').value = nlat1;
   }
 
   $('.leaflet-container').css('cursor', '');
@@ -249,54 +266,54 @@ map.on('draw:created', function (e) {
 
 
 function prefill_snapshot() {
-  
+
   //console.log(prefill);
   tempLayer.clearLayers();
 
   //set values of inputs
   document.getElementById('sn_lo0').value = regions[prefill][0];
-  document.getElementById('sn_lo1').value = regions[prefill][1];   
+  document.getElementById('sn_lo1').value = regions[prefill][1];
   document.getElementById('sn_la0').value = regions[prefill][2];
   document.getElementById('sn_la1').value = regions[prefill][3];
   //draw temp layer
-  var rectangle = L.rectangle([[regions[prefill][2], regions[prefill][0]], 
-                               [regions[prefill][3], regions[prefill][1]]], 
-                               { color: '#6f42c1', weight: 1 }).addTo(tempLayer);  
+  var rectangle = L.rectangle([[regions[prefill][2], regions[prefill][0]],
+  [regions[prefill][3], regions[prefill][1]]],
+    { color: '#6f42c1', weight: 1 }).addTo(tempLayer);
 
   //inc
-  prefill = prefill < regions.length-1 ? prefill+1 : 0;
+  prefill = prefill < regions.length - 1 ? prefill + 1 : 0;
 }
 
 
 function gen_img(clicked) {
 
-  if (clicked==1) {
+  if (clicked == 1) {
     var lat0 = parseFloat(document.getElementById('ts_la0').value);
     var lon0 = parseFloat(document.getElementById('ts_lo0').value);
     var lat1 = parseFloat(document.getElementById('ts_la0').value);
-    var lon1 = parseFloat(document.getElementById('ts_lo0').value);    
+    var lon1 = parseFloat(document.getElementById('ts_lo0').value);
     var ano = document.getElementById('ts_ano').checked == true ? 1 : 0;
   }
-  else if(clicked==2) {
+  else if (clicked == 2) {
     var lat0 = parseFloat(document.getElementById('pr_la0').value);
     var lon0 = parseFloat(document.getElementById('pr_lo0').value);
     var lat1 = parseFloat(document.getElementById('pr_la0').value);
     var lon1 = parseFloat(document.getElementById('pr_lo0').value);
     var ano = document.getElementById('pr_ano').checked == true ? 1 : 0;
   }
-  else if(clicked==3) {
+  else if (clicked == 3) {
     var lat0 = parseFloat(document.getElementById('sn_la0').value);
     var lon0 = parseFloat(document.getElementById('sn_lo0').value);
     var lat1 = parseFloat(document.getElementById('sn_la1').value);
     var lon1 = parseFloat(document.getElementById('sn_lo1').value);
     var ano = document.getElementById('sn_ano').checked == true ? 1 : 0;
   }
-  else if(clicked==4) {
+  else if (clicked == 4) {
     var lat0 = parseFloat(document.getElementById('se_la0').value);
     var lon0 = parseFloat(document.getElementById('se_lo0').value);
     var lat1 = parseFloat(document.getElementById('se_la1').value);
     var lon1 = parseFloat(document.getElementById('se_lo1').value);
-    var ano = document.getElementById('se_ano').checked == true ? 1 : 0; 
+    var ano = document.getElementById('se_ano').checked == true ? 1 : 0;
   }
 
   //CLEAR TEMPLAYER
@@ -312,40 +329,40 @@ function gen_img(clicked) {
 
     //When closing the window, we also need to remove the div element to avoid any issue with the clim function
     mapd = document.getElementById('map');
-    trm = mapd.lastElementChild; 
-    trm.parentNode.removeChild(trm);    
-    
+    trm = mapd.lastElementChild;
+    trm.parentNode.removeChild(trm);
+
   });
 
   //MARKER FOR POINT OPERATIONS
-  if (clicked<3) {
+  if (clicked < 3) {
     var marker = L.marker([(lat0 + lat1) / 2, (lon0 + lon1) / 2]).addTo(window[oneshotname]);
   }
 
   //RECTANGLE FOR SNAPSHOT
-  if (clicked==3) {
+  if (clicked == 3) {
     var rectangle = L.rectangle([[lat0, lon0], [lat1, lon1]], { color: 'Red', weight: 1 }).addTo(window[oneshotname]);
   }
 
   //LINE FOR SECTION
-  if (clicked==4) {
+  if (clicked == 4) {
     var line = L.polyline([[lat0, lon0], [lat1, lon1]], { color: 'Red' }).addTo(window[oneshotname]);
   }
 
   //SET WINDOW CONTENT
   winc.content("<div id='img_div'><center><div class=\"lds-dual-ring\"></div></center></div>");
 
-  if (clicked==1) {
+  if (clicked == 1) {
     winc.title("<a style=\"font-size:20px; font-weight:bold;\">" + lat0.toFixed(2) + ',' + lon0.toFixed(2) + " / " + user_selection['depth'].toString() + "m</a>");
   }
-  else if (clicked==2) {
+  else if (clicked == 2) {
     winc.title("<a style=\"font-size:20px; font-weight:bold;\">" + lat0.toFixed(2) + ',' + lon0.toFixed(2) + " / " + user_selection['time'].substr(0, 10) + "</a>");
   }
-  else if (clicked==3) {
+  else if (clicked == 3) {
     winc.title("<a style=\"font-size:20px; font-weight:bold;\">" + user_selection['time'].substr(0, 10) +
       ' / ' + user_selection['depth'].toString() + "m</a>");
   }
-  else if (clicked==4){
+  else if (clicked == 4) {
     winc.title("<a style=\"font-size:20px; font-weight:bold;\">" + user_selection['time'].substr(0, 10) + "</a>");
   }
 
@@ -358,7 +375,7 @@ function gen_img(clicked) {
     '&time=' + user_selection['time'] + '&lowval=' + user_selection['lowval'].toString() +
     '&highval=' + user_selection['highval'].toString() + '&clim=' + user_selection['climatology']
 
-    console.log(reqstring);
+  //console.log(reqstring);
 
   $.ajax({
     type: "GET",
@@ -396,8 +413,8 @@ function gen_img(clicked) {
     plat1 = parseFloat(to_parse.searchParams.get("lat1"));
     plon1 = parseFloat(to_parse.searchParams.get("lon1"));
     pclicked = parseInt(to_parse.searchParams.get("operation"));
-    panomaly =  parseInt(to_parse.searchParams.get("anomaly"));
-    pdataset = to_parse.searchParams.get("dataset");    
+    panomaly = parseInt(to_parse.searchParams.get("anomaly"));
+    pdataset = to_parse.searchParams.get("dataset");
     pvariable = to_parse.searchParams.get("variable");
     pdepth = parseFloat(to_parse.searchParams.get("depth"));
     ptime = to_parse.searchParams.get("time");
@@ -453,4 +470,17 @@ function gen_img(clicked) {
     });
   }
 
+}
+
+function mod(n, m) {
+  return ((n % m) + m) % m;
+}
+
+function outlon(lon) {
+  if (Math.abs(lon) > 180) {
+    return lon > 0 ? mod(lon, 360) - 360 : mod(lon, 360);
+  }
+  else {
+    return lon
+  }
 }
