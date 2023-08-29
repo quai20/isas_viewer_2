@@ -205,22 +205,45 @@ def snapshot(lat0, lon0, lat1, lon1, dataset, variable, depth, date, lowval, hig
             if (variable in dataset_config[iz]['vars']):               
 
                 dsa = open_dap_ds(iz,decode_times=False)
-                dsa = dsa.sel(latitude=slice(lat0,lat1),longitude=slice(lon0,lon1)).sel(depth=np.abs(depth),method='nearest').isel(time=month_index).squeeze()                
-                
+                if(lon0<lon1):
+                    dsa = dsa.sel(latitude=slice(lat0,lat1),longitude=slice(lon0,lon1)).sel(depth=np.abs(depth),method='nearest').isel(time=month_index).squeeze()                
+                else:
+                    dsa_1 = dsa.sel(latitude=slice(lat0,lat1),longitude=slice(lon0,180)).sel(depth=np.abs(depth),method='nearest').isel(time=month_index).squeeze()                
+                    dsa_2 = dsa.sel(latitude=slice(lat0,lat1),longitude=slice(-180,lon1)).sel(depth=np.abs(depth),method='nearest').isel(time=month_index).squeeze()                
+                    dsa_2['longitude'] = dsa_2['longitude']+360
+                    dsa = xr.concat([dsa_1,dsa_2],dim='longitude')
+
                 dsb = open_dap_ds(ix,decode_times=True)    
-                dsb = dsb.sel(latitude=slice(lat0,lat1),longitude=slice(lon0,lon1)).sel(depth=np.abs(depth),time=np.datetime64(date),method='nearest').squeeze()                                
+                if(lon0<lon1):
+                    dsb = dsb.sel(latitude=slice(lat0,lat1),longitude=slice(lon0,lon1)).sel(depth=np.abs(depth),time=np.datetime64(date),method='nearest').squeeze()                                
+                else :
+                    dsb_1 = dsb.sel(latitude=slice(lat0,lat1),longitude=slice(lon0,180)).sel(depth=np.abs(depth),time=np.datetime64(date),method='nearest').squeeze()                                
+                    dsb_2 = dsb.sel(latitude=slice(lat0,lat1),longitude=slice(-180,lon1)).sel(depth=np.abs(depth),time=np.datetime64(date),method='nearest').squeeze()                                
+                    dsb_2['longitude'] = dsb_2['longitude']+360
+                    dsb = xr.concat([dsb_1,dsb_2],dim='longitude')
                 ds = dsb - dsa
                 clabel=variable+' anomaly'
             else :
                 return "static/dist/unavailable.png"
         else :            
             ds = open_dap_ds(ix,decode_times=True)    
-            ds = ds.sel(latitude=slice(lat0,lat1),longitude=slice(lon0,lon1)).sel(depth=np.abs(depth),time=np.datetime64(date),method='nearest')
+            if(lon0<lon1):
+                ds = ds.sel(latitude=slice(lat0,lat1),longitude=slice(lon0,lon1)).sel(depth=np.abs(depth),time=np.datetime64(date),method='nearest')
+            else:
+                ds_1 = ds.sel(latitude=slice(lat0,lat1),longitude=slice(lon0,180)).sel(depth=np.abs(depth),time=np.datetime64(date),method='nearest')
+                ds_2 = ds.sel(latitude=slice(lat0,lat1),longitude=slice(-180,lon1)).sel(depth=np.abs(depth),time=np.datetime64(date),method='nearest')
+                ds_2['longitude']=ds_2['longitude']+360
+                ds = xr.concat([ds_1,ds_2],dim='longitude')
+
             clabel=variable
         ds.to_netcdf(nc_filename)    
 
     fig = plt.figure(figsize=(9,9),dpi=100)
-    ax = fig.add_subplot(1,1,1,projection=ccrs.Miller())    
+    if(lon0<lon1):
+        ax = fig.add_subplot(1,1,1,projection=ccrs.Miller(central_longitude=0))    
+    else:
+        ax = fig.add_subplot(1,1,1,projection=ccrs.Miller(central_longitude=180))
+            
     if((lowval==None)&(highval==None)):
         lowval = ds[variable].squeeze().min().values
         highval = ds[variable].squeeze().max().values
@@ -233,6 +256,7 @@ def snapshot(lat0, lon0, lat1, lon1, dataset, variable, depth, date, lowval, hig
     gl = ax.gridlines(linestyle=':',draw_labels=True)
     gl.right_labels = None
     gl.top_labels = None
+    
     plt.savefig(png_filename, bbox_inches='tight')
     return png_filename        
 
