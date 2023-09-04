@@ -295,13 +295,16 @@ def section(lat0, lon0, lat1, lon1, dataset, variable, date, lowval, highval, pt
         
         lat0f, lat1f, lon0f, lon1f = lat0, lat1, lon0, lon1
         if (lat0f>lat1f):
-            lat0f,lat1f = lat1f,lat0f
-        if (lon0f>lon1f):
-            lon0f,lon1f = lon1f,lon0f
+            lat0f,lat1f = lat1f,lat0f        
         lat0f=max(lat0f-1,-90)
         lat1f=min(lat1f+1,90)
-        lon0f=max(lon0f-1,-180)
-        lon1f=min(lon1f+1,180)
+
+        if(lon0f<lon1f):
+            lon0f=max(lon0f-1,-180)
+            lon1f=min(lon1f+1,180)
+        else: #crossing meridian
+            lon0f-=1
+            lon1f+=1
         
         month_index = pd.to_datetime(np.datetime64(date)).month - 1  
 
@@ -312,26 +315,57 @@ def section(lat0, lon0, lat1, lon1, dataset, variable, date, lowval, highval, pt
             if (variable in dataset_config[iz]['vars']):
 
                 dsa = open_dap_ds(iz,decode_times=False)
-                dsa = dsa.sel(latitude=slice(lat0f,lat1f),longitude=slice(lon0f,lon1f)).isel(time=month_index).squeeze()                
-                
-                dsb = open_dap_ds(ix,decode_times=True)   
-                dsb = dsb.sel(latitude=slice(lat0f,lat1f),longitude=slice(lon0f,lon1f)).sel(time=np.datetime64(date)).squeeze()                
+                if(lon0f<lon1f):
+                    dsa = dsa.sel(latitude=slice(lat0f,lat1f),longitude=slice(lon0f,lon1f)).isel(time=month_index).squeeze()                
+                else: #crossing meridian
+                    dsa_1 = dsa.sel(latitude=slice(lat0f,lat1f),longitude=slice(lon0f,180)).isel(time=month_index).squeeze()                
+                    dsa_2 = dsa.sel(latitude=slice(lat0f,lat1f),longitude=slice(-180,lon1f)).isel(time=month_index).squeeze()                
+                    dsa_2['longitude'] = dsa_2['longitude']+360
+                    dsa = xr.concat([dsa_1,dsa_2],dim='longitude')
+
+                dsb = open_dap_ds(ix,decode_times=True)    
+                if(lon0f<lon1f):
+                    dsb = dsb.sel(latitude=slice(lat0f,lat1f),longitude=slice(lon0f,lon1f)).sel(time=np.datetime64(date),method='nearest').squeeze()                                
+                else : #crossing meridian
+                    dsb_1 = dsb.sel(latitude=slice(lat0f,lat1f),longitude=slice(lon0f,180)).sel(time=np.datetime64(date),method='nearest').squeeze()                                
+                    dsb_2 = dsb.sel(latitude=slice(lat0f,lat1f),longitude=slice(-180,lon1f)).sel(time=np.datetime64(date),method='nearest').squeeze()                                
+                    dsb_2['longitude'] = dsb_2['longitude']+360
+                    dsb = xr.concat([dsb_1,dsb_2],dim='longitude')
                 ds = dsb - dsa
+
                 clabel=variable+' anomaly'
 
             else :
                 return "static/dist/unavailable.png"
         else :                
             ds = open_dap_ds(ix,decode_times=True)   
-            ds = ds.sel(latitude=slice(lat0f,lat1f),longitude=slice(lon0f,lon1f)).sel(time=np.datetime64(date))
+            if(lon0<lon1):
+                ds = ds.sel(latitude=slice(lat0f,lat1f),longitude=slice(lon0f,lon1f)).sel(time=np.datetime64(date),method='nearest')
+            else: #crossing meridian
+                ds_1 = ds.sel(latitude=slice(lat0f,lat1f),longitude=slice(lon0f,180)).sel(time=np.datetime64(date),method='nearest')
+                ds_2 = ds.sel(latitude=slice(lat0f,lat1f),longitude=slice(-180,lon1f)).sel(time=np.datetime64(date),method='nearest')
+                ds_2['longitude']=ds_2['longitude']+360
+                ds = xr.concat([ds_1,ds_2],dim='longitude')
             clabel=variable
         ds.to_netcdf(nc_filename)    
         
-    drt = geode.inverse((lon0,lat0),(lon1,lat1))
+    if(lon0>lon1): #crossing meridian
+        lon0b = lon0
+        lon1b = lon1+360
+    else:
+        lon0b=lon0
+        lon1b=lon1    
+
+    drt = geode.inverse((lon0b,lat0),(lon1b,lat1))
     d = drt[0][0]
     a = drt[0][1]
     distances = np.arange(0,d,50000) #step in meters, here 50km
-    points = geode.direct((lon0,lat0),a.repeat(len(distances)),distances)
+
+    points = geode.direct((lon0b,lat0),a.repeat(len(distances)),distances)
+    
+    if(lon0>lon1): #crossing meridian
+        points[:,0][points[:,0]<0] += 360
+    
     seclon_array = points[:,0]
     seclat_array = points[:,1]
     secx = xr.DataArray(seclon_array, coords={"distance":distances/1e3})

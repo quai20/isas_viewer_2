@@ -354,6 +354,7 @@ function gen_img(clicked) {
   if (clicked == 3) {
     if (lon0<lon1){
       var rectangle = L.rectangle([[lat0, lon0], [lat1, lon1]], { color: 'Red', weight: 1 }).addTo(window[oneshotname]);
+      map.panTo([lat0, lon0]);
     }
     else { //crossing meridian
       var rectangle = L.rectangle([[lat0, lon0], [lat1, lon1+360]], { color: 'Red', weight: 1 }).addTo(window[oneshotname]);
@@ -366,6 +367,7 @@ function gen_img(clicked) {
   if (clicked == 4) {
     if (lon0<lon1){
       var line = L.polyline([[lat0, lon0], [lat1, lon1]], { color: 'Red' }).addTo(window[oneshotname]);
+      map.panTo([lat0, lon0]);
     }
     else { //crossing meridian
       var line = L.polyline([[lat0, lon0], [lat1, lon1+360]], { color: 'Red' }).addTo(window[oneshotname]);
