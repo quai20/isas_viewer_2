@@ -7,9 +7,7 @@ import json
 import numpy as np
 import time
 from utilities import *
-import os
-import sys
-import glob
+import os, sys, glob, random, string
 
 app = Flask(__name__)
 
@@ -19,16 +17,17 @@ def init_webpage():
     """landing page routing function
 
     Render the index.html template
-    """
+    """    
     # Should do a cleanup of the /static/img dir
     # Clean img dir
     files_tbrm = glob.glob('static/img/*.png')
     for f in files_tbrm:
         os.remove(f)
-    # Clean netcdf cache dir
-    files_tbrn = glob.glob('static/nc_cache/*.nc')
-    for f in files_tbrn:
-        os.remove(f)
+    # Clean netcdf cache dir if dir too big
+    if (sum(os.path.getsize(f) for f in glob.glob('static/nc_cache/*.nc'))/1e6 > 500):
+        files_tbrn = glob.glob('static/nc_cache/*.nc')
+        for f in files_tbrn:
+            os.remove(f)
 
     return render_template('index.html')
 
