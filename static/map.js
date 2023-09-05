@@ -1,7 +1,7 @@
 var wms_layer = new L.LayerGroup();
 var islayed = false;
 var prefill = 0;
-const regions = [[-180, 180, -90, 90], [-80, 0, 10, 70], [-70, 25, -60, 15], [25, 140, -60, 25]]
+const regions = [[-180, 180, -90, 90], [-80, 0, 10, 70], [-70, 25, -60, 15], [25, 140, -60, 25],[120, 255, 10, 65],[120,288,-55,10]]
 
 // Get user selection
 var dst = parseInt(document.getElementById('dataset').value);
@@ -283,7 +283,12 @@ function prefill_snapshot() {
 
   //set values of inputs
   document.getElementById('sn_lo0').value = regions[prefill][0];
-  document.getElementById('sn_lo1').value = regions[prefill][1];
+  if(regions[prefill][1]<=180){
+    document.getElementById('sn_lo1').value = regions[prefill][1];
+  }
+  else {
+    document.getElementById('sn_lo1').value = regions[prefill][1]-360;
+  }
   document.getElementById('sn_la0').value = regions[prefill][2];
   document.getElementById('sn_la1').value = regions[prefill][3];
   //draw temp layer
