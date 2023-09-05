@@ -356,22 +356,19 @@ def section(lat0, lon0, lat1, lon1, dataset, variable, date, lowval, highval, pt
         lon0b=lon0
         lon1b=lon1    
 
-    drt = geode.inverse((lon0b,lat0),(lon1b,lat1))
+    #distance between points
+    drt = geode.inverse((lon0b,lat0),(lon1b,lat1))    
     d = drt[0][0]
-    a = drt[0][1]
-    distances = np.arange(0,d,50000) #step in meters, here 50km
+    #distance array
+    distances = np.linspace(0,d,int(d/50000)) #step in meters, here 50km
+    seclon_array = np.linspace(lon0b,lon1b,int(d/50000),endpoint=True)
+    seclat_array = np.linspace(lat0,lat1,int(d/50000),endpoint=True)
 
-    points = geode.direct((lon0b,lat0),a.repeat(len(distances)),distances)
-    
-    if(lon0>lon1): #crossing meridian
-        points[:,0][points[:,0]<0] += 360
-    
-    seclon_array = points[:,0]
-    seclat_array = points[:,1]
+    #2 dataarrays with new distance coordinate to interpolate ds on points (not grid)
     secx = xr.DataArray(seclon_array, coords={"distance":distances/1e3})
     secy = xr.DataArray(seclat_array, coords={"distance":distances/1e3})
-    dsi = ds.interp(longitude=secx,latitude=secy)        
-    
+    dsi = ds.interp(longitude=secx,latitude=secy)
+        
     my_dpi=100
     f,ax = plt.subplots(1,1,figsize=(900/my_dpi, 350/my_dpi), dpi=my_dpi) 
     
