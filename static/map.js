@@ -1,5 +1,7 @@
 var wms_layer = new L.LayerGroup();
 var islayed = false;
+
+// predefined regions
 var prefill = 0;
 const regions = [[-180, 180, -90, 90], [-80, 0, 10, 70], [-70, 25, -60, 15], [25, 140, -60, 25],[120, 255, 10, 65],[120,288,-55,10]]
 
@@ -12,6 +14,7 @@ var lowval = parseFloat(document.getElementById('lowval').value);
 var highval = parseFloat(document.getElementById('highval').value);
 var clim = parseInt(document.getElementById('climatology').value);
 
+//init user selection dict
 user_selection = {
   'dataset': dataset_config[dst]['name'], 'variable': dataset_config[dst]['vars'][variable], 'depth': dataset_config[dst]['levels'][level],
   'time': dataset_config[dst]['daterange'][req_time], 'lowval': lowval, 'highval': highval, 'climatology': dataset_config[clim]['name']
@@ -45,6 +48,7 @@ function updateMap() {
     'time': dataset_config[dst]['daterange'][req_time], 'lowval': lowval, 'highval': highval, 'climatology': dataset_config[clim]['name']
   };
 
+  //WMS LAYER   
   if (isNaN(lowval) || isNaN(highval) || (lowval > highval)) {
     var legend_url = dataset_config[dst]['url'] + "REQUEST=GetLegendGraphic&LAYER=" + dataset_config[dst]['vars'][variable] + "&bgcolor=0xffffff";
     //console.log(legend_url);
@@ -91,6 +95,7 @@ function updateMap() {
     map.spin(true, { lines: 8, length: 30, width: 13, radius: 20, scale: 0.5, color: 'black' });
   });
 
+  //loaded
   wms_layer.on('load tileerror tileabort', function (e) {
     map.spin(false);
   });
@@ -99,6 +104,7 @@ function updateMap() {
   islayed = true;
 }
 
+//map creation func : basemap tiles, zoom bounds
 function initDemoMap() {
 
   var Esri_WorldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
@@ -151,28 +157,33 @@ var LineDrawer = new L.Draw.Polyline(map);
 var clicked = 0;
 var tempLayer = L.layerGroup().addTo(map); //FOR INTERACTIVE PURPOSE
 
-
+//called by the "draw point" button in time serie menu
 function coords_timeserie() {
   clicked = 1;
   $('.leaflet-container').css('cursor', 'crosshair');
 }
 
+//called by the "draw point" button in profile menu
 function coords_profile() {
   clicked = 2;
   $('.leaflet-container').css('cursor', 'crosshair');
 }
 
+//called by the "draw rectangle" button in snapshot menu
 function coords_snapshot() {
   clicked = 3;
   $('.leaflet-container').css('cursor', 'crosshair');
   map.fireEvent('click');
 }
 
+//called by the "draw line" button in section menu
 function coords_section() {
   clicked = 4;
   $('.leaflet-container').css('cursor', 'crosshair');
   map.fireEvent('click');
 }
+
+//clear all inputs
 function clear_ip() {
   tempLayer.clearLayers();
   document.getElementById('ts_lo0').value = "";
@@ -190,10 +201,11 @@ function clear_ip() {
   prefill = 0;
 }
 
+//"click on map" management, regarding what button we clicked before
 map.on('click', function (e) {
 
   if (clicked == 1) {
-    //set values of inputs
+    //set values of inputs for time serie
     var nlat = e.latlng.lat;
     var nlon = outlon(e.latlng.lng);
     document.getElementById('ts_lo0').value = nlon;
@@ -206,10 +218,9 @@ map.on('click', function (e) {
     clicked = 0;
   }
   else if (clicked == 2) {
-    //set values of inputs
+    //set values of inputs for profile
     var nlat = e.latlng.lat;
     var nlon = outlon(e.latlng.lng);
-
     document.getElementById('pr_lo0').value = nlon;
     document.getElementById('pr_la0').value = nlat;
     //marker
@@ -220,24 +231,25 @@ map.on('click', function (e) {
     clicked = 0;
   }
   else if (clicked == 3) {
+    //enable rectable drawing for snapshot
     RectDrawer.enable();
   }
   else if (clicked == 4) {
+    //enable line drawing for section
     LineDrawer.enable();
   }
 });
 
-//for rectangle & line
+//map drawing management for rectangle & line
 map.on('draw:created', function (e) {
 
-  //var type = e.layerType,
   layer = e.layer;
   layer.addTo(tempLayer);
   var coords = layer.getLatLngs();
 
   if (clicked == 3) {    
 
-    //set values of inputs    
+    //set values of inputs for snapshot
     var nlon0 = outlon(coords[0]['lng']);
     var nlon1 = outlon(coords[2]['lng']);
     var nlat0 = coords[0]['lat'];
@@ -250,7 +262,7 @@ map.on('draw:created', function (e) {
 
   }
   else if (clicked == 4) {
-    //set values of inputs, sorting the line by longitude
+    //set values of inputs for section, sorting the line by longitude
 
     if (coords[0]['lng']<coords[1]['lng']){
       var nlon0 = outlon(coords[0]['lng']);
@@ -275,10 +287,9 @@ map.on('draw:created', function (e) {
   clicked = 0;
 });
 
-
+//predefined region by clicking on the globe
 function prefill_snapshot() {
-
-  //console.log(prefill);
+  
   tempLayer.clearLayers();
 
   //set values of inputs
@@ -296,13 +307,14 @@ function prefill_snapshot() {
   [regions[prefill][3], regions[prefill][1]]],
     { color: '#6f42c1', weight: 1 }).addTo(tempLayer);
 
-  //inc
+  //increment onto the next predefined region
   prefill = prefill < regions.length - 1 ? prefill + 1 : 0;
 }
 
 
 function gen_img(clicked) {
 
+  //get inputs
   if (clicked == 1) {
     var lat0 = parseFloat(document.getElementById('ts_la0').value);
     var lon0 = parseFloat(document.getElementById('ts_lo0').value);
@@ -335,12 +347,12 @@ function gen_img(clicked) {
   //CLEAR TEMPLAYER
   tempLayer.clearLayers();
 
-  //CREATE ONESHOTLAYER with a random name 
+  //CREATE ONESHOTLAYER with a random name so that the plot (window obj) is associated to the marker/rectangle/line 
   var oneshotname = "l" + (Math.floor(Math.random() * 1e6)).toString();
   window[oneshotname] = L.layerGroup().addTo(map);
 
   //CREATE WINDOW OBJ
-  var winc = L.control.window(map, { title: '', position: 'topLeft' }).on('hide', function () {
+  var winc = L.control.window(map, { title: '', position: 'center' }).on('hide', function () {
     window[oneshotname].clearLayers();
 
     //When closing the window, we also need to remove the div element to avoid any issue with the clim function
@@ -383,6 +395,7 @@ function gen_img(clicked) {
   //SET WINDOW CONTENT
   winc.content("<div id='img_div'><center><div class=\"lds-dual-ring\"></div></center></div>");
 
+  //TITLE
   if (clicked == 1) {
     winc.title("<a style=\"font-size:20px; font-weight:bold;\">" + lat0.toFixed(2) + ',' + lon0.toFixed(2) + " / " + user_selection['depth'].toString() + "m</a>");
   }
@@ -397,17 +410,15 @@ function gen_img(clicked) {
     winc.title("<a style=\"font-size:20px; font-weight:bold;\">" + user_selection['time'].substr(0, 10) + "</a>");
   }
 
-  winc.show();
-  //console.log(lon1);
+  winc.show();  
   reqstring = 'lat0=' + lat0.toString() + '&lon0=' + lon0.toString() +
     '&lat1=' + lat1.toString() + '&lon1=' + lon1.toString() +
     '&operation=' + clicked.toString() + '&anomaly=' + ano.toString() + '&dataset=' + user_selection['dataset'] +
     '&variable=' + user_selection['variable'] + '&depth=' + user_selection['depth'].toString() +
     '&time=' + user_selection['time'] + '&lowval=' + user_selection['lowval'].toString() +
-    '&highval=' + user_selection['highval'].toString() + '&clim=' + user_selection['climatology']
+    '&highval=' + user_selection['highval'].toString() + '&clim=' + user_selection['climatology']  
 
-  //console.log(reqstring);
-
+  //FLASK REQUEST
   $.ajax({
     type: "GET",
     url: '/get_img',
@@ -434,8 +445,8 @@ function gen_img(clicked) {
     }
   });
 
-  function redrawMap(e) {
-    //console.log(e);
+  //Called by the "redraw" button inside of a plot
+  function redrawMap(e) {    
     reqstring1 = e.target.cparam;
     //parsing reqstring
     to_parse = new URL("http://toto.fr/?" + reqstring1);
@@ -500,13 +511,14 @@ function gen_img(clicked) {
       }
     });
   }
-
 }
 
+//The JavaScript Modulo Bug (https://web.archive.org/web/20090717035140if_/javascript.about.com/od/problemsolving/a/modulobug.htm)
 function mod(n, m) {
   return ((n % m) + m) % m;
 }
 
+//longitude between -180/180
 function outlon(lon) {
   if (Math.abs(lon) > 180) {
     return lon > 0 ? mod(lon, 360) - 360 : mod(lon, 360);

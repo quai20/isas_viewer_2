@@ -140,7 +140,7 @@ L.Control.Window = L.Control.extend({
 
         var top = rect.top;
         var left = rect.left;
-        var offset =0;
+        var offset = 300;
 
         // SET POSITION OF WINDOW
         if (this.options.position == 'topLeft'){
@@ -160,7 +160,7 @@ L.Control.Window = L.Control.extend({
         } else if (this.options.position == 'bottom') {
             this.showOn([left+width/2-thisWidth/2-margin,top+ height-thisHeight-margin*2-offset])
         } else {
-            this.showOn([left+width/2-thisWidth/2-margin, top+top+height/2-thisHeight/2-margin+offset])
+            this.showOn([left+width/2-thisWidth/2-margin, top+top+height/2-thisHeight/2-margin-offset])
         }
 
         return this;
