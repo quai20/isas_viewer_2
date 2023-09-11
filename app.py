@@ -11,30 +11,30 @@ import os, sys, glob, random, string
 
 app = Flask(__name__)
 
-
 @app.route("/")
 def init_webpage():
     """landing page routing function
 
+    Clear the image cache & clear the nc cache when it's over 500Mb
     Render the index.html template
-    """    
-    # Should do a cleanup of the /static/img dir
-    # Clean img dir
-    files_tbrm = glob.glob('static/img/*.png')
-    for f in files_tbrm:
-        os.remove(f)
+    """        
+    # Clean img dir if it's too big
+    if (sum(os.path.getsize(f) for f in glob.glob('static/img/*.png'))/1e6 > 200):
+        files_tbrm = glob.glob('static/img/*.png')
+        for f in files_tbrm:
+            os.remove(f)
     # Clean netcdf cache dir if dir too big
-    if (sum(os.path.getsize(f) for f in glob.glob('static/nc_cache/*.nc'))/1e6 > 500):
+    if (sum(os.path.getsize(f) for f in glob.glob('static/nc_cache/*.nc'))/1e6 > 200):
         files_tbrn = glob.glob('static/nc_cache/*.nc')
         for f in files_tbrn:
             os.remove(f)
-
+    # Render index
     return render_template('index.html')
 
 
 @app.route("/get_img", methods=['POST', 'GET'])
 def gen_img_route():
-    """rounting function to generate an image
+    """routing function to generate an image
 
     Returns:
         json: path to generated img

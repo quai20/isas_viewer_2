@@ -340,7 +340,7 @@ function gen_img(clicked) {
   window[oneshotname] = L.layerGroup().addTo(map);
 
   //CREATE WINDOW OBJ
-  var winc = L.control.window(map, { title: '', position: 'topLeft' }).on('hide', function () {
+  var winc = L.control.window(map, { title: '', position: 'center' }).on('hide', function () {
     window[oneshotname].clearLayers();
 
     //When closing the window, we also need to remove the div element to avoid any issue with the clim function

@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import matplotlib
+matplotlib.use('agg')
 
 import matplotlib.pyplot as plt
 import cartopy
@@ -22,7 +24,49 @@ grid = xr.open_dataset('static/isas_grid.nc')
 lon_array = grid.longitude.values
 lat_array = grid.latitude.values
 
+def gen_filename(op, lat0, lon0, lat1, lon1, dataset, variable, depth, date, ptype):   
+    """funtion that return a unique filename string 
+    corresponding to the requests
+
+    Args:
+        op (int): operation id
+        lat0 (float): latitude value
+        lon0 (float): longitude value
+        lat1 (float): latitude value
+        lon1 (float): longitude value
+        dataset (str): dataset name
+        variable (str): variable name
+        depth (float): depth value
+        date (str): datetime
+        ptype (int): anomaly var
+
+    Returns:
+        str: filename
+    """
+    operations = ['T','P','R','S']
+    pfx = 'static/nc_cache/'
+    #'static/nc_cache/'+dataset+'_'+variable+str(ptype)+'_'+clim+'_'+str(depth)+'_'+'%.2f'%lat+'_%.2f'%lon+'.nc'
+    if(op==0):
+        params = (operations[op], dataset, str(ptype) , variable, '%.2f'%lat0, '%.2f'%lon0, '%d'%depth)  
+    elif(op==1):
+        params = (operations[op], dataset, str(ptype) , variable, '%.2f'%lat0, '%.2f'%lon0, str(date)[:10])  
+    elif(op==2):
+        params = (operations[op], dataset, str(ptype) , variable, '%.2f'%lat0, '%.2f'%lon0, '%.2f'%lat1, '%.2f'%lon1, '%d'%depth, str(date)[:10])  
+    else :
+        params = (operations[op], dataset, str(ptype) , variable, '%.2f'%lat0, '%.2f'%lon0, '%.2f'%lat1, '%.2f'%lon1, str(date)[:10]) 
+    return pfx + '_'.join(params) + '.nc'   
+
 def open_dap_ds(ix,decode_times=True):
+    """return the xarray dataset from opendap request
+    for cmems, it uses MOTU env var
+
+    Args:
+        ix (int): dataset id
+        decode_times (bool, optional): Defaults to True.
+
+    Returns:
+        xr.Dataset: xarray dataset, lazy dap
+    """
     if (dataset_config[ix]['credentials']):
         #open with cmems cred
         user = os.environ['MOTU_USERNAME']
@@ -37,22 +81,23 @@ def open_dap_ds(ix,decode_times=True):
     return ds
 
 def time_serie_on_point(lat, lon, dataset, variable, depth,ptype, clim):    
-    """_summary_
+    """plot time series
 
     Args:
-        lat (_type_): _description_
-        lon (_type_): _description_
-        dataset (_type_): _description_
-        variable (_type_): _description_
-        depth (_type_): _description_
-        ptype (_type_): _description_
+        lat (float): Latitude value
+        lon (float): Longitude value
+        dataset (str): dataset name
+        variable (str): variable name
+        depth (float): depth value
+        ptype (int): anomaly var
 
     Returns:
-        _type_: _description_
+        str: plot image filename
     """        
 
-    # Saving netcdf in cache dir
-    nc_filename = 'static/nc_cache/'+dataset+'_'+variable+str(ptype)+'_'+clim+'_'+str(depth)+'_'+'%.2f'%lat+'_%.2f'%lon+'.nc'
+    # Saving netcdf in cache dir    
+    nc_filename = gen_filename(0, lat, lon, None, None, dataset, variable, depth, None, ptype)
+
     # Gen random img filename
     png_filename = 'static/img/a'+str(int(time.time()))+".png"    
 
@@ -100,21 +145,22 @@ def time_serie_on_point(lat, lon, dataset, variable, depth,ptype, clim):
 
 
 def profile_on_point(lat, lon, dataset, variable, date, ptype, clim):
-    """_summary_
+    """plot profile
 
     Args:
-        lat (_type_): _description_
-        lon (_type_): _description_
-        dataset (_type_): _description_
-        variable (_type_): _description_
-        date (_type_): _description_
-        ptype (_type_): _description_
+        lat (float): Latitude value
+        lon (float): Longitude value
+        dataset (str): dataset name
+        variable (str): variable name
+        date (str): datetime
+        ptype (int): anomaly var
 
     Returns:
-        _type_: _description_
+        str: plot image filename
     """        
+    
+    nc_filename = gen_filename(1, lat, lon, None, None, dataset, variable, None, date, ptype)
 
-    nc_filename = 'static/nc_cache/'+dataset+'_'+variable+str(ptype)+'_'+clim+'_'+str(date)[:10]+'_'+'%.2f'%lat+'_%.2f'%lon+'.nc'
     png_filename = 'static/img/a'+str(int(time.time()))+".png"    
     
     if (os.path.exists(nc_filename)):
@@ -160,31 +206,28 @@ def profile_on_point(lat, lon, dataset, variable, date, ptype, clim):
 
 
 def snapshot(lat0, lon0, lat1, lon1, dataset, variable, depth, date, lowval, highval, ptype, clim):
-    """_summary_
+    """plot a region
 
     Args:
-        lat0 (_type_): _description_
-        lon0 (_type_): _description_
-        lat1 (_type_): _description_
-        lon1 (_type_): _description_
-        dataset (_type_): _description_
-        variable (_type_): _description_
-        depth (_type_): _description_
-        date (_type_): _description_
-        lowval (_type_): _description_
-        highval (_type_): _description_
-        ptype (_type_): _description_
+        lat0 (float): Latitude value
+        lon0 (float): Longitude value
+        lat1 (float): Latitude value
+        lon1 (float): Longitude value
+        dataset (str): dataset name
+        variable (str): variable name
+        depth (float): depth value
+        date (str): datetime
+        lowval (float): Color low limit
+        highval (float): Color high limit
+        ptype (int): anomaly var
 
     Returns:
-        _type_: _description_
+        str: plot image filename
     """
-
-    nc_filename = 'static/nc_cache/'+dataset+'_'+variable+str(ptype)+'_'+clim+'_'+str(date)[:10]+'_'+str(depth)+'_'+'%.2f'%lat0+'_%.2f'%lon0+'to'+'%.2f'%lat1+'_%.2f'%lon1+'_sna.nc'    
-    png_filename = 'static/img/a'+str(int(time.time()))+".png"    
     
-    #if (lon0>lon1):
-    #    lon0,lon1 = lon1,lon0
-        # if lon1 is > 180, this is not the same pb ...
+    nc_filename = gen_filename(2, lat0, lon0, lat1, lon1, dataset, variable, depth, date, ptype)
+
+    png_filename = 'static/img/a'+str(int(time.time()))+".png"            
         
     if (os.path.exists(nc_filename)):
         ds = xr.open_dataset(nc_filename)
@@ -261,25 +304,26 @@ def snapshot(lat0, lon0, lat1, lon1, dataset, variable, depth, date, lowval, hig
     return png_filename        
 
 def section(lat0, lon0, lat1, lon1, dataset, variable, date, lowval, highval, ptype, clim):
-    """_summary_
+    """plot vertical section
 
     Args:
-        lat0 (_type_): _description_
-        lon0 (_type_): _description_
-        lat1 (_type_): _description_
-        lon1 (_type_): _description_
-        dataset (_type_): _description_
-        variable (_type_): _description_
-        date (_type_): _description_
-        lowval (_type_): _description_
-        highval (_type_): _description_
-        ptype (_type_): _description_s
+        lat0 (float): Latitude value
+        lon0 (float): Longitude value
+        lat1 (float): Latitude value
+        lon1 (float): Longitude value
+        dataset (str): dataset name
+        variable (str): variable name
+        date (str): datetime
+        lowval (float): Color low limit
+        highval (float): Color high limit
+        ptype (int): anomaly var
 
     Returns:
-        _type_: _description_
+        str: plot image filename
     """
     
-    nc_filename = 'static/nc_cache/'+dataset+'_'+variable+str(ptype)+'_'+clim+'_'+str(date)[:10]+'_'+'%.2f'%lat0+'_%.2f'%lon0+'to'+'%.2f'%lat1+'_%.2f'%lon1+'_sec.nc'    
+    nc_filename = gen_filename(3, lat0, lon0, lat1, lon1, dataset, variable, None, date, ptype)
+
     png_filename = 'static/img/a'+str(int(time.time()))+".png"   
     
     if (os.path.exists(nc_filename)):
