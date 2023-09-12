@@ -4,5 +4,7 @@ services:
     environment:
     - SUB_URI=/app/isasviewer
     - FLASK_RUN_PORT=8000
+    - MOTU_USERNAME
+    - MOTU_PASSWORD
     ports:
       - "8000:8000"
