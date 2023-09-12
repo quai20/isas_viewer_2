@@ -9,7 +9,7 @@ import time
 from utilities import *
 import os, sys, glob, random, string
 
-sub_uri = os.getenv("", "/app/isasviewer")
+sub_uri = os.getenv("SUB_URI", "/")
 
 app = Flask(__name__,
             static_url_path=f'{sub_uri}/static')
