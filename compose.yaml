@@ -1,0 +1,8 @@
+services:
+  isasviewer:
+    build: .
+    environment:
+    - SUB_URI=/app/isasviewer
+    - FLASK_RUN_PORT=8000
+    ports:
+      - "8000:8000"
