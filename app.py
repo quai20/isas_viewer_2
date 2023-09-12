@@ -9,9 +9,12 @@ import time
 from utilities import *
 import os, sys, glob, random, string
 
-app = Flask(__name__)
+sub_uri = os.getenv("SUB_URI", "/")
 
-@app.route("/")
+app = Flask(__name__,
+            static_url_path=f'{sub_uri}/static')
+
+@app.route(f"{sub_uri}/")
 def init_webpage():
     """landing page routing function
 
@@ -32,7 +35,7 @@ def init_webpage():
     return render_template('index.html')
 
 
-@app.route("/get_img", methods=['POST', 'GET'])
+@app.route(f"{sub_uri}/get_img", methods=['POST', 'GET'])
 def gen_img_route():
     """routing function to generate an image
 
