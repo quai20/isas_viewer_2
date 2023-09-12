@@ -421,7 +421,7 @@ function gen_img(clicked) {
   //FLASK REQUEST
   $.ajax({
     type: "GET",
-    url: '/get_img',
+    url:  window.location.href + '/get_img',
     data: reqstring,
     contentType: 'application/json;charset=UTF-8',
     success: function (data) {
@@ -487,7 +487,7 @@ function gen_img(clicked) {
     //Re run the ajax call for /get_img and reset winc content
     $.ajax({
       type: "GET",
-      url: '/get_img',
+      url: window.location.href + '/get_img',
       data: reqstring2,
       contentType: 'application/json;charset=UTF-8',
       success: function (data) {
