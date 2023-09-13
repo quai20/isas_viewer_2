@@ -140,7 +140,7 @@ L.Control.Window = L.Control.extend({
 
         var top = rect.top;
         var left = rect.left;
-        var offset = 300;
+        var offset = 0;
 
         // SET POSITION OF WINDOW
         if (this.options.position == 'topLeft'){
@@ -170,7 +170,8 @@ L.Control.Window = L.Control.extend({
         this.setContentMaxHeight();
         L.DomUtil.setPosition(this._container, L.point(Math.round(point[0]),Math.round(point[1]),true));
 
-        var draggable = new L.Draggable(this._container,this._containerTitleBar);
+        var draggable = new L.Draggable(this._container,this._container);
+        //var draggable = new L.Draggable(this._container,this._containerTitleBar);
         draggable.enable();
 
         L.DomUtil.addClass(this._wrapper, 'visible');
