@@ -80,6 +80,9 @@ def gen_img_route():
 
     return json.dumps(img_path)
 
+@app.route(f"{sub_uri}/help")
+def help():
+    return render_template('helppage.html')
 
 if __name__ == '__main__':
     app.run()

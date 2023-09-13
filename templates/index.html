@@ -21,7 +21,11 @@
 
 <body>
 
-    <center><h2>ISAS Viewer</h2></center>
+    <center>
+        <h2>ISAS Viewer <img src="{{ url_for('static', filename='/dist/icons/help.png')}}"
+                onclick="open_help();" width="30px" height="30px" title="How to use"></h2>
+    </center>
+    
 
     <div class="container d-md-flex align-items-stretch">
 
@@ -59,8 +63,10 @@
                     </li>
                     <li>
                         <a><b>Color range</b></a>
-                        <input type="number" id="lowval" name="lowval" style="width:40%; float: left;" onchange="updateUserSelection()">
-                        <input type="number" id="highval" name="highval" style="width:40%; margin-left: 20px;" onchange="updateUserSelection()">
+                        <input type="number" id="lowval" name="lowval" style="width:40%; float: left;"
+                            onchange="updateUserSelection()">
+                        <input type="number" id="highval" name="highval" style="width:40%; margin-left: 20px;"
+                            onchange="updateUserSelection()">
                     </li>
                     <li>
                         <center><button class="btn btn1" onclick="updateMap()">Plot</button></center>
@@ -71,7 +77,8 @@
                     <p style="color:black; font-size: large; font-weight: bold; margin-bottom: 0px;">Tools</p>
                     <!-- climatology selection -->
                     <p style="color:black; font-size: small; margin-bottom: 0px;">Climatology</p>
-                    <select name="climatology" id="climatology" style="width:95%; margin-bottom: 15px;" onchange="updateUserSelection()"></select>
+                    <select name="climatology" id="climatology" style="width:95%; margin-bottom: 15px;"
+                        onchange="updateUserSelection()"></select>
 
                     <!-- Time Series -->
                     <p>
@@ -144,13 +151,13 @@
                                 <input type="number" id="sn_la0" name="sn_la0"
                                     style="width:40%; float: right; margin-top: 2px; margin-right: 2px;" tabindex="3">
                             </form>
-                            <form> 
+                            <form>
                                 <img src="{{ url_for('static', filename='/dist/icons/select_carbon.png')}}"
                                     onclick="coords_snapshot();" width="30px" height="30px" title="Draw rectangle">
-                                
+
                                 <img src="{{ url_for('static', filename='/dist/icons/world_carbon.png')}}"
-                                    onclick="prefill_snapshot();" width="30px" height="30px" title="Predefined">    
-                                    
+                                    onclick="prefill_snapshot();" width="30px" height="30px" title="Predefined">
+
                                 <img src="{{ url_for('static', filename='/dist/icons/trash_carbon.png')}}"
                                     onclick="clear_ip();" width="25px" height="25px" title="Clear">
                             </form>
@@ -262,7 +269,7 @@
             //FILL CLIMATOLOGY SELECTOR
             const sel4 = document.getElementById("climatology");
             for (let i = 0; i < dataset_config.length; i++) {
-                if(dataset_config[i]['climato']){
+                if (dataset_config[i]['climato']) {
                     const opt4 = document.createElement("option");
                     opt4.value = String(i);
                     opt4.text = dataset_config[i]['name'];
@@ -331,10 +338,15 @@
             var clim = parseInt(document.getElementById('climatology').value);
             user_selection = {
                 'dataset': dataset_config[dst]['name'], 'variable': dataset_config[dst]['vars'][variable], 'depth': dataset_config[dst]['levels'][level],
-                'time': dataset_config[dst]['daterange'][req_time], 'lowval': lowval, 'highval': highval, 'climatology':dataset_config[clim]['name']
+                'time': dataset_config[dst]['daterange'][req_time], 'lowval': lowval, 'highval': highval, 'climatology': dataset_config[clim]['name']
             };
             //console.log(user_selection);
         }
+
+        function open_help(){
+            window.open("{{ url_for( 'help') }}", "_blank");
+        }
+
     </script>
 
     <link rel="stylesheet" href="{{ url_for('static', filename='dist/leaflet/leaflet.css')}}" />
