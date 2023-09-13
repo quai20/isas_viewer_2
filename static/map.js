@@ -91,12 +91,12 @@ function updateMap() {
   document.getElementById("colorbar").innerHTML = "<img id=\"imgL\"src=\"" + legend_url + "\" alt=\"\" height=264px width=110px>";
 
   //spin 
-  wms_layer.on('loading', function (e) {
+  wms_layer.on('loading tileloadstart', function (e) {
     map.spin(true, { lines: 8, length: 30, width: 13, radius: 20, scale: 0.5, color: 'black' });
   });
 
   //loaded
-  wms_layer.on('load tileerror tileabort', function (e) {
+  wms_layer.on('load tileerror tileabort tileunload tileload', function (e) {
     map.spin(false);
   });
 
