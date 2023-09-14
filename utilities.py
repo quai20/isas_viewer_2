@@ -44,8 +44,7 @@ def gen_filename(op, lat0, lon0, lat1, lon1, dataset, variable, depth, date, pty
         str: filename
     """
     operations = ['T','P','R','S']
-    pfx = 'static/nc_cache/'
-    #'static/nc_cache/'+dataset+'_'+variable+str(ptype)+'_'+clim+'_'+str(depth)+'_'+'%.2f'%lat+'_%.2f'%lon+'.nc'
+    pfx = 'static/nc_cache/'    
     if(op==0):
         params = (operations[op], dataset, str(ptype) , variable, '%.2f'%lat0, '%.2f'%lon0, '%d'%depth)  
     elif(op==1):
@@ -55,6 +54,44 @@ def gen_filename(op, lat0, lon0, lat1, lon1, dataset, variable, depth, date, pty
     else :
         params = (operations[op], dataset, str(ptype) , variable, '%.2f'%lat0, '%.2f'%lon0, '%.2f'%lat1, '%.2f'%lon1, str(date)[:10]) 
     return pfx + '_'.join(params) + '.nc'   
+
+def gen_figname(op, lat0, lon0, lat1, lon1, dataset, variable, depth, date, ptype, lowval, highval):   
+    """funtion that return a unique filename string 
+    corresponding to the requests
+
+    Args:
+        op (int): operation id
+        lat0 (float): latitude value
+        lon0 (float): longitude value
+        lat1 (float): latitude value
+        lon1 (float): longitude value
+        dataset (str): dataset name
+        variable (str): variable name
+        depth (float): depth value
+        date (str): datetime
+        ptype (int): anomaly var
+        lowval (float) : clim low
+        highval (float): clim high
+
+    Returns:
+        str: filename
+    """
+    operations = ['T','P','R','S']
+    pfx = 'static/img/'
+    if lowval==None:
+        lowval=0
+    if highval==None:
+        highval=0
+    
+    if(op==0):
+        params = (operations[op], dataset, str(ptype) , variable, '%.2f'%lat0, '%.2f'%lon0, '%d'%depth)  
+    elif(op==1):
+        params = (operations[op], dataset, str(ptype) , variable, '%.2f'%lat0, '%.2f'%lon0, str(date)[:10])  
+    elif(op==2):
+        params = (operations[op], dataset, str(ptype) , variable, '%.2f'%lat0, '%.2f'%lon0, '%.2f'%lat1, '%.2f'%lon1, '%d'%depth, str(date)[:10], '%.1f'%lowval, '%.1f'%highval)  
+    else :
+        params = (operations[op], dataset, str(ptype) , variable, '%.2f'%lat0, '%.2f'%lon0, '%.2f'%lat1, '%.2f'%lon1, str(date)[:10], '%.1f'%lowval, '%.1f'%highval) 
+    return pfx + '_'.join(params) + '.png' 
 
 def open_dap_ds(ix,decode_times=True):
     """return the xarray dataset from opendap request
@@ -90,6 +127,7 @@ def time_serie_on_point(lat, lon, dataset, variable, depth,ptype, clim):
         variable (str): variable name
         depth (float): depth value
         ptype (int): anomaly var
+        clim (str): name of the climatology
 
     Returns:
         str: plot image filename
@@ -99,7 +137,7 @@ def time_serie_on_point(lat, lon, dataset, variable, depth,ptype, clim):
     nc_filename = gen_filename(0, lat, lon, None, None, dataset, variable, depth, None, ptype)
 
     # Gen random img filename
-    png_filename = 'static/img/a'+str(int(time.time()))+".png"    
+    png_filename = gen_figname(0, lat, lon, None, None, dataset, variable, depth, None, ptype, None, None)
 
     if (os.path.exists(nc_filename)):
         ds = xr.open_dataset(nc_filename)
@@ -154,6 +192,7 @@ def profile_on_point(lat, lon, dataset, variable, date, ptype, clim):
         variable (str): variable name
         date (str): datetime
         ptype (int): anomaly var
+        clim (str): name of the climatology
 
     Returns:
         str: plot image filename
@@ -161,7 +200,7 @@ def profile_on_point(lat, lon, dataset, variable, date, ptype, clim):
     
     nc_filename = gen_filename(1, lat, lon, None, None, dataset, variable, None, date, ptype)
 
-    png_filename = 'static/img/a'+str(int(time.time()))+".png"    
+    png_filename = gen_figname(1, lat, lon, None, None, dataset, variable, None, date, ptype, None, None)
     
     if (os.path.exists(nc_filename)):
         ds = xr.open_dataset(nc_filename)
@@ -220,14 +259,15 @@ def snapshot(lat0, lon0, lat1, lon1, dataset, variable, depth, date, lowval, hig
         lowval (float): Color low limit
         highval (float): Color high limit
         ptype (int): anomaly var
+        clim (str): name of the climatology
 
     Returns:
         str: plot image filename
     """
     
     nc_filename = gen_filename(2, lat0, lon0, lat1, lon1, dataset, variable, depth, date, ptype)
-
-    png_filename = 'static/img/a'+str(int(time.time()))+".png"            
+    
+    png_filename = gen_figname(2, lat0, lon0, lat1, lon1, dataset, variable, depth, date, ptype, lowval, highval)
         
     if (os.path.exists(nc_filename)):
         ds = xr.open_dataset(nc_filename)
@@ -317,6 +357,7 @@ def section(lat0, lon0, lat1, lon1, dataset, variable, date, lowval, highval, pt
         lowval (float): Color low limit
         highval (float): Color high limit
         ptype (int): anomaly var
+        clim (str) : name of the climatology
 
     Returns:
         str: plot image filename
@@ -324,7 +365,7 @@ def section(lat0, lon0, lat1, lon1, dataset, variable, date, lowval, highval, pt
     
     nc_filename = gen_filename(3, lat0, lon0, lat1, lon1, dataset, variable, None, date, ptype)
 
-    png_filename = 'static/img/a'+str(int(time.time()))+".png"   
+    png_filename = gen_figname(3, lat0, lon0, lat1, lon1, dataset, variable, None, date, ptype, lowval, highval)
     
     if (os.path.exists(nc_filename)):
         ds = xr.open_dataset(nc_filename)
