@@ -229,42 +229,7 @@
                 opt0.value = String(i);
                 opt0.text = dataset_config[i]['name'];
                 sel0.add(opt0, sel0.options[i]);
-            }
-
-            //FILL VARIABLE SELECTOR
-            // const sel1 = document.getElementById("variable");
-            // for (let i = 0; i < dataset_config[dataset_config.length - 1]['vars'].length; i++) {
-            //     const opt1 = document.createElement("option");
-            //     opt1.value = String(i);
-            //     opt1.text = dataset_config[dataset_config.length - 1]['vars'][i];
-            //     sel1.add(opt1, sel1.options[i]);
-            // }
-
-            // //FILL DEPTH SELECTOR
-            // const sel2 = document.getElementById("depth");
-            // for (let i = 0; i < dataset_config[dataset_config.length - 1]['levels'].length; i++) {
-            //     const opt2 = document.createElement("option");
-            //     opt2.value = String(i);
-            //     opt2.text = String(dataset_config[dataset_config.length - 1]['levels'][i]).substr(0, 5) + " m";
-            //     sel2.add(opt2, sel2.options[i]);
-            // }
-
-            // //FILL DATE RANGE
-            // const sel3 = document.getElementById("daterange");
-            // var drange;
-            // if (dataset_config[dataset_config.length - 1].hasOwnProperty('datedisplay')) {
-            //     drange = dataset_config[dataset_config.length - 1]['datedisplay'];
-            // }
-            // else {
-            //     drange = dataset_config[dataset_config.length - 1]['daterange'];
-            // }
-
-            // for (let i = 0; i < drange.length; i++) {
-            //     const opt3 = document.createElement("option");
-            //     opt3.value = String(i);
-            //     opt3.text = drange[i].substr(0, 10);
-            //     sel3.add(opt3, sel3.options[i]);
-            // }
+            }   
 
             //FILL CLIMATOLOGY SELECTOR
             const sel4 = document.getElementById("climatology");
