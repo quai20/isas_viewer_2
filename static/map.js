@@ -314,6 +314,18 @@ function prefill_snapshot() {
 
 function gen_img(clicked) {
 
+  //close any existing winc, marker, rectangle or line
+  const el0 = document.getElementsByClassName('leaflet-control leaflet-control-window control-window');  
+    while(el0.length > 0){
+        el0[0].parentNode.removeChild(el0[0]);
+    } 
+
+  // const el1 = document.getElementsByClassName('leaflet-clickable');  
+  //   while(el1.length > 0){
+  //       el1[0].parentNode.removeChild(el1[0]);
+  //   } 
+ 
+  
   //get inputs
   if (clicked == 1) {
     var lat0 = parseFloat(document.getElementById('ts_la0').value);
@@ -348,12 +360,13 @@ function gen_img(clicked) {
   tempLayer.clearLayers();
 
   //CREATE ONESHOTLAYER with a random name so that the plot (window obj) is associated to the marker/rectangle/line 
-  var oneshotname = "l" + (Math.floor(Math.random() * 1e6)).toString();
-  window[oneshotname] = L.layerGroup().addTo(map);
+  //var oneshotname = "l" + (Math.floor(Math.random() * 1e6)).toString();
+  //window[oneshotname] = L.layerGroup().addTo(map);
 
   //CREATE WINDOW OBJ
   var winc = L.control.window(map, { title: '', position: 'left' }).on('hide', function () {
-    window[oneshotname].clearLayers();
+    //window[oneshotname].clearLayers();
+    tempLayer.clearLayers();
 
     //When closing the window, we also need to remove the div element to avoid any issue with the clim function
     mapd = document.getElementById('map');
@@ -364,17 +377,21 @@ function gen_img(clicked) {
 
   //MARKER FOR POINT OPERATIONS
   if (clicked < 3) {
-    var marker = L.marker([(lat0 + lat1) / 2, (lon0 + lon1) / 2]).addTo(window[oneshotname]);
+    //var marker = L.marker([(lat0 + lat1) / 2, (lon0 + lon1) / 2]).addTo(window[oneshotname]);
+    var marker = L.marker([(lat0 + lat1) / 2, (lon0 + lon1) / 2]).addTo(tempLayer);
+
   }
 
   //RECTANGLE FOR SNAPSHOT
   if (clicked == 3) {
     if (lon0<lon1){
-      var rectangle = L.rectangle([[lat0, lon0], [lat1, lon1]], { color: 'Red', weight: 1 }).addTo(window[oneshotname]);
+      //var rectangle = L.rectangle([[lat0, lon0], [lat1, lon1]], { color: 'Red', weight: 1 }).addTo(window[oneshotname]);
+      var rectangle = L.rectangle([[lat0, lon0], [lat1, lon1]], { color: 'Red', weight: 1 }).addTo(tempLayer);
       map.panTo([(lat0+lat1)/2, (lon0+lon1)/2]);
     }
     else { //crossing meridian
-      var rectangle = L.rectangle([[lat0, lon0], [lat1, lon1+360]], { color: 'Red', weight: 1 }).addTo(window[oneshotname]);
+      //var rectangle = L.rectangle([[lat0, lon0], [lat1, lon1+360]], { color: 'Red', weight: 1 }).addTo(window[oneshotname]);
+      var rectangle = L.rectangle([[lat0, lon0], [lat1, lon1+360]], { color: 'Red', weight: 1 }).addTo(tempLayer);
       map.panTo([(lat0+lat1)/2, (lon0+lon1+360)/2]);
     }
 
@@ -383,11 +400,13 @@ function gen_img(clicked) {
   //LINE FOR SECTION
   if (clicked == 4) {
     if (lon0<lon1){
-      var line = L.polyline([[lat0, lon0], [lat1, lon1]], { color: 'Red' }).addTo(window[oneshotname]);
+      //var line = L.polyline([[lat0, lon0], [lat1, lon1]], { color: 'Red' }).addTo(window[oneshotname]);
+      var line = L.polyline([[lat0, lon0], [lat1, lon1]], { color: 'Red' }).addTo(tempLayer);
       map.panTo([(lat0+lat1)/2, (lon0+lon1)/2]);
     }
     else { //crossing meridian
-      var line = L.polyline([[lat0, lon0], [lat1, lon1+360]], { color: 'Red' }).addTo(window[oneshotname]);
+      //var line = L.polyline([[lat0, lon0], [lat1, lon1+360]], { color: 'Red' }).addTo(window[oneshotname]);
+      var line = L.polyline([[lat0, lon0], [lat1, lon1+360]], { color: 'Red' }).addTo(tempLayer);
       map.panTo([(lat0+lat1)/2, (lon0+lon1+360)/2]);
     }
   }

@@ -22,10 +22,10 @@
 <body>
 
     <center>
-        <h2>ISAS Viewer <img src="{{ url_for('static', filename='/dist/icons/help.png')}}"
-                onclick="open_help();" width="30px" height="30px" title="How to use"></h2>
+        <h2>ISAS Viewer <img src="{{ url_for('static', filename='/dist/icons/help.png')}}" onclick="open_help();"
+                width="30px" height="30px" title="How to use"></h2>
     </center>
-    
+
 
     <div class="container d-md-flex align-items-stretch">
 
@@ -229,7 +229,7 @@
                 opt0.value = String(i);
                 opt0.text = dataset_config[i]['name'];
                 sel0.add(opt0, sel0.options[i]);
-            }   
+            }
 
             //FILL CLIMATOLOGY SELECTOR
             const sel4 = document.getElementById("climatology");
@@ -312,7 +312,7 @@
             //console.log(user_selection);
         }
 
-        function open_help(){
+        function open_help() {
             window.open("{{ url_for( 'help') }}", "_blank");
         }
 
