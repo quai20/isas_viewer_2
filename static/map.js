@@ -199,6 +199,7 @@ function clear_ip() {
   document.getElementById('se_lo1').value = "";
   document.getElementById('se_la1').value = "";
   prefill = 0;
+  tempLayer.clearLayers();
 }
 
 //"click on map" management, regarding what button we clicked before
@@ -314,7 +315,7 @@ function prefill_snapshot() {
 
 function gen_img(clicked) {
 
-  //close any existing winc, marker, rectangle or line
+  //close any existing winc
   const el0 = document.getElementsByClassName('leaflet-control leaflet-control-window control-window');  
     while(el0.length > 0){
         el0[0].parentNode.removeChild(el0[0]);
@@ -364,7 +365,7 @@ function gen_img(clicked) {
   //window[oneshotname] = L.layerGroup().addTo(map);
 
   //CREATE WINDOW OBJ
-  var winc = L.control.window(map, { title: '', position: 'left' }).on('hide', function () {
+  var winc = L.control.window(map, { title: '', position: 'left', modal: false }).on('hide', function () {
     //window[oneshotname].clearLayers();
     tempLayer.clearLayers();
 
