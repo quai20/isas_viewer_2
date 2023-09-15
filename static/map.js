@@ -156,6 +156,7 @@ var RectDrawer = new L.Draw.Rectangle(map);
 var LineDrawer = new L.Draw.Polyline(map);
 var clicked = 0;
 var tempLayer = L.layerGroup().addTo(map); //FOR INTERACTIVE PURPOSE
+var winc_list = {};
 
 //called by the "draw point" button in time serie menu
 function coords_timeserie() {
@@ -313,19 +314,7 @@ function prefill_snapshot() {
 }
 
 
-function gen_img(clicked) {
-
-  //close any existing winc
-  const el0 = document.getElementsByClassName('leaflet-control leaflet-control-window control-window');  
-    while(el0.length > 0){
-        el0[0].parentNode.removeChild(el0[0]);
-    } 
-
-  // const el1 = document.getElementsByClassName('leaflet-clickable');  
-  //   while(el1.length > 0){
-  //       el1[0].parentNode.removeChild(el1[0]);
-  //   } 
- 
+function gen_img(clicked) {  
   
   //get inputs
   if (clicked == 1) {
@@ -361,38 +350,33 @@ function gen_img(clicked) {
   tempLayer.clearLayers();
 
   //CREATE ONESHOTLAYER with a random name so that the plot (window obj) is associated to the marker/rectangle/line 
-  //var oneshotname = "l" + (Math.floor(Math.random() * 1e6)).toString();
-  //window[oneshotname] = L.layerGroup().addTo(map);
+  var oneshotname = "l" + (Math.floor(Math.random() * 1e6)).toString();
+  window[oneshotname] = L.layerGroup().addTo(map);
 
   //CREATE WINDOW OBJ
   var winc = L.control.window(map, { title: '', position: 'left', modal: false }).on('hide', function () {
-    //window[oneshotname].clearLayers();
-    tempLayer.clearLayers();
-
-    //When closing the window, we also need to remove the div element to avoid any issue with the clim function
-    mapd = document.getElementById('map');
-    trm = mapd.lastElementChild;
-    trm.parentNode.removeChild(trm);
-
+    window[oneshotname].clearLayers();    
+    //When closing the window, we also need to remove the div element to avoid any issue with the clim function     
+    winc_list[oneshotname].parentNode.removeChild(winc_list[oneshotname]);
   });
+  
+  //store winc element
+  mapd = document.getElementById('map');  
+  winc_list[oneshotname] = mapd.lastElementChild;
 
   //MARKER FOR POINT OPERATIONS
   if (clicked < 3) {
-    //var marker = L.marker([(lat0 + lat1) / 2, (lon0 + lon1) / 2]).addTo(window[oneshotname]);
-    var marker = L.marker([(lat0 + lat1) / 2, (lon0 + lon1) / 2]).addTo(tempLayer);
-
+    var marker = L.marker([(lat0 + lat1) / 2, (lon0 + lon1) / 2]).addTo(window[oneshotname]);    
   }
 
   //RECTANGLE FOR SNAPSHOT
   if (clicked == 3) {
     if (lon0<lon1){
-      //var rectangle = L.rectangle([[lat0, lon0], [lat1, lon1]], { color: 'Red', weight: 1 }).addTo(window[oneshotname]);
-      var rectangle = L.rectangle([[lat0, lon0], [lat1, lon1]], { color: 'Red', weight: 1 }).addTo(tempLayer);
+      var rectangle = L.rectangle([[lat0, lon0], [lat1, lon1]], { color: 'Red', weight: 1 }).addTo(window[oneshotname]);      
       map.panTo([(lat0+lat1)/2, (lon0+lon1)/2]);
     }
     else { //crossing meridian
-      //var rectangle = L.rectangle([[lat0, lon0], [lat1, lon1+360]], { color: 'Red', weight: 1 }).addTo(window[oneshotname]);
-      var rectangle = L.rectangle([[lat0, lon0], [lat1, lon1+360]], { color: 'Red', weight: 1 }).addTo(tempLayer);
+      var rectangle = L.rectangle([[lat0, lon0], [lat1, lon1+360]], { color: 'Red', weight: 1 }).addTo(window[oneshotname]);      
       map.panTo([(lat0+lat1)/2, (lon0+lon1+360)/2]);
     }
 
@@ -401,13 +385,11 @@ function gen_img(clicked) {
   //LINE FOR SECTION
   if (clicked == 4) {
     if (lon0<lon1){
-      //var line = L.polyline([[lat0, lon0], [lat1, lon1]], { color: 'Red' }).addTo(window[oneshotname]);
-      var line = L.polyline([[lat0, lon0], [lat1, lon1]], { color: 'Red' }).addTo(tempLayer);
+      var line = L.polyline([[lat0, lon0], [lat1, lon1]], { color: 'Red' }).addTo(window[oneshotname]);      
       map.panTo([(lat0+lat1)/2, (lon0+lon1)/2]);
     }
     else { //crossing meridian
-      //var line = L.polyline([[lat0, lon0], [lat1, lon1+360]], { color: 'Red' }).addTo(window[oneshotname]);
-      var line = L.polyline([[lat0, lon0], [lat1, lon1+360]], { color: 'Red' }).addTo(tempLayer);
+      var line = L.polyline([[lat0, lon0], [lat1, lon1+360]], { color: 'Red' }).addTo(window[oneshotname]);      
       map.panTo([(lat0+lat1)/2, (lon0+lon1+360)/2]);
     }
   }
