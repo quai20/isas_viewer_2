@@ -3,7 +3,7 @@ var islayed = false;
 
 // predefined regions
 var prefill = 0;
-const regions = [[-180, 180, -90, 90], [-80, 0, 10, 70], [-70, 25, -60, 15], [25, 140, -60, 25],[120, 255, 10, 65],[120,288,-55,10]]
+const regions = [[-180, 180, -90, 90], [-80, 0, 10, 70], [-70, 25, -60, 15], [25, 140, -60, 25], [120, 255, 10, 65], [120, 288, -55, 10]]
 
 // Get user selection
 var dst = parseInt(document.getElementById('dataset').value);
@@ -156,6 +156,9 @@ var RectDrawer = new L.Draw.Rectangle(map);
 var LineDrawer = new L.Draw.Polyline(map);
 var clicked = 0;
 var tempLayer = L.layerGroup().addTo(map); //FOR INTERACTIVE PURPOSE
+var winc_list = {};
+var winc_divlist = {};
+
 
 //called by the "draw point" button in time serie menu
 function coords_timeserie() {
@@ -248,7 +251,7 @@ map.on('draw:created', function (e) {
   layer.addTo(tempLayer);
   var coords = layer.getLatLngs();
 
-  if (clicked == 3) {    
+  if (clicked == 3) {
 
     //set values of inputs for snapshot
     var nlon0 = outlon(coords[0]['lng']);
@@ -265,7 +268,7 @@ map.on('draw:created', function (e) {
   else if (clicked == 4) {
     //set values of inputs for section, sorting the line by longitude
 
-    if (coords[0]['lng']<coords[1]['lng']){
+    if (coords[0]['lng'] < coords[1]['lng']) {
       var nlon0 = outlon(coords[0]['lng']);
       var nlon1 = outlon(coords[1]['lng']);
       var nlat0 = coords[0]['lat'];
@@ -276,7 +279,7 @@ map.on('draw:created', function (e) {
       var nlon1 = outlon(coords[0]['lng']);
       var nlat0 = coords[1]['lat'];
       var nlat1 = coords[0]['lat'];
-    }    
+    }
 
     document.getElementById('se_lo0').value = nlon0;
     document.getElementById('se_lo1').value = nlon1;
@@ -290,16 +293,16 @@ map.on('draw:created', function (e) {
 
 //predefined region by clicking on the globe
 function prefill_snapshot() {
-  
+
   tempLayer.clearLayers();
 
   //set values of inputs
   document.getElementById('sn_lo0').value = regions[prefill][0];
-  if(regions[prefill][1]<=180){
+  if (regions[prefill][1] <= 180) {
     document.getElementById('sn_lo1').value = regions[prefill][1];
   }
   else {
-    document.getElementById('sn_lo1').value = regions[prefill][1]-360;
+    document.getElementById('sn_lo1').value = regions[prefill][1] - 360;
   }
   document.getElementById('sn_la0').value = regions[prefill][2];
   document.getElementById('sn_la1').value = regions[prefill][3];
@@ -315,18 +318,6 @@ function prefill_snapshot() {
 
 function gen_img(clicked) {
 
-  //close any existing winc
-  const el0 = document.getElementsByClassName('leaflet-control leaflet-control-window control-window');  
-    while(el0.length > 0){
-        el0[0].parentNode.removeChild(el0[0]);
-    } 
-
-  // const el1 = document.getElementsByClassName('leaflet-clickable');  
-  //   while(el1.length > 0){
-  //       el1[0].parentNode.removeChild(el1[0]);
-  //   } 
- 
-  
   //get inputs
   if (clicked == 1) {
     var lat0 = parseFloat(document.getElementById('ts_la0').value);
@@ -357,117 +348,116 @@ function gen_img(clicked) {
     var ano = document.getElementById('se_ano').checked == true ? 1 : 0;
   }
 
-  //CLEAR TEMPLAYER
+  //CLEAR TEMPLAYER (for markers only)
   tempLayer.clearLayers();
 
-  //CREATE ONESHOTLAYER with a random name so that the plot (window obj) is associated to the marker/rectangle/line 
-  //var oneshotname = "l" + (Math.floor(Math.random() * 1e6)).toString();
-  //window[oneshotname] = L.layerGroup().addTo(map);
+  //CREATE ONESHOTNAME : a random id so that the plot (window obj) is handled individually
+  var oneshotname = "l" + (Math.floor(Math.random() * 1e6)).toString();
+  window[oneshotname] = L.layerGroup().addTo(map);
 
   //CREATE WINDOW OBJ
-  var winc = L.control.window(map, { title: '', position: 'left', modal: false }).on('hide', function () {
-    //window[oneshotname].clearLayers();
-    tempLayer.clearLayers();
-
-    //When closing the window, we also need to remove the div element to avoid any issue with the clim function
-    mapd = document.getElementById('map');
-    trm = mapd.lastElementChild;
-    trm.parentNode.removeChild(trm);
-
+  winc_list[oneshotname] = L.control.window(map, { title: '', position: 'left', modal: false }).on('hide', function () {
+    window[oneshotname].clearLayers();
+    //When closing the window, we also need to remove the div element  
+    winc_divlist[oneshotname].remove();
+    //removing from dict
+    delete winc_divlist[oneshotname];
+    delete winc_list[oneshotname];
   });
+
+  //store winc element in a dict with unique key, so it can be delete in the above func
+  mapd = document.getElementById('map');
+  winc_divlist[oneshotname] = mapd.lastElementChild;
 
   //MARKER FOR POINT OPERATIONS
   if (clicked < 3) {
-    //var marker = L.marker([(lat0 + lat1) / 2, (lon0 + lon1) / 2]).addTo(window[oneshotname]);
-    var marker = L.marker([(lat0 + lat1) / 2, (lon0 + lon1) / 2]).addTo(tempLayer);
-
+    var marker = L.marker([(lat0 + lat1) / 2, (lon0 + lon1) / 2]).addTo(window[oneshotname]);
   }
 
   //RECTANGLE FOR SNAPSHOT
   if (clicked == 3) {
-    if (lon0<lon1){
-      //var rectangle = L.rectangle([[lat0, lon0], [lat1, lon1]], { color: 'Red', weight: 1 }).addTo(window[oneshotname]);
-      var rectangle = L.rectangle([[lat0, lon0], [lat1, lon1]], { color: 'Red', weight: 1 }).addTo(tempLayer);
-      map.panTo([(lat0+lat1)/2, (lon0+lon1)/2]);
+    if (lon0 < lon1) {
+      var rectangle = L.rectangle([[lat0, lon0], [lat1, lon1]], { color: 'Red', weight: 1 }).addTo(window[oneshotname]);
+      map.panTo([(lat0 + lat1) / 2, (lon0 + lon1) / 2]);
     }
     else { //crossing meridian
-      //var rectangle = L.rectangle([[lat0, lon0], [lat1, lon1+360]], { color: 'Red', weight: 1 }).addTo(window[oneshotname]);
-      var rectangle = L.rectangle([[lat0, lon0], [lat1, lon1+360]], { color: 'Red', weight: 1 }).addTo(tempLayer);
-      map.panTo([(lat0+lat1)/2, (lon0+lon1+360)/2]);
+      var rectangle = L.rectangle([[lat0, lon0], [lat1, lon1 + 360]], { color: 'Red', weight: 1 }).addTo(window[oneshotname]);
+      map.panTo([(lat0 + lat1) / 2, (lon0 + lon1 + 360) / 2]);
     }
 
   }
 
   //LINE FOR SECTION
   if (clicked == 4) {
-    if (lon0<lon1){
-      //var line = L.polyline([[lat0, lon0], [lat1, lon1]], { color: 'Red' }).addTo(window[oneshotname]);
-      var line = L.polyline([[lat0, lon0], [lat1, lon1]], { color: 'Red' }).addTo(tempLayer);
-      map.panTo([(lat0+lat1)/2, (lon0+lon1)/2]);
+    if (lon0 < lon1) {
+      var line = L.polyline([[lat0, lon0], [lat1, lon1]], { color: 'Red' }).addTo(window[oneshotname]);
+      map.panTo([(lat0 + lat1) / 2, (lon0 + lon1) / 2]);
     }
     else { //crossing meridian
-      //var line = L.polyline([[lat0, lon0], [lat1, lon1+360]], { color: 'Red' }).addTo(window[oneshotname]);
-      var line = L.polyline([[lat0, lon0], [lat1, lon1+360]], { color: 'Red' }).addTo(tempLayer);
-      map.panTo([(lat0+lat1)/2, (lon0+lon1+360)/2]);
+      var line = L.polyline([[lat0, lon0], [lat1, lon1 + 360]], { color: 'Red' }).addTo(window[oneshotname]);
+      map.panTo([(lat0 + lat1) / 2, (lon0 + lon1 + 360) / 2]);
     }
   }
 
   //SET WINDOW CONTENT
-  winc.content("<div id='img_div'><center><div class=\"lds-dual-ring\"></div></center></div>");
+  winc_list[oneshotname].content("<div id='img_div'><center><div class=\"lds-dual-ring\"></div></center></div>");
 
   //TITLE
   if (clicked == 1) {
-    winc.title("<a style=\"font-size:20px; font-weight:bold;\">" + lat0.toFixed(2) + ',' + lon0.toFixed(2) + " / " + user_selection['depth'].toString() + "m</a>");
+    winc_list[oneshotname].title("<a style=\"font-size:20px; font-weight:bold;\">" + lat0.toFixed(2) + ',' + lon0.toFixed(2) + " / " + user_selection['depth'].toString() + "m</a>");
   }
   else if (clicked == 2) {
-    winc.title("<a style=\"font-size:20px; font-weight:bold;\">" + lat0.toFixed(2) + ',' + lon0.toFixed(2) + " / " + user_selection['time'].substr(0, 10) + "</a>");
+    winc_list[oneshotname].title("<a style=\"font-size:20px; font-weight:bold;\">" + lat0.toFixed(2) + ',' + lon0.toFixed(2) + " / " + user_selection['time'].substr(0, 10) + "</a>");
   }
   else if (clicked == 3) {
-    winc.title("<a style=\"font-size:20px; font-weight:bold;\">" + user_selection['time'].substr(0, 10) +
+    winc_list[oneshotname].title("<a style=\"font-size:20px; font-weight:bold;\">" + user_selection['time'].substr(0, 10) +
       ' / ' + user_selection['depth'].toString() + "m</a>");
   }
   else if (clicked == 4) {
-    winc.title("<a style=\"font-size:20px; font-weight:bold;\">" + user_selection['time'].substr(0, 10) + "</a>");
+    winc_list[oneshotname].title("<a style=\"font-size:20px; font-weight:bold;\">" + user_selection['time'].substr(0, 10) + "</a>");
   }
 
-  winc.show();  
+  winc_list[oneshotname].show();
+
   reqstring = 'lat0=' + lat0.toString() + '&lon0=' + lon0.toString() +
     '&lat1=' + lat1.toString() + '&lon1=' + lon1.toString() +
     '&operation=' + clicked.toString() + '&anomaly=' + ano.toString() + '&dataset=' + user_selection['dataset'] +
     '&variable=' + user_selection['variable'] + '&depth=' + user_selection['depth'].toString() +
     '&time=' + user_selection['time'] + '&lowval=' + user_selection['lowval'].toString() +
-    '&highval=' + user_selection['highval'].toString() + '&clim=' + user_selection['climatology']  
+    '&highval=' + user_selection['highval'].toString() + '&clim=' + user_selection['climatology']
 
   //FLASK REQUEST
   $.ajax({
     type: "GET",
-    url:  window.location.href + '/get_img',
+    url: window.location.href + '/get_img',
     data: reqstring,
     contentType: 'application/json;charset=UTF-8',
     success: function (data) {
       dataarray = JSON.parse(data)
       // EDIT IMG WINDOW (Add clim inputs for map plots)
       clim_input = "<a style=\"margin-left: 10px; float: left;\">Color range :</a>" +
-        "<input type=\"number\" id=\"lowval2\" name=\"lowval2\" style=\"width:70px; margin-left: 10px; float: left;\">" +
-        "<input type=\"number\" id=\"highval2\" name=\"highval2\" style=\"width:70px; margin-left: 10px; float:left;\">" +
-        "<input type=\"button\" id=\"Redraw\" value=\"Redraw\" style=\"width:60px; margin-left: 10px;\" />";
+        "<input type=\"number\" id=\"lowval2_" + oneshotname + "\" name=\"lowval2\" style=\"width:70px; margin-left: 10px; float: left;\">" +
+        "<input type=\"number\" id=\"highval2_" + oneshotname + "\" name=\"highval2\" style=\"width:70px; margin-left: 10px; float:left;\">" +
+        "<input type=\"button\" id=\"Redraw_" + oneshotname + "\" value=\"Redraw\" style=\"width:60px; margin-left: 10px;\" />";
 
       if ([3, 7, 4, 8].includes(clicked)) {
-        winc.content("<img src=\"" + dataarray + "\" alt=\"img\"></img><br>" + clim_input);
-        redraw_button = document.getElementById("Redraw");
+        winc_list[oneshotname].content("<img src=\"" + dataarray + "\" alt=\"img\"></img><br>" + clim_input);
+        redraw_button = document.getElementById("Redraw_" + oneshotname);
         redraw_button.cparam = reqstring;
+        redraw_button.rid = oneshotname;
         redraw_button.addEventListener("click", redrawMap, false);
       }
       else {
-        winc.content("<img src=\"" + dataarray + "\" alt=\"img\"></img>");
+        winc_list[oneshotname].content("<img src=\"" + dataarray + "\" alt=\"img\"></img>");
       }
 
     }
   });
 
   //Called by the "redraw" button inside of a plot
-  function redrawMap(e) {    
+  function redrawMap(e) {
     reqstring1 = e.target.cparam;
+    oneshotname1 = e.target.rid;
     //parsing reqstring
     to_parse = new URL("http://toto.fr/?" + reqstring1);
     plat0 = parseFloat(to_parse.searchParams.get("lat0"));
@@ -482,8 +472,8 @@ function gen_img(clicked) {
     ptime = to_parse.searchParams.get("time");
 
     //Get new color range
-    lowval2 = parseFloat(document.getElementById('lowval2').value);
-    highval2 = parseFloat(document.getElementById('highval2').value);
+    lowval2 = parseFloat(document.getElementById('lowval2_' + oneshotname1).value);
+    highval2 = parseFloat(document.getElementById('highval2_' + oneshotname1).value);
 
     //climato
     pclim = to_parse.searchParams.get("clim");
@@ -502,7 +492,7 @@ function gen_img(clicked) {
     }
 
     //Loading
-    winc.content("<div id='img_div'><center><div class=\"lds-dual-ring\"></div></center></div>");
+    winc_list[oneshotname1].content("<div id='img_div'><center><div class=\"lds-dual-ring\"></div></center></div>");
 
     //Re run the ajax call for /get_img and reset winc content
     $.ajax({
@@ -514,18 +504,19 @@ function gen_img(clicked) {
         dataarray = JSON.parse(data)
         // EDIT IMG WINDOW (Add clim inputs for map plots)
         clim_input = "<a style=\"margin-left: 10px; float: left;\">Color range :</a>" +
-          "<input type=\"number\" id=\"lowval2\" name=\"lowval2\" style=\"width:70px; margin-left: 10px; float: left;\">" +
-          "<input type=\"number\" id=\"highval2\" name=\"highval2\" style=\"width:70px; margin-left: 10px; float:left;\">" +
-          "<input type=\"button\" id=\"Redraw\" value=\"Redraw\" style=\"width:60px; margin-left: 10px;\" />";
+          "<input type=\"number\" id=\"lowval2_" + oneshotname1 + "\" name=\"lowval2\" style=\"width:70px; margin-left: 10px; float: left;\">" +
+          "<input type=\"number\" id=\"highval2_" + oneshotname1 + "\" name=\"highval2\" style=\"width:70px; margin-left: 10px; float:left;\">" +
+          "<input type=\"button\" id=\"Redraw_" + oneshotname1 + "\" value=\"Redraw\" style=\"width:60px; margin-left: 10px;\" />";
 
         if ([3, 7, 4, 8].includes(pclicked)) {
-          winc.content("<img src=\"" + dataarray + "\" alt=\"img\"></img><br>" + clim_input);
-          redraw_button = document.getElementById("Redraw");
+          winc_list[oneshotname1].content("<img src=\"" + dataarray + "\" alt=\"img\"></img><br>" + clim_input);
+          redraw_button = document.getElementById("Redraw_" + oneshotname1);
           redraw_button.cparam = reqstring2;
+          redraw_button.rid = oneshotname1;
           redraw_button.addEventListener("click", redrawMap, false);
         }
         else {
-          winc.content("<img src=\"" + dataarray + "\" alt=\"img\"></img>");
+          winc_list[oneshotname1].content("<img src=\"" + dataarray + "\" alt=\"img\"></img>");
         }
 
       }
