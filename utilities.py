@@ -24,7 +24,7 @@ grid = xr.open_dataset('static/isas_grid.nc')
 lon_array = grid.longitude.values
 lat_array = grid.latitude.values
 
-def gen_filename(op, lat0, lon0, lat1, lon1, dataset, variable, depth, date, ptype):   
+def gen_filename(op, lat0, lon0, lat1, lon1, dataset, variable, depth, date, ptype, clim):   
     """funtion that return a unique filename string 
     corresponding to the requests
 
@@ -39,6 +39,7 @@ def gen_filename(op, lat0, lon0, lat1, lon1, dataset, variable, depth, date, pty
         depth (float): depth value
         date (str): datetime
         ptype (int): anomaly var
+        clim (str): climatology name
 
     Returns:
         str: filename
@@ -53,9 +54,13 @@ def gen_filename(op, lat0, lon0, lat1, lon1, dataset, variable, depth, date, pty
         params = (operations[op], dataset, str(ptype) , variable, '%.2f'%lat0, '%.2f'%lon0, '%.2f'%lat1, '%.2f'%lon1, '%d'%depth, str(date)[:10])  
     else :
         params = (operations[op], dataset, str(ptype) , variable, '%.2f'%lat0, '%.2f'%lon0, '%.2f'%lat1, '%.2f'%lon1, str(date)[:10]) 
-    return pfx + '_'.join(params) + '.nc'   
+    if(ptype==0):
+        return pfx + '_'.join(params) + '.nc'   
+    else:
+        return pfx + '_'.join(params) + '_' + clim + '.nc'   
+        
 
-def gen_figname(op, lat0, lon0, lat1, lon1, dataset, variable, depth, date, ptype, lowval, highval):   
+def gen_figname(op, lat0, lon0, lat1, lon1, dataset, variable, depth, date, ptype, lowval, highval, clim):   
     """funtion that return a unique filename string 
     corresponding to the requests
 
@@ -72,6 +77,7 @@ def gen_figname(op, lat0, lon0, lat1, lon1, dataset, variable, depth, date, ptyp
         ptype (int): anomaly var
         lowval (float) : clim low
         highval (float): clim high
+        clim (str) : climatology name
 
     Returns:
         str: filename
@@ -91,7 +97,10 @@ def gen_figname(op, lat0, lon0, lat1, lon1, dataset, variable, depth, date, ptyp
         params = (operations[op], dataset, str(ptype) , variable, '%.2f'%lat0, '%.2f'%lon0, '%.2f'%lat1, '%.2f'%lon1, '%d'%depth, str(date)[:10], '%.1f'%lowval, '%.1f'%highval)  
     else :
         params = (operations[op], dataset, str(ptype) , variable, '%.2f'%lat0, '%.2f'%lon0, '%.2f'%lat1, '%.2f'%lon1, str(date)[:10], '%.1f'%lowval, '%.1f'%highval) 
-    return pfx + '_'.join(params) + '.png' 
+    if(ptype==0):
+        return pfx + '_'.join(params) + '.png' 
+    else :
+        return pfx + '_'.join(params) + '_' + clim +'.png' 
 
 def open_dap_ds(ix,decode_times=True):
     """return the xarray dataset from opendap request
@@ -134,10 +143,10 @@ def time_serie_on_point(lat, lon, dataset, variable, depth,ptype, clim):
     """        
 
     # Saving netcdf in cache dir    
-    nc_filename = gen_filename(0, lat, lon, None, None, dataset, variable, depth, None, ptype)
+    nc_filename = gen_filename(0, lat, lon, None, None, dataset, variable, depth, None, ptype, clim)
 
     # Gen random img filename
-    png_filename = gen_figname(0, lat, lon, None, None, dataset, variable, depth, None, ptype, None, None)
+    png_filename = gen_figname(0, lat, lon, None, None, dataset, variable, depth, None, ptype, None, None, clim)
 
     if (os.path.exists(nc_filename)):
         ds = xr.open_dataset(nc_filename)
@@ -198,9 +207,9 @@ def profile_on_point(lat, lon, dataset, variable, date, ptype, clim):
         str: plot image filename
     """        
     
-    nc_filename = gen_filename(1, lat, lon, None, None, dataset, variable, None, date, ptype)
+    nc_filename = gen_filename(1, lat, lon, None, None, dataset, variable, None, date, ptype, clim)
 
-    png_filename = gen_figname(1, lat, lon, None, None, dataset, variable, None, date, ptype, None, None)
+    png_filename = gen_figname(1, lat, lon, None, None, dataset, variable, None, date, ptype, None, None, clim)
     
     if (os.path.exists(nc_filename)):
         ds = xr.open_dataset(nc_filename)
@@ -265,9 +274,9 @@ def snapshot(lat0, lon0, lat1, lon1, dataset, variable, depth, date, lowval, hig
         str: plot image filename
     """
     
-    nc_filename = gen_filename(2, lat0, lon0, lat1, lon1, dataset, variable, depth, date, ptype)
+    nc_filename = gen_filename(2, lat0, lon0, lat1, lon1, dataset, variable, depth, date, ptype, clim, clim)
     
-    png_filename = gen_figname(2, lat0, lon0, lat1, lon1, dataset, variable, depth, date, ptype, lowval, highval)
+    png_filename = gen_figname(2, lat0, lon0, lat1, lon1, dataset, variable, depth, date, ptype, lowval, highval, clim, clim)
         
     if (os.path.exists(nc_filename)):
         ds = xr.open_dataset(nc_filename)
@@ -363,9 +372,9 @@ def section(lat0, lon0, lat1, lon1, dataset, variable, date, lowval, highval, pt
         str: plot image filename
     """
     
-    nc_filename = gen_filename(3, lat0, lon0, lat1, lon1, dataset, variable, None, date, ptype)
+    nc_filename = gen_filename(3, lat0, lon0, lat1, lon1, dataset, variable, None, date, ptype, clim)
 
-    png_filename = gen_figname(3, lat0, lon0, lat1, lon1, dataset, variable, None, date, ptype, lowval, highval)
+    png_filename = gen_figname(3, lat0, lon0, lat1, lon1, dataset, variable, None, date, ptype, lowval, highval, clim)
     
     if (os.path.exists(nc_filename)):
         ds = xr.open_dataset(nc_filename)
