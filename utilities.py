@@ -274,9 +274,9 @@ def snapshot(lat0, lon0, lat1, lon1, dataset, variable, depth, date, lowval, hig
         str: plot image filename
     """
     
-    nc_filename = gen_filename(2, lat0, lon0, lat1, lon1, dataset, variable, depth, date, ptype, clim, clim)
+    nc_filename = gen_filename(2, lat0, lon0, lat1, lon1, dataset, variable, depth, date, ptype, clim)
     
-    png_filename = gen_figname(2, lat0, lon0, lat1, lon1, dataset, variable, depth, date, ptype, lowval, highval, clim, clim)
+    png_filename = gen_figname(2, lat0, lon0, lat1, lon1, dataset, variable, depth, date, ptype, lowval, highval, clim)
         
     if (os.path.exists(nc_filename)):
         ds = xr.open_dataset(nc_filename)
