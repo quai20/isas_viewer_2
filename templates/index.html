@@ -241,6 +241,8 @@
                     sel4.add(opt4, sel4.options[i]);
                 }
             }
+            //force isas nrt
+            document.getElementById('dataset').value = dataset_config.length-1;
 
             updateSelectors();
 
@@ -291,6 +293,9 @@
                 opt3.text = drange[i].substr(0, 10);
                 sel3.add(opt3, sel3.options[i]);
             }
+
+            //force last timestamp
+            document.getElementById("daterange").value = drange.length-1;
 
             updateUserSelection();
 
