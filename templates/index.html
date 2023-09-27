@@ -30,11 +30,11 @@
     <div class="container d-md-flex align-items-stretch" style="height: 900 !important; ">
 
         <div id="content" class="p-4 p-md-5 pt-5" style="display:flex; margin-top: 0; padding-top:1rem !important; min-height: auto !important;">
-            <div id="map" style="width: 100%; height: 100%; position:relative; background-color: #ffffff;"></div>
+            <div id="map" style="width: 100%; height: 88vh; position:relative; background-color: #ffffff;"></div>
             <div id="colorbar"></div>
         </div>
 
-        <nav id="bssidebar" style="overflow-y: auto; height:100% !important;">>
+        <nav id="bssidebar" style="overflow-y: auto; height:88vh !important;">>
             <div class="p-4 pt-5" style="padding-top: 0rem !important;">
                 <ul class="list-unstyled components mb-5" style="margin-bottom: 0px !important;">
                     <li>
@@ -92,10 +92,10 @@
                                     style="width:35%; float: right; margin-top: 2px; margin-right: 2px;"></form>
                             <form>Lat : <input type="number" id="ts_la0" name="ts_la0"
                                     style="width:35%; float: right; margin-top: 2px; margin-right: 2px;"></form>
-                            <form> <img src="{{ url_for('static', filename='/dist/icons/target_carbon.png')}}"
+                            <form> <img class="mbut" src="{{ url_for('static', filename='/dist/icons/target_carbon.png')}}"
                                     onclick="coords_timeserie();" width="30px" height="30px" title="Draw point">
-                                <img src="{{ url_for('static', filename='/dist/icons/trash_carbon.png')}}"
-                                    onclick="clear_ip();" width="25px" height="25px" title="Clear">
+                                <img class="mbut" src="{{ url_for('static', filename='/dist/icons/trash_carbon.png')}}"
+                                    onclick="clear_ip();" width="30px" height="30px" title="Clear">
                             </form>
 
                             <form> Anomaly <input type="checkbox" id="ts_ano" name="ts_ano" value="off">
@@ -117,10 +117,10 @@
                                     style="width:35%; float: right; margin-top: 2px; margin-right: 2px;"></form>
                             <form>Lat : <input type="number" id="pr_la0" name="pr_la0"
                                     style="width:35%; float: right; margin-top: 2px; margin-right: 2px;"></form>
-                            <form> <img src="{{ url_for('static', filename='/dist/icons/target_carbon.png')}}"
+                            <form> <img class="mbut" src="{{ url_for('static', filename='/dist/icons/target_carbon.png')}}"
                                     onclick="coords_profile();" width="30px" height="30px" title="Draw point">
-                                <img src="{{ url_for('static', filename='/dist/icons/trash_carbon.png')}}"
-                                    onclick="clear_ip();" width="25px" height="25px" title="Clear">
+                                <img class="mbut" src="{{ url_for('static', filename='/dist/icons/trash_carbon.png')}}"
+                                    onclick="clear_ip();" width="30px" height="30px" title="Clear">
                             </form>
 
                             <form> Anomaly <input type="checkbox" id="pr_ano" name="pr_ano" value="off">
@@ -151,15 +151,15 @@
                                 <input type="number" id="sn_la0" name="sn_la0"
                                     style="width:35%; float: right; margin-top: 2px; margin-right: 2px;" tabindex="3">
                             </form>
-                            <form>
-                                <img src="{{ url_for('static', filename='/dist/icons/select_carbon.png')}}"
+                            <form style="margin-top: 4px;">
+                                <img class="mbut" src="{{ url_for('static', filename='/dist/icons/select_carbon.png')}}"
                                     onclick="coords_snapshot();" width="30px" height="30px" title="Draw rectangle">
 
-                                <img src="{{ url_for('static', filename='/dist/icons/world_carbon.png')}}"
+                                <img class="mbut" src="{{ url_for('static', filename='/dist/icons/world_carbon.png')}}"
                                     onclick="prefill_snapshot();" width="30px" height="30px" title="Predefined">
 
-                                <img src="{{ url_for('static', filename='/dist/icons/trash_carbon.png')}}"
-                                    onclick="clear_ip();" width="25px" height="25px" title="Clear">
+                                <img class="mbut" src="{{ url_for('static', filename='/dist/icons/trash_carbon.png')}}"
+                                    onclick="clear_ip();" width="30px" height="30px" title="Clear">
                             </form>
 
 
@@ -191,10 +191,10 @@
                                 <input type="number" id="se_la0" name="se_la0"
                                     style="width:35%; float: right; margin-top: 2px; margin-right: 2px;" tabindex="3">
                             </form>
-                            <form> <img src="{{ url_for('static', filename='/dist/icons/target_carbon.png')}}"
+                            <form style="margin-top: 4px;"> <img class="mbut" src="{{ url_for('static', filename='/dist/icons/target_carbon.png')}}"
                                     onclick="coords_section();" width="30px" height="30px" title="Draw section">
-                                <img src="{{ url_for('static', filename='/dist/icons/trash_carbon.png')}}"
-                                    onclick="clear_ip();" width="25px" height="25px" title="Clear">
+                                <img class="mbut" src="{{ url_for('static', filename='/dist/icons/trash_carbon.png')}}"
+                                    onclick="clear_ip();" width="30px" height="30px" title="Clear">
                             </form>
 
                             <form> Anomaly <input type="checkbox" id="se_ano" name="se_ano" value="off">

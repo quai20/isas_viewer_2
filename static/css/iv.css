@@ -1,3 +1,9 @@
+.mbut:hover{
+  background-color: #d0e1f0;
+  border: 1px solid rgb(0, 0, 0);
+  border-radius: 5px;
+}
+
 .btn{
   position: relative;
   display: block;
