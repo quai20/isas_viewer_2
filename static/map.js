@@ -156,6 +156,8 @@ var RectDrawer = new L.Draw.Rectangle(map);
 var LineDrawer = new L.Draw.Polyline(map);
 var clicked = 0;
 var tempLayer = L.layerGroup().addTo(map); //FOR INTERACTIVE PURPOSE
+var TS_Marker = new L.marker();
+var PR_Marker = new L.marker();
 var winc_list = {};
 var winc_divlist = {};
 
@@ -214,8 +216,10 @@ map.on('click', function (e) {
     var nlon = outlon(e.latlng.lng);
     document.getElementById('ts_lo0').value = nlon;
     document.getElementById('ts_la0').value = nlat;
-    //marker
-    var marker = L.marker([nlat, nlon]).addTo(tempLayer);
+    //marker    
+    TS_Marker.setLatLng([nlat, nlon]);
+    TS_Marker.addTo(tempLayer);
+    //pan
     map.panTo([nlat, nlon]);
     //reset clicked
     $('.leaflet-container').css('cursor', '');
@@ -228,7 +232,9 @@ map.on('click', function (e) {
     document.getElementById('pr_lo0').value = nlon;
     document.getElementById('pr_la0').value = nlat;
     //marker
-    var marker = L.marker([nlat, nlon]).addTo(tempLayer);
+    PR_Marker.setLatLng([nlat, nlon]);
+    PR_Marker.addTo(tempLayer);
+    //pan
     map.panTo([nlat, nlon]);
     //reset clicked
     $('.leaflet-container').css('cursor', '');
