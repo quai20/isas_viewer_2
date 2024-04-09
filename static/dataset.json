@@ -290,8 +290,8 @@
     },
     {
         "name": "ISAS-NRT",
-        "url": "https://wmts.marine.copernicus.eu/teroWmts/INSITU_GLO_PHY_TS_OA_NRT_013_002/cmems_obs-ins_glo_phy-temp-sal_nrt_oa_P1M_202211?",        
-        "opendap": "https://nrt.cmems-du.eu/thredds/dodsC/cmems_obs-ins_glo_phy-temp-sal_nrt_oa_P1M",
+        "url": "https://wmts.marine.copernicus.eu/teroWmts?",        
+        "layer": "INSITU_GLO_PHY_TS_OA_NRT_013_002/cmems_obs-ins_glo_phy-temp-sal_nrt_oa_P1M_202211",        
         "climato": false,
         "vars": ["TEMP", "PSAL","TEMP_PCTVAR","PSAL_PCTVAR"],
         "credentials":true,
