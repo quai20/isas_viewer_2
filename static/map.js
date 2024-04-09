@@ -25,7 +25,7 @@ function updateMap() {
 
   map.spin(false);
   // loader
-  map.spin(true, { lines: 8, length: 30, width: 13, radius: 20, scale: 0.5, color: 'black' });
+  //map.spin(true, { lines: 8, length: 30, width: 13, radius: 20, scale: 0.5, color: 'black' });
 
   // clear overlay
   if (islayed == true) {
@@ -33,6 +33,19 @@ function updateMap() {
     map.removeLayer(wms_layer);
   }
 
+  //TEST
+var wmts_template =
+'https://wmts.marine.copernicus.eu/teroWmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=&LAYER={layer}&STYLE=&FORMAT=image/png&TILEMATRIXSET={tileMatrixSet}&TILEMATRIX={z}&time={time}&elevation={elevation}&TILEROW={y}&TILECOL={x}'
+
+var wmts_ayer = L.tileLayer(wmts_template, {
+layer: 'INSITU_GLO_PHY_TS_OA_NRT_013_002/cmems_obs-ins_glo_phy-temp-sal_nrt_oa_P1M_202211/TEMP',
+tileMatrixSet: 'EPSG:3857',
+time: '2024-02-01',
+elevation: '-1',
+noWrap: true
+}).addTo(map);
+wmts_ayer.bringToFront();
+//
 
   // Get user selection
   var dst = parseInt(document.getElementById('dataset').value);
@@ -48,60 +61,61 @@ function updateMap() {
     'time': dataset_config[dst]['daterange'][req_time], 'lowval': lowval, 'highval': highval, 'climatology': dataset_config[clim]['name']
   };
 
+
   //WMS LAYER   
-  if (isNaN(lowval) || isNaN(highval) || (lowval > highval)) {
-    var legend_url = dataset_config[dst]['url'] + "REQUEST=GetLegendGraphic&LAYER=" + dataset_config[dst]['vars'][variable] + "&bgcolor=0xffffff";
-    //console.log(legend_url);
-    wms_layer = L.tileLayer.wms(dataset_config[dst]['url'], {
-      crs: L.CRS.EPSG3857,
-      format: 'image/png',
-      layers: dataset_config[dst]['vars'][variable],
-      belowmincolor: 'transparent',
-      abovemaxcolor: 'transparent',
-      numcolorbands: 250,
-      style: 'boxfill/ncview',
-      time: dataset_config[dst]['daterange'][req_time],
-      elevation: String(dataset_config[dst]['levels'][level]),
-      transparent: true,
-      opacity: 0.7,
-      version: '1.3.0'
-    }).addTo(map);
-  }
-  else {
-    var legend_url = dataset_config[dst]['url'] + "REQUEST=GetLegendGraphic&LAYER=" + dataset_config[dst]['vars'][variable] + "&bgcolor=0xffffff&colorscalerange=" + String(lowval) + "," + String(highval);
-    //console.log(legend_url);
-    wms_layer = L.tileLayer.wms(dataset_config[dst]['url'], {
-      crs: L.CRS.EPSG3857,
-      format: 'image/png',
-      layers: dataset_config[dst]['vars'][variable],
-      belowmincolor: 'transparent',
-      abovemaxcolor: 'transparent',
-      numcolorbands: 250,
-      style: 'boxfill/ncview',
-      time: dataset_config[dst]['daterange'][req_time],
-      elevation: String(dataset_config[dst]['levels'][level]),
-      colorscalerange: [lowval, highval],
-      transparent: true,
-      opacity: 0.7,
-      version: '1.3.0'
-    }).addTo(map);
-  }
+  // if (isNaN(lowval) || isNaN(highval) || (lowval > highval)) {
+  //   var legend_url = dataset_config[dst]['url'] + "REQUEST=GetLegendGraphic&LAYER=" + dataset_config[dst]['vars'][variable] + "&bgcolor=0xffffff";
+  //   //console.log(legend_url);
+  //   wms_layer = L.tileLayer.wms(dataset_config[dst]['url'], {
+  //     crs: L.CRS.EPSG3857,
+  //     format: 'image/png',
+  //     layers: dataset_config[dst]['vars'][variable],
+  //     belowmincolor: 'transparent',
+  //     abovemaxcolor: 'transparent',
+  //     numcolorbands: 250,
+  //     style: 'boxfill/ncview',
+  //     time: dataset_config[dst]['daterange'][req_time],
+  //     elevation: String(dataset_config[dst]['levels'][level]),
+  //     transparent: true,
+  //     opacity: 0.7,
+  //     version: '1.3.0'
+  //   }).addTo(map);
+  // }
+  // else {
+  //   var legend_url = dataset_config[dst]['url'] + "REQUEST=GetLegendGraphic&LAYER=" + dataset_config[dst]['vars'][variable] + "&bgcolor=0xffffff&colorscalerange=" + String(lowval) + "," + String(highval);
+  //   //console.log(legend_url);
+  //   wms_layer = L.tileLayer.wms(dataset_config[dst]['url'], {
+  //     crs: L.CRS.EPSG3857,
+  //     format: 'image/png',
+  //     layers: dataset_config[dst]['vars'][variable],
+  //     belowmincolor: 'transparent',
+  //     abovemaxcolor: 'transparent',
+  //     numcolorbands: 250,
+  //     style: 'boxfill/ncview',
+  //     time: dataset_config[dst]['daterange'][req_time],
+  //     elevation: String(dataset_config[dst]['levels'][level]),
+  //     colorscalerange: [lowval, highval],
+  //     transparent: true,
+  //     opacity: 0.7,
+  //     version: '1.3.0'
+  //   }).addTo(map);
+  // }
 
-  //legend
-  document.getElementById("colorbar").innerHTML = "<img id=\"imgL\"src=\"" + legend_url + "\" alt=\"\" height=264px width=110px>";
+  // //legend
+  // document.getElementById("colorbar").innerHTML = "<img id=\"imgL\"src=\"" + legend_url + "\" alt=\"\" height=264px width=110px>";
 
-  //spin 
-  wms_layer.on('loading tileloadstart', function (e) {
-    map.spin(true, { lines: 8, length: 30, width: 13, radius: 20, scale: 0.5, color: 'black' });
-  });
+  // //spin 
+  // wms_layer.on('loading tileloadstart', function (e) {
+  //   map.spin(true, { lines: 8, length: 30, width: 13, radius: 20, scale: 0.5, color: 'black' });
+  // });
 
-  //loaded
-  wms_layer.on('load tileerror tileabort tileunload tileload', function (e) {
-    map.spin(false);
-  });
+  // //loaded
+  // wms_layer.on('load tileerror tileabort tileunload tileload', function (e) {
+  //   map.spin(false);
+  // });
 
-  layerControl.addOverlay(wms_layer, "User request")
-  islayed = true;
+  // layerControl.addOverlay(wms_layer, "User request")
+  // islayed = true;
 }
 
 //map creation func : basemap tiles, zoom bounds
