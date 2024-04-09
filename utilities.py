@@ -15,6 +15,7 @@ import pandas as pd
 import numpy as np
 import json
 import os, sys, glob, time, requests
+import copernicusmarine as cm
 
 # Datasets configurations
 jsonfile=open('static/dataset.json')
@@ -114,14 +115,13 @@ def open_dap_ds(ix,decode_times=True):
         xr.Dataset: xarray dataset, lazy dap
     """
     if (dataset_config[ix]['credentials']):
-        #open with cmems cred
-        user = os.environ['MOTU_USERNAME']
-        password = os.environ['MOTU_PASSWORD']
-        session = requests.Session()
-        session.auth = (user, password)
-        root = dataset_config[ix]['opendap']
-        store = xr.backends.PydapDataStore.open(root, session=session)
-        ds = xr.open_dataset(store,decode_times=decode_times)
+        #open with cmems cred & new cmems marine data store
+                
+        cm.login(username=os.environ['MOTU_USERNAME'], password=os.environ['MOTU_PASSWORD'])
+        # Load xarray dataset
+        ds = cm.open_dataset(
+        dataset_id = dataset_config[ix]['dataset-id']        
+        )
     else:
         ds = xr.open_dataset(dataset_config[ix]['opendap'],decode_times=decode_times)
     return ds
