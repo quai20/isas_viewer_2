@@ -5,8 +5,5 @@ static/img/*
 !static/img/.gitkeep 
 static/nc_cache/*
 !static/nc_cache/.gitkeep 
-__pycache__/app.cpython-39.pyc
-__pycache__/utilities.cpython-39.pyc
-__pycache__/utilities.cpython-39.pyc
 tmpk/
-__pycache__/utilities.cpython-39.pyc
+

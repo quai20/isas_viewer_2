@@ -50,17 +50,34 @@ function updateMap() {
   //WMTS LAYER (CMEMS)
   if (dataset_config[dst]['name'] == 'ISAS-NRT') {
 
-    var wmts_template =
-    dataset_config[dst]['url']+'SERVICE=WMTS&REQUEST=GetTile&VERSION=&LAYER={layer}&STYLE=&FORMAT=image/png&TILEMATRIXSET={tileMatrixSet}&TILEMATRIX={z}&time={time}&elevation={elevation}&TILEROW={y}&TILECOL={x}'
+    if (isNaN(lowval) || isNaN(highval) || (lowval > highval)) {
+      var wmts_template =
+      dataset_config[dst]['url']+'SERVICE=WMTS&REQUEST=GetTile&VERSION=&LAYER={layer}&FORMAT=image/png&TILEMATRIXSET={tileMatrixSet}&TILEMATRIX={z}&time={time}&elevation={elevation}&TILEROW={y}&TILECOL={x}'
+      wms_layer = L.tileLayer(wmts_template, {
+        layer: dataset_config[dst]['layer']+'/'+dataset_config[dst]['vars'][variable],
+        tileMatrixSet: 'EPSG:3857',
+        time: dataset_config[dst]['daterange'][req_time],
+        elevation: String(dataset_config[dst]['levels'][level]),        
+        noWrap: true
+        }).addTo(map);
+        wms_layer.bringToFront();
+    }
+    else {
+      var wmts_template =
+      dataset_config[dst]['url']+'SERVICE=WMTS&REQUEST=GetTile&VERSION=&LAYER={layer}&FORMAT=image/png&TILEMATRIXSET={tileMatrixSet}&TILEMATRIX={z}&time={time}&elevation={elevation}&TILEROW={y}&TILECOL={x}&style=noClamp,range:{minvalue}/{maxvalue}'
+      wms_layer = L.tileLayer(wmts_template, {
+      layer: dataset_config[dst]['layer']+'/'+dataset_config[dst]['vars'][variable],
+      tileMatrixSet: 'EPSG:3857',
+      time: dataset_config[dst]['daterange'][req_time],
+      elevation: String(dataset_config[dst]['levels'][level]),
+      minvalue : lowval,
+      maxvalue : highval,
+      noWrap: true
+      }).addTo(map);
+      wms_layer.bringToFront();
+    }
 
-    wms_layer = L.tileLayer(wmts_template, {
-    layer: dataset_config[dst]['layer']+'/'+dataset_config[dst]['vars'][variable],
-    tileMatrixSet: 'EPSG:3857',
-    time: dataset_config[dst]['daterange'][req_time],
-    elevation: String(dataset_config[dst]['levels'][level]),
-    noWrap: true
-    }).addTo(map);
-    wms_layer.bringToFront();
+    
 
   }
   else {

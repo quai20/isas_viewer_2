@@ -103,7 +103,7 @@ def gen_figname(op, lat0, lon0, lat1, lon1, dataset, variable, depth, date, ptyp
     else :
         return pfx + '_'.join(params) + '_' + clim +'.png' 
 
-def open_dap_ds(ix,decode_times=True):
+def open_dap_ds(ix,decode_times=True,conf={}):
     """return the xarray dataset from opendap request
     for cmems, it uses MOTU env var
 
@@ -114,15 +114,27 @@ def open_dap_ds(ix,decode_times=True):
     Returns:
         xr.Dataset: xarray dataset, lazy dap
     """
-    if (dataset_config[ix]['credentials']):
-        #open with cmems cred & new cmems marine data store
-                
-        cm.login(username=os.environ['MOTU_USERNAME'], password=os.environ['MOTU_PASSWORD'])
+    if (dataset_config[ix]['credentials']=="cmems"):
+        # open with cmems cred & new cmems marine data store
+        # login               
+        cm.login(username=os.environ['MOTU_USERNAME'], 
+                 password=os.environ['MOTU_PASSWORD'],
+                 overwrite_configuration_file=False,
+                 skip_if_user_logged_in=True)                
         # Load xarray dataset
         ds = cm.open_dataset(
-        dataset_id = dataset_config[ix]['dataset-id']        
+            dataset_id = dataset_config[ix]['dataset-id'],
+            minimum_longitude = conf['lon_min'],
+            maximum_longitude = conf['lon_max'],
+            minimum_latitude = conf['lat_min'],
+            maximum_latitude = conf['lat_max'],
+            start_datetime = conf['date'] if ('date' in conf) else '2000-01-01',
+            end_datetime = conf['date'] if ('date' in conf) else '2100-01-01',
+            variables = [conf['variable']],
+            minimum_depth = conf['depth'] if ('depth' in conf) else 0,
+            maximum_depth = conf['depth'] if ('depth' in conf) else 5000
         )
-    else:
+    else: #for classic opendap, no need to reducte ds
         ds = xr.open_dataset(dataset_config[ix]['opendap'],decode_times=decode_times)
     return ds
 
@@ -148,6 +160,9 @@ def time_serie_on_point(lat, lon, dataset, variable, depth,ptype, clim):
     # Gen random img filename
     png_filename = gen_figname(0, lat, lon, None, None, dataset, variable, depth, None, ptype, None, None, clim)
 
+    # Gen conf for dl
+    conf={'lat_min':lat,'lat_max':lat,'lon_min':lon,'lon_max':lon,'depth':np.abs(depth),'variable':variable}
+
     if (os.path.exists(nc_filename)):
         ds = xr.open_dataset(nc_filename)
         if (ptype==1):
@@ -162,19 +177,19 @@ def time_serie_on_point(lat, lon, dataset, variable, depth,ptype, clim):
             iz = [clim==dataset_config[i]['name'] for i in range(len(dataset_config))]
             iz = np.argmax(iz)      
             if(variable in dataset_config[iz]['vars']):                            
-                dsa = open_dap_ds(iz,decode_times=False)
+                dsa = open_dap_ds(iz,decode_times=False, conf=conf)
                 dsa = dsa.sel(latitude=lat,longitude=lon,depth=np.abs(depth),method='nearest')
                 dsa['time'] = np.arange(1,13)
                 dsa = dsa.rename({'time':'month'})
                 
-                dsb = open_dap_ds(ix,decode_times=True)
+                dsb = open_dap_ds(ix,decode_times=True, conf=conf)
                 dsb = dsb.sel(latitude=lat,longitude=lon,depth=np.abs(depth),method='nearest')
                 ds = dsb.groupby('time.month') - dsa    
                 ylabel=variable+' anomaly'           
             else:
                 return "static/dist/unavailable.png"
         else :
-            ds = open_dap_ds(ix,decode_times=True)
+            ds = open_dap_ds(ix,decode_times=True, conf=conf)
             ds = ds.sel(latitude=lat,longitude=lon,depth=np.abs(depth),method='nearest')
             ylabel=variable
         ds.to_netcdf(nc_filename)    
@@ -210,6 +225,9 @@ def profile_on_point(lat, lon, dataset, variable, date, ptype, clim):
     nc_filename = gen_filename(1, lat, lon, None, None, dataset, variable, None, date, ptype, clim)
 
     png_filename = gen_figname(1, lat, lon, None, None, dataset, variable, None, date, ptype, None, None, clim)
+
+    # Gen conf for dl
+    conf={'lat_min':lat,'lat_max':lat,'lon_min':lon,'lon_max':lon,'date':date[:10],'variable':variable}
     
     if (os.path.exists(nc_filename)):
         ds = xr.open_dataset(nc_filename)
@@ -226,17 +244,17 @@ def profile_on_point(lat, lon, dataset, variable, date, ptype, clim):
             iz = [clim==dataset_config[i]['name'] for i in range(len(dataset_config))]
             iz = np.argmax(iz)
             if (variable in dataset_config[iz]['vars']):                
-                dsa = open_dap_ds(iz,decode_times=False)
+                dsa = open_dap_ds(iz,decode_times=False, conf=conf)
                 dsa = dsa.sel(latitude=lat,longitude=lon,method='nearest').isel(time=month_index).squeeze()                
                 
-                dsb = open_dap_ds(ix,decode_times=True)
+                dsb = open_dap_ds(ix,decode_times=True, conf=conf)
                 dsb = dsb.sel(latitude=lat,longitude=lon,time=np.datetime64(date),method='nearest').squeeze()
                 ds = dsb - dsa                   
                 xlabel=variable+' anomaly'
             else :
                 return "static/dist/unavailable.png"
         else :                
-            ds = open_dap_ds(ix,decode_times=True)
+            ds = open_dap_ds(ix,decode_times=True, conf=conf)
             ds = ds.sel(latitude=lat,longitude=lon,time=np.datetime64(date),method='nearest')
             xlabel = variable
         ds.to_netcdf(nc_filename) 
@@ -277,7 +295,10 @@ def snapshot(lat0, lon0, lat1, lon1, dataset, variable, depth, date, lowval, hig
     nc_filename = gen_filename(2, lat0, lon0, lat1, lon1, dataset, variable, depth, date, ptype, clim)
     
     png_filename = gen_figname(2, lat0, lon0, lat1, lon1, dataset, variable, depth, date, ptype, lowval, highval, clim)
-        
+
+    # Gen conf for dl
+    conf={'lat_min':lat0,'lat_max':lat1,'lon_min':lon0,'lon_max':lon1,'depth':np.abs(depth),'date':date[:10],'variable':variable}
+
     if (os.path.exists(nc_filename)):
         ds = xr.open_dataset(nc_filename)
         if (ptype==1):
@@ -296,7 +317,7 @@ def snapshot(lat0, lon0, lat1, lon1, dataset, variable, depth, date, lowval, hig
             iz = np.argmax(iz)
             if (variable in dataset_config[iz]['vars']):               
 
-                dsa = open_dap_ds(iz,decode_times=False)
+                dsa = open_dap_ds(iz,decode_times=False, conf=conf)
                 if(lon0<lon1):
                     dsa = dsa.sel(latitude=slice(lat0,lat1),longitude=slice(lon0,lon1)).sel(depth=np.abs(depth),method='nearest').isel(time=month_index).squeeze()                
                 else: #crossing meridian
@@ -305,7 +326,7 @@ def snapshot(lat0, lon0, lat1, lon1, dataset, variable, depth, date, lowval, hig
                     dsa_2['longitude'] = dsa_2['longitude']+360
                     dsa = xr.concat([dsa_1,dsa_2],dim='longitude')
 
-                dsb = open_dap_ds(ix,decode_times=True)    
+                dsb = open_dap_ds(ix,decode_times=True, conf=conf)    
                 if(lon0<lon1):
                     dsb = dsb.sel(latitude=slice(lat0,lat1),longitude=slice(lon0,lon1)).sel(depth=np.abs(depth),time=np.datetime64(date),method='nearest').squeeze()                                
                 else : #crossing meridian
@@ -318,7 +339,7 @@ def snapshot(lat0, lon0, lat1, lon1, dataset, variable, depth, date, lowval, hig
             else :
                 return "static/dist/unavailable.png"
         else :            
-            ds = open_dap_ds(ix,decode_times=True)    
+            ds = open_dap_ds(ix,decode_times=True, conf=conf)    
             if(lon0<lon1):
                 ds = ds.sel(latitude=slice(lat0,lat1),longitude=slice(lon0,lon1)).sel(depth=np.abs(depth),time=np.datetime64(date),method='nearest')
             else: #crossing meridian
@@ -376,6 +397,9 @@ def section(lat0, lon0, lat1, lon1, dataset, variable, date, lowval, highval, pt
 
     png_filename = gen_figname(3, lat0, lon0, lat1, lon1, dataset, variable, None, date, ptype, lowval, highval, clim)
     
+    # Gen conf for dl
+    conf={'lat_min':lat0,'lat_max':lat1,'lon_min':lon0,'lon_max':lon1,'date':date[:10],'variable':variable}
+
     if (os.path.exists(nc_filename)):
         ds = xr.open_dataset(nc_filename)
         if (ptype==1):
@@ -408,7 +432,7 @@ def section(lat0, lon0, lat1, lon1, dataset, variable, date, lowval, highval, pt
 
             if (variable in dataset_config[iz]['vars']):
 
-                dsa = open_dap_ds(iz,decode_times=False)
+                dsa = open_dap_ds(iz,decode_times=False, conf=conf)
                 if(lon0f<lon1f):
                     dsa = dsa.sel(latitude=slice(lat0f,lat1f),longitude=slice(lon0f,lon1f)).isel(time=month_index).squeeze()                
                 else: #crossing meridian
@@ -417,7 +441,7 @@ def section(lat0, lon0, lat1, lon1, dataset, variable, date, lowval, highval, pt
                     dsa_2['longitude'] = dsa_2['longitude']+360
                     dsa = xr.concat([dsa_1,dsa_2],dim='longitude')
 
-                dsb = open_dap_ds(ix,decode_times=True)    
+                dsb = open_dap_ds(ix,decode_times=True, conf=conf)    
                 if(lon0f<lon1f):
                     dsb = dsb.sel(latitude=slice(lat0f,lat1f),longitude=slice(lon0f,lon1f)).sel(time=np.datetime64(date),method='nearest').squeeze()                                
                 else : #crossing meridian
@@ -432,7 +456,7 @@ def section(lat0, lon0, lat1, lon1, dataset, variable, date, lowval, highval, pt
             else :
                 return "static/dist/unavailable.png"
         else :                
-            ds = open_dap_ds(ix,decode_times=True)   
+            ds = open_dap_ds(ix,decode_times=True, conf=conf)   
             if(lon0<lon1):
                 ds = ds.sel(latitude=slice(lat0f,lat1f),longitude=slice(lon0f,lon1f)).sel(time=np.datetime64(date),method='nearest')
             else: #crossing meridian
