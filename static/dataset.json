@@ -1,8 +1,8 @@
 [
     {
         "name": "ISAS13",
-        "url": "http://tds0.isival.ifremer.fr/thredds/wms/LPO_GLOBANA_ISAS13_MNTH_TIME_SERIE?",        
-        "opendap": "http://tds0.isival.ifremer.fr/thredds/dodsC/LPO_GLOBANA_ISAS13_MNTH_TIME_SERIE",
+        "url": "http://tds0.ifremer.fr/thredds/wms/LPO_GLOBANA_ISAS13_MNTH_TIME_SERIE?",        
+        "opendap": "http://tds0.ifremer.fr/thredds/dodsC/LPO_GLOBANA_ISAS13_MNTH_TIME_SERIE",
         "climato": false,
         "vars": ["TEMP", "PSAL"],
         "credentials":false,
@@ -49,8 +49,8 @@
     },
     {
         "name": "ISAS13-CLIM",
-        "url": "https://tds0.isival.ifremer.fr/thredds/wms/LPO-GLOBAL-ISAS13-CLIM_TIME_SERIE?",        
-        "opendap": "https://tds0.isival.ifremer.fr/thredds/dodsC/LPO-GLOBAL-ISAS13-CLIM_TIME_SERIE",
+        "url": "https://tds0.ifremer.fr/thredds/wms/LPO-GLOBAL-ISAS13-CLIM_TIME_SERIE?",        
+        "opendap": "https://tds0.ifremer.fr/thredds/dodsC/LPO-GLOBAL-ISAS13-CLIM_TIME_SERIE",
         "climato": true,
         "vars": ["TEMP", "PSAL"],
         "credentials":false,
@@ -74,8 +74,8 @@
     },
     {
         "name": "ISAS15",
-        "url": "http://tds0.isival.ifremer.fr/thredds/wms/LPO_GLOBANA_ISAS15_MNTH_TIME_SERIE?",        
-        "opendap": "http://tds0.isival.ifremer.fr/thredds/dodsC/LPO_GLOBANA_ISAS15_MNTH_TIME_SERIE",
+        "url": "http://tds0.ifremer.fr/thredds/wms/LPO_GLOBANA_ISAS15_MNTH_TIME_SERIE?",        
+        "opendap": "http://tds0.ifremer.fr/thredds/dodsC/LPO_GLOBANA_ISAS15_MNTH_TIME_SERIE",
         "climato": false,
         "vars": ["TEMP", "PSAL","HSTR","SABS","SIG0"],
         "credentials":false,
@@ -128,8 +128,8 @@
     },
     {
         "name": "ISAS15-CLIM",
-        "url": "https://tds0.isival.ifremer.fr/thredds/wms/LPO-GLOBAL-ISAS15-CLIM_TIME_SERIE?",        
-        "opendap": "https://tds0.isival.ifremer.fr/thredds/dodsC/LPO-GLOBAL-ISAS15-CLIM_TIME_SERIE",
+        "url": "https://tds0.ifremer.fr/thredds/wms/LPO-GLOBAL-ISAS15-CLIM_TIME_SERIE?",        
+        "opendap": "https://tds0.ifremer.fr/thredds/dodsC/LPO-GLOBAL-ISAS15-CLIM_TIME_SERIE",
         "climato": true,
         "vars": ["TEMP", "PSAL","HSTR","SABS","SIG0"],
         "credentials":false,
@@ -153,8 +153,8 @@
     },
     {
         "name": "ISAS17",
-        "url": "http://tds0.isival.ifremer.fr/thredds/wms/LPO_GLOBANA_ISAS17_MNTH_TIME_SERIE?",        
-        "opendap": "http://tds0.isival.ifremer.fr/thredds/dodsC/LPO_GLOBANA_ISAS17_MNTH_TIME_SERIE",
+        "url": "http://tds0.ifremer.fr/thredds/wms/LPO_GLOBANA_ISAS17_MNTH_TIME_SERIE?",        
+        "opendap": "http://tds0.ifremer.fr/thredds/dodsC/LPO_GLOBANA_ISAS17_MNTH_TIME_SERIE",
         "climato": false,
         "vars": ["TEMP", "PSAL","HSTR","SABS","SIG0"],
         "credentials":false,
@@ -206,8 +206,8 @@
     },
     {
         "name": "ISAS17-CLIM",
-        "url": "https://tds0.isival.ifremer.fr/thredds/wms/LPO-GLOBAL-ISAS17-CLIM_TIME_SERIE?",        
-        "opendap": "https://tds0.isival.ifremer.fr/thredds/dodsC/LPO-GLOBAL-ISAS17-CLIM_TIME_SERIE",
+        "url": "https://tds0.ifremer.fr/thredds/wms/LPO-GLOBAL-ISAS17-CLIM_TIME_SERIE?",        
+        "opendap": "https://tds0.ifremer.fr/thredds/dodsC/LPO-GLOBAL-ISAS17-CLIM_TIME_SERIE",
         "climato": true,
         "vars": ["TEMP", "PSAL","HSTR","SABS","SIG0"],
         "credentials":false,
@@ -231,8 +231,8 @@
     },
     {
         "name": "ISAS20-ARGO",
-        "url": "http://tds0.isival.ifremer.fr/thredds/wms/LPO_GLOBANA_ISAS20_ARGO_MNTH_TIME_SERIE?",        
-        "opendap": "http://tds0.isival.ifremer.fr/thredds/dodsC/LPO_GLOBANA_ISAS20_ARGO_MNTH_TIME_SERIE",
+        "url": "http://tds0.ifremer.fr/thredds/wms/LPO_GLOBANA_ISAS20_ARGO_MNTH_TIME_SERIE?",        
+        "opendap": "http://tds0.ifremer.fr/thredds/dodsC/LPO_GLOBANA_ISAS20_ARGO_MNTH_TIME_SERIE",
         "climato": false,
         "vars": ["TEMP", "PSAL","HSTR","SABS","SIG0"],
         "credentials":false,
