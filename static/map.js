@@ -31,6 +31,7 @@ function updateMap() {
   if (islayed == true) {
     layerControl.removeLayer(wms_layer);
     map.removeLayer(wms_layer);
+    document.getElementById("colorbar").innerHTML = "";
   }    
   
   // Get user selection
@@ -55,7 +56,7 @@ function updateMap() {
       dataset_config[dst]['url']+'SERVICE=WMTS&REQUEST=GetTile&VERSION=&LAYER={layer}&FORMAT=image/png&TILEMATRIXSET={tileMatrixSet}&TILEMATRIX={z}&time={time}&elevation={elevation}&TILEROW={y}&TILECOL={x}'
       wms_layer = L.tileLayer(wmts_template, {
         layer: dataset_config[dst]['layer']+'/'+dataset_config[dst]['vars'][variable],
-        tileMatrixSet: 'EPSG:3857',
+        tileMatrixSet: 'EPSG:3857@2x',
         time: dataset_config[dst]['daterange'][req_time],
         elevation: String(dataset_config[dst]['levels'][level]),        
         noWrap: true
@@ -67,7 +68,7 @@ function updateMap() {
       dataset_config[dst]['url']+'SERVICE=WMTS&REQUEST=GetTile&VERSION=&LAYER={layer}&FORMAT=image/png&TILEMATRIXSET={tileMatrixSet}&TILEMATRIX={z}&time={time}&elevation={elevation}&TILEROW={y}&TILECOL={x}&style=noClamp,range:{minvalue}/{maxvalue}'
       wms_layer = L.tileLayer(wmts_template, {
       layer: dataset_config[dst]['layer']+'/'+dataset_config[dst]['vars'][variable],
-      tileMatrixSet: 'EPSG:3857',
+      tileMatrixSet: 'EPSG:3857@2x',
       time: dataset_config[dst]['daterange'][req_time],
       elevation: String(dataset_config[dst]['levels'][level]),
       minvalue : lowval,

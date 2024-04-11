@@ -119,7 +119,7 @@ def open_dap_ds(ix,decode_times=True,conf={}):
         # login               
         cm.login(username=os.environ['MOTU_USERNAME'], 
                  password=os.environ['MOTU_PASSWORD'],
-                 overwrite_configuration_file=False,
+                 overwrite_configuration_file=True,
                  skip_if_user_logged_in=True)                
         # Load xarray dataset
         ds = cm.open_dataset(
