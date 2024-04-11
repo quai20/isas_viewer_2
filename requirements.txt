@@ -8,4 +8,4 @@ flask==2.2.2
 curl==7.87.0
 netcdf4==1.6.0
 libcurl==7.87.0
-pydap
+copernicusmarine

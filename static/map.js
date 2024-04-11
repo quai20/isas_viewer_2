@@ -31,9 +31,9 @@ function updateMap() {
   if (islayed == true) {
     layerControl.removeLayer(wms_layer);
     map.removeLayer(wms_layer);
-  }
-
-
+    document.getElementById("colorbar").innerHTML = "";
+  }    
+  
   // Get user selection
   var dst = parseInt(document.getElementById('dataset').value);
   var variable = parseInt(document.getElementById('variable').value);
@@ -48,48 +48,82 @@ function updateMap() {
     'time': dataset_config[dst]['daterange'][req_time], 'lowval': lowval, 'highval': highval, 'climatology': dataset_config[clim]['name']
   };
 
-  //WMS LAYER   
-  if (isNaN(lowval) || isNaN(highval) || (lowval > highval)) {
-    var legend_url = dataset_config[dst]['url'] + "REQUEST=GetLegendGraphic&LAYER=" + dataset_config[dst]['vars'][variable] + "&bgcolor=0xffffff";
-    //console.log(legend_url);
-    wms_layer = L.tileLayer.wms(dataset_config[dst]['url'], {
-      crs: L.CRS.EPSG3857,
-      format: 'image/png',
-      layers: dataset_config[dst]['vars'][variable],
-      belowmincolor: 'transparent',
-      abovemaxcolor: 'transparent',
-      numcolorbands: 250,
-      style: 'boxfill/ncview',
+  //WMTS LAYER (CMEMS)
+  if (dataset_config[dst]['name'] == 'ISAS-NRT') {
+
+    if (isNaN(lowval) || isNaN(highval) || (lowval > highval)) {
+      var wmts_template =
+      dataset_config[dst]['url']+'SERVICE=WMTS&REQUEST=GetTile&VERSION=&LAYER={layer}&FORMAT=image/png&TILEMATRIXSET={tileMatrixSet}&TILEMATRIX={z}&time={time}&elevation={elevation}&TILEROW={y}&TILECOL={x}'
+      wms_layer = L.tileLayer(wmts_template, {
+        layer: dataset_config[dst]['layer']+'/'+dataset_config[dst]['vars'][variable],
+        tileMatrixSet: 'EPSG:3857@2x',
+        time: dataset_config[dst]['daterange'][req_time],
+        elevation: String(dataset_config[dst]['levels'][level]),        
+        noWrap: true
+        }).addTo(map);
+        wms_layer.bringToFront();
+    }
+    else {
+      var wmts_template =
+      dataset_config[dst]['url']+'SERVICE=WMTS&REQUEST=GetTile&VERSION=&LAYER={layer}&FORMAT=image/png&TILEMATRIXSET={tileMatrixSet}&TILEMATRIX={z}&time={time}&elevation={elevation}&TILEROW={y}&TILECOL={x}&style=noClamp,range:{minvalue}/{maxvalue}'
+      wms_layer = L.tileLayer(wmts_template, {
+      layer: dataset_config[dst]['layer']+'/'+dataset_config[dst]['vars'][variable],
+      tileMatrixSet: 'EPSG:3857@2x',
       time: dataset_config[dst]['daterange'][req_time],
       elevation: String(dataset_config[dst]['levels'][level]),
-      transparent: true,
-      opacity: 0.7,
-      version: '1.3.0'
-    }).addTo(map);
+      minvalue : lowval,
+      maxvalue : highval,
+      noWrap: true
+      }).addTo(map);
+      wms_layer.bringToFront();
+    }
+
+    
+
   }
   else {
-    var legend_url = dataset_config[dst]['url'] + "REQUEST=GetLegendGraphic&LAYER=" + dataset_config[dst]['vars'][variable] + "&bgcolor=0xffffff&colorscalerange=" + String(lowval) + "," + String(highval);
-    //console.log(legend_url);
-    wms_layer = L.tileLayer.wms(dataset_config[dst]['url'], {
-      crs: L.CRS.EPSG3857,
-      format: 'image/png',
-      layers: dataset_config[dst]['vars'][variable],
-      belowmincolor: 'transparent',
-      abovemaxcolor: 'transparent',
-      numcolorbands: 250,
-      style: 'boxfill/ncview',
-      time: dataset_config[dst]['daterange'][req_time],
-      elevation: String(dataset_config[dst]['levels'][level]),
-      colorscalerange: [lowval, highval],
-      transparent: true,
-      opacity: 0.7,
-      version: '1.3.0'
-    }).addTo(map);
+    //WMS LAYER   
+    if (isNaN(lowval) || isNaN(highval) || (lowval > highval)) {
+      var legend_url = dataset_config[dst]['url'] + "REQUEST=GetLegendGraphic&LAYER=" + dataset_config[dst]['vars'][variable] + "&bgcolor=0xffffff";
+      //console.log(legend_url);
+      wms_layer = L.tileLayer.wms(dataset_config[dst]['url'], {
+        crs: L.CRS.EPSG3857,
+        format: 'image/png',
+        layers: dataset_config[dst]['vars'][variable],
+        belowmincolor: 'transparent',
+        abovemaxcolor: 'transparent',
+        numcolorbands: 250,
+        style: 'boxfill/ncview',
+        time: dataset_config[dst]['daterange'][req_time],
+        elevation: String(dataset_config[dst]['levels'][level]),
+        transparent: true,
+        opacity: 0.7,
+        version: '1.3.0'
+      }).addTo(map);
+    }
+    else {
+      var legend_url = dataset_config[dst]['url'] + "REQUEST=GetLegendGraphic&LAYER=" + dataset_config[dst]['vars'][variable] + "&bgcolor=0xffffff&colorscalerange=" + String(lowval) + "," + String(highval);
+      //console.log(legend_url);
+      wms_layer = L.tileLayer.wms(dataset_config[dst]['url'], {
+        crs: L.CRS.EPSG3857,
+        format: 'image/png',
+        layers: dataset_config[dst]['vars'][variable],
+        belowmincolor: 'transparent',
+        abovemaxcolor: 'transparent',
+        numcolorbands: 250,
+        style: 'boxfill/ncview',
+        time: dataset_config[dst]['daterange'][req_time],
+        elevation: String(dataset_config[dst]['levels'][level]),
+        colorscalerange: [lowval, highval],
+        transparent: true,
+        opacity: 0.7,
+        version: '1.3.0'
+      }).addTo(map);
+    }
+
+    //legend
+    document.getElementById("colorbar").innerHTML = "<img id=\"imgL\"src=\"" + legend_url + "\" alt=\"\" height=264px width=110px>";
   }
-
-  //legend
-  document.getElementById("colorbar").innerHTML = "<img id=\"imgL\"src=\"" + legend_url + "\" alt=\"\" height=264px width=110px>";
-
   //spin 
   wms_layer.on('loading tileloadstart', function (e) {
     map.spin(true, { lines: 8, length: 30, width: 13, radius: 20, scale: 0.5, color: 'black' });
