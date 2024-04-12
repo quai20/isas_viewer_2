@@ -225,10 +225,9 @@ def profile_on_point(lat, lon, dataset, variable, date, ptype, clim):
     nc_filename = gen_filename(1, lat, lon, None, None, dataset, variable, None, date, ptype, clim)
 
     png_filename = gen_figname(1, lat, lon, None, None, dataset, variable, None, date, ptype, None, None, clim)
-
     # Gen conf for dl
     conf={'lat_min':lat,'lat_max':lat,'lon_min':lon,'lon_max':lon,'date':date[:10],'variable':variable}
-    
+
     if (os.path.exists(nc_filename)):
         ds = xr.open_dataset(nc_filename)
         if (ptype==1):
@@ -249,7 +248,12 @@ def profile_on_point(lat, lon, dataset, variable, date, ptype, clim):
                 
                 dsb = open_dap_ds(ix,decode_times=True, conf=conf)
                 dsb = dsb.sel(latitude=lat,longitude=lon,time=np.datetime64(date),method='nearest').squeeze()
-                ds = dsb - dsa                   
+                
+                if (np.all(dsa.depth.values == dsb.depth.values)):
+                    ds = dsb - dsa
+                else:    
+                    ds = dsb - dsa.interp(depth=dsb.depth)                   
+
                 xlabel=variable+' anomaly'
             else :
                 return "static/dist/unavailable.png"
@@ -295,10 +299,9 @@ def snapshot(lat0, lon0, lat1, lon1, dataset, variable, depth, date, lowval, hig
     nc_filename = gen_filename(2, lat0, lon0, lat1, lon1, dataset, variable, depth, date, ptype, clim)
     
     png_filename = gen_figname(2, lat0, lon0, lat1, lon1, dataset, variable, depth, date, ptype, lowval, highval, clim)
-
     # Gen conf for dl
     conf={'lat_min':lat0,'lat_max':lat1,'lon_min':lon0,'lon_max':lon1,'depth':np.abs(depth),'date':date[:10],'variable':variable}
-
+    
     if (os.path.exists(nc_filename)):
         ds = xr.open_dataset(nc_filename)
         if (ptype==1):
@@ -334,7 +337,12 @@ def snapshot(lat0, lon0, lat1, lon1, dataset, variable, depth, date, lowval, hig
                     dsb_2 = dsb.sel(latitude=slice(lat0,lat1),longitude=slice(-180,lon1)).sel(depth=np.abs(depth),time=np.datetime64(date),method='nearest').squeeze()                                
                     dsb_2['longitude'] = dsb_2['longitude']+360
                     dsb = xr.concat([dsb_1,dsb_2],dim='longitude')
-                ds = dsb - dsa
+                
+                if(np.all(dsa.longitude.values == dsb.longitude.values) & np.all(dsa.latitude.values == dsb.latitude.values)):
+                    ds = dsb - dsa
+                else:     
+                    ds = dsb.interp(latitude=dsa.latitude,longitude=dsb.longitude) - dsa
+
                 clabel=variable+' anomaly'                
             else :
                 return "static/dist/unavailable.png"
@@ -396,7 +404,6 @@ def section(lat0, lon0, lat1, lon1, dataset, variable, date, lowval, highval, pt
     nc_filename = gen_filename(3, lat0, lon0, lat1, lon1, dataset, variable, None, date, ptype, clim)
 
     png_filename = gen_figname(3, lat0, lon0, lat1, lon1, dataset, variable, None, date, ptype, lowval, highval, clim)
-    
     # Gen conf for dl
     conf={'lat_min':lat0,'lat_max':lat1,'lon_min':lon0,'lon_max':lon1,'date':date[:10],'variable':variable}
 
@@ -449,7 +456,11 @@ def section(lat0, lon0, lat1, lon1, dataset, variable, date, lowval, highval, pt
                     dsb_2 = dsb.sel(latitude=slice(lat0f,lat1f),longitude=slice(-180,lon1f)).sel(time=np.datetime64(date),method='nearest').squeeze()                                
                     dsb_2['longitude'] = dsb_2['longitude']+360
                     dsb = xr.concat([dsb_1,dsb_2],dim='longitude')
-                ds = dsb - dsa
+
+                if(np.all(dsa.longitude.values == dsb.longitude.values) & np.all(dsa.latitude.values == dsb.latitude.values) & np.all(dsa.depth.values == dsb.depth.values)):
+                    ds = dsb - dsa
+                else :    
+                    ds = dsb.interp(latitude=dsa.latitude,longitude=dsb.longitude)-dsa.interp(depth=dsb.depth)
 
                 clabel=variable+' anomaly'
 
