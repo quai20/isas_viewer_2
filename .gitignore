@@ -6,4 +6,4 @@ static/img/*
 static/nc_cache/*
 !static/nc_cache/.gitkeep 
 tmpk/
-
+UpdateDateRangeNRT.*
