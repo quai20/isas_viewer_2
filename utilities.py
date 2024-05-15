@@ -404,9 +404,7 @@ def section(lat0, lon0, lat1, lon1, dataset, variable, date, lowval, highval, pt
     nc_filename = gen_filename(3, lat0, lon0, lat1, lon1, dataset, variable, None, date, ptype, clim)
 
     png_filename = gen_figname(3, lat0, lon0, lat1, lon1, dataset, variable, None, date, ptype, lowval, highval, clim)
-    # Gen conf for dl
-    conf={'lat_min':lat0,'lat_max':lat1,'lon_min':lon0,'lon_max':lon1,'date':date[:10],'variable':variable}
-
+    
     if (os.path.exists(nc_filename)):
         ds = xr.open_dataset(nc_filename)
         if (ptype==1):
@@ -431,6 +429,10 @@ def section(lat0, lon0, lat1, lon1, dataset, variable, date, lowval, highval, pt
             lon0f-=1
             lon1f+=1
         
+        # Gen conf for dl
+        conf={'lat_min':lat0f,'lat_max':lat1f,'lon_min':lon0f,'lon_max':lon1f,'date':date[:10],'variable':variable}
+
+
         month_index = pd.to_datetime(np.datetime64(date)).month - 1  
 
         if (ptype==1):
