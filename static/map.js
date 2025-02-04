@@ -78,7 +78,7 @@ function updateMap() {
       wms_layer.bringToFront();
     }
 
-    
+ 
 
   }
   else {
