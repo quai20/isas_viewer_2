@@ -35,13 +35,13 @@ function updateMap() {
   }    
   
   // Get user selection
-  var dst = parseInt(document.getElementById('dataset').value);
-  var variable = parseInt(document.getElementById('variable').value);
-  var level = parseInt(document.getElementById('depth').value);
-  var req_time = parseInt(document.getElementById('daterange').value);
-  var lowval = parseFloat(document.getElementById('lowval').value);
-  var highval = parseFloat(document.getElementById('highval').value);
-  var clim = parseInt(document.getElementById('climatology').value);
+  dst = parseInt(document.getElementById('dataset').value);
+  variable = parseInt(document.getElementById('variable').value);
+  level = parseInt(document.getElementById('depth').value);
+  req_time = parseInt(document.getElementById('daterange').value);
+  lowval = parseFloat(document.getElementById('lowval').value);
+  highval = parseFloat(document.getElementById('highval').value);
+  clim = parseInt(document.getElementById('climatology').value);
 
   user_selection = {
     'dataset': dataset_config[dst]['name'], 'variable': dataset_config[dst]['vars'][variable], 'depth': dataset_config[dst]['levels'][level],
@@ -77,8 +77,6 @@ function updateMap() {
       }).addTo(map);
       wms_layer.bringToFront();
     }
-
- 
 
   }
   else {
@@ -259,10 +257,21 @@ map.on('click', function (e) {
     $('.leaflet-container').css('cursor', '');
     clicked = 0;
   }
-  else if (clicked == 2) {
+  else if (clicked == 2) {   
     //set values of inputs for profile
     var nlat = e.latlng.lat;
     var nlon = outlon(e.latlng.lng);
+    // TEST retrieveWmtsValueFromLatLon
+    var layer = dataset_config[dst]['layer']+'/'+dataset_config[dst]['vars'][variable];
+    var baseUrl = dataset_config[dst]['url'];
+    var time = dataset_config[dst]['daterange'][req_time];
+    var elevation = dataset_config[dst]['levels'][level];
+    const run = async () => {
+      const info = await retrieveWmtsValueFromLatLon(baseUrl, nlat, nlon, layer, time, elevation);
+      console.log(info);
+    };
+    run();
+    // END TEST
     document.getElementById('pr_lo0').value = nlon;
     document.getElementById('pr_la0').value = nlat;
     //marker
@@ -578,3 +587,64 @@ function outlon(lon) {
     return lon
   }
 }
+
+const latLonToTileEPSG4326 = (lat, lon, zoom) => {
+  const constrainedLat = Math.max(-89.999999, lat); // Constrain lat within (-90, 90]
+  const constrainedLon = lon === 180 ? 179.999999 : lon; // Constrain lon to be < 180
+
+  // Define bounds in EPSG:4326
+  const minLat = -90;
+  const maxLat = 90;
+  const minLon = -180;
+  const maxLon = 180;
+
+  // Number of tiles at this zoom level
+  const tileCountX = Math.pow(2, zoom + 1);
+  const tileCountY = Math.pow(2, zoom);
+
+  // Calculate tile width and height in terms of lat/lon degrees
+  const tileWidth = (maxLon - minLon) / tileCountX; // 360 degrees / 2^(zoom+1)
+  const tileHeight = (maxLat - minLat) / tileCountY; // 180 degrees / 2^zoom
+
+  // Calculate tile index
+  const tileX = Math.floor((constrainedLon - minLon) / tileWidth);
+  const tileY = Math.floor((maxLat - constrainedLat) / tileHeight);
+
+  // Pixel position within the tile (256x256 pixels)
+  const pixelX = Math.floor(
+    (((constrainedLon - minLon) % tileWidth) / tileWidth) * 256
+  );
+  const pixelY = Math.floor(
+    (((maxLat - constrainedLat) % tileHeight) / tileHeight) * 256
+  );
+
+  return {
+    tileX,
+    tileY,
+    pixelX,
+    pixelY,
+  };
+};
+
+const retrieveWmtsValueFromLatLon = async (
+  baseUrl,
+  lat,
+  lon,
+  layer,
+  time,
+  elevation
+) => {  
+  
+  // Use the highest zoom level possible for best precision
+  const zoom = 10;
+  
+  const { tileX, tileY, pixelX, pixelY } = latLonToTileEPSG4326(lat, lon, zoom);
+  
+  const url = `${baseUrl}?SERVICE=WMTS&REQUEST=GetFeatureInfo&VERSION=1.0.0&LAYER=${layer}&INFOFORMAT=application/json&TILEMATRIXSET=EPSG:4326&TILEMATRIX=${zoom}&TILEROW=${tileY}&TILECOL=${tileX}&I=${pixelX}&J=${pixelY}&elevation=${elevation}&time=${time}`;
+  console.log(url);
+  
+  const res = await fetch(url);
+  const info = await res.json();
+
+  return info.features[0].properties;
+};
