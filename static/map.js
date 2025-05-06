@@ -27,7 +27,7 @@ function updateMap() {
 
   map.spin(false);
   // loader
-  map.spin(true, { lines: 8, length: 30, width: 13, radius: 20, scale: 0.5, color: 'black' });
+  map.spin(true, { lines: 8, length: 30, width: 13, radius: 20, scale: 0.5, color: 'black' })
 
   // clear overlay
   if (islayed == true) {
@@ -188,6 +188,12 @@ function initDemoMap() {
 
   map.setView([32, -36], 3);
   L.control.mousePosition().addTo(map);
+
+  //add button
+  L.easyButton('fa-crosshairs fa-lg', function (btn, map) {
+    GetFeatureMarker();
+  }).addTo(map);
+
   //INIT RETURN FUNCTION
   return {
     map: map,
@@ -206,9 +212,9 @@ var clicked = 0;
 var tempLayer = L.layerGroup().addTo(map); //FOR INTERACTIVE PURPOSE
 var TS_Marker = new L.marker();
 var PR_Marker = new L.marker();
+var GF_Marker = new L.marker();
 var winc_list = {};
 var winc_divlist = {};
-
 
 //called by the "draw point" button in time serie menu
 function coords_timeserie() {
@@ -234,6 +240,12 @@ function coords_section() {
   clicked = 4;
   $('.leaflet-container').css('cursor', 'crosshair');
   map.fireEvent('click');
+}
+
+//called by the getvalue button on map
+function GetFeatureMarker() {
+  clicked = 5;
+  $('.leaflet-container').css('cursor', 'crosshair');
 }
 
 //clear all inputs
@@ -277,17 +289,6 @@ map.on('click', function (e) {
     //set values of inputs for profile
     var nlat = e.latlng.lat;
     var nlon = outlon(e.latlng.lng);
-    // TEST retrieveWmtsValueFromLatLon
-    var layer = dataset_config[dst]['layer'] + '/' + dataset_config[dst]['vars'][variable];
-    var baseUrl = dataset_config[dst]['url'];
-    var time = dataset_config[dst]['daterange'][req_time];
-    var elevation = dataset_config[dst]['levels'][level];
-    const run = async () => {
-      const info = await retrieveWmtsValueFromLatLon(baseUrl, nlat, nlon, layer, time, elevation);
-      console.log(info);
-    };
-    run();
-    // END TEST
     document.getElementById('pr_lo0').value = nlon;
     document.getElementById('pr_la0').value = nlat;
     //marker
@@ -306,6 +307,32 @@ map.on('click', function (e) {
   else if (clicked == 4) {
     //enable line drawing for section
     LineDrawer.enable();
+  }
+  else if (clicked == 5) {
+    //setMarker
+    var nlat = e.latlng.lat;
+    var nlon = outlon(e.latlng.lng);
+    // retrieveWmtsValueFromLatLon
+    var layer = dataset_config[dst]['layer'] + '/' + dataset_config[dst]['vars'][variable];
+    var baseUrl = dataset_config[dst]['url'];
+    var time = dataset_config[dst]['daterange'][req_time];
+    var elevation = dataset_config[dst]['levels'][level];
+    var feature_info = '';
+    GF_Marker.setLatLng([nlat, nlon]);
+    const run = async () => {
+      feature_info = await retrieveWmtsValueFromLatLon(baseUrl, nlat, nlon, layer, time, elevation);
+      //console.log(feature_info);
+      GF_Marker.bindPopup(feature_info.value.toFixed(2) + ' ' + feature_info.units.toString());
+      GF_Marker.getPopup().on('close', function() {
+        tempLayer.clearLayers();
+      });
+      GF_Marker.addTo(tempLayer);
+      GF_Marker.openPopup();      
+    };
+    run();
+    //reset clicked
+    $('.leaflet-container').css('cursor', '');
+    clicked = 0;
   }
 });
 
