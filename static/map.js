@@ -19,6 +19,8 @@ user_selection = {
   'dataset': dataset_config[dst]['name'], 'variable': dataset_config[dst]['vars'][variable], 'depth': dataset_config[dst]['levels'][level],
   'time': dataset_config[dst]['daterange'][req_time], 'lowval': lowval, 'highval': highval, 'climatology': dataset_config[clim]['name']
 };
+//TEST STORE VAR
+// var datae;
 
 // this function is called by the UPDATE button
 function updateMap() {
@@ -32,8 +34,8 @@ function updateMap() {
     layerControl.removeLayer(wms_layer);
     map.removeLayer(wms_layer);
     document.getElementById("colorbar").innerHTML = "";
-  }    
-  
+  }
+
   // Get user selection
   dst = parseInt(document.getElementById('dataset').value);
   variable = parseInt(document.getElementById('variable').value);
@@ -48,32 +50,46 @@ function updateMap() {
     'time': dataset_config[dst]['daterange'][req_time], 'lowval': lowval, 'highval': highval, 'climatology': dataset_config[clim]['name']
   };
 
+  // var parser = new ol.format.WMTSCapabilities();
+  // var GetCapURL = 'https://wmts.marine.copernicus.eu/teroWmts/'+dataset_config[dst]['layer']+'?SERVICE=WMTS&version=1.0.0&REQUEST=GetCapabilities'
+  // console.log(GetCapURL);
+
+  //   $.ajax({    
+  //     url: GetCapURL,
+  //     dataType: "xml",
+  //     success: function(data) {
+  //         console.log(data);
+  //         var result = parser.read(data);
+  //         datae = result;
+  //     }
+  // });
+
   //WMTS LAYER (CMEMS)
   if (dataset_config[dst]['name'] == 'ISAS-NRT') {
 
     if (isNaN(lowval) || isNaN(highval) || (lowval > highval)) {
       var wmts_template =
-      dataset_config[dst]['url']+'SERVICE=WMTS&REQUEST=GetTile&VERSION=&LAYER={layer}&FORMAT=image/png&TILEMATRIXSET={tileMatrixSet}&TILEMATRIX={z}&time={time}&elevation={elevation}&TILEROW={y}&TILECOL={x}'
+        dataset_config[dst]['url'] + 'SERVICE=WMTS&REQUEST=GetTile&VERSION=&LAYER={layer}&FORMAT=image/png&TILEMATRIXSET={tileMatrixSet}&TILEMATRIX={z}&time={time}&elevation={elevation}&TILEROW={y}&TILECOL={x}'
       wms_layer = L.tileLayer(wmts_template, {
-        layer: dataset_config[dst]['layer']+'/'+dataset_config[dst]['vars'][variable],
+        layer: dataset_config[dst]['layer'] + '/' + dataset_config[dst]['vars'][variable],
         tileMatrixSet: 'EPSG:3857@2x',
         time: dataset_config[dst]['daterange'][req_time],
-        elevation: String(dataset_config[dst]['levels'][level]),        
+        elevation: String(dataset_config[dst]['levels'][level]),
         noWrap: true
-        }).addTo(map);
-        wms_layer.bringToFront();
+      }).addTo(map);
+      wms_layer.bringToFront();
     }
     else {
       var wmts_template =
-      dataset_config[dst]['url']+'SERVICE=WMTS&REQUEST=GetTile&VERSION=&LAYER={layer}&FORMAT=image/png&TILEMATRIXSET={tileMatrixSet}&TILEMATRIX={z}&time={time}&elevation={elevation}&TILEROW={y}&TILECOL={x}&style=noClamp,range:{minvalue}/{maxvalue}'
+        dataset_config[dst]['url'] + 'SERVICE=WMTS&REQUEST=GetTile&VERSION=&LAYER={layer}&FORMAT=image/png&TILEMATRIXSET={tileMatrixSet}&TILEMATRIX={z}&time={time}&elevation={elevation}&TILEROW={y}&TILECOL={x}&style=noClamp,range:{minvalue}/{maxvalue}'
       wms_layer = L.tileLayer(wmts_template, {
-      layer: dataset_config[dst]['layer']+'/'+dataset_config[dst]['vars'][variable],
-      tileMatrixSet: 'EPSG:3857@2x',
-      time: dataset_config[dst]['daterange'][req_time],
-      elevation: String(dataset_config[dst]['levels'][level]),
-      minvalue : lowval,
-      maxvalue : highval,
-      noWrap: true
+        layer: dataset_config[dst]['layer'] + '/' + dataset_config[dst]['vars'][variable],
+        tileMatrixSet: 'EPSG:3857@2x',
+        time: dataset_config[dst]['daterange'][req_time],
+        elevation: String(dataset_config[dst]['levels'][level]),
+        minvalue: lowval,
+        maxvalue: highval,
+        noWrap: true
       }).addTo(map);
       wms_layer.bringToFront();
     }
@@ -257,12 +273,12 @@ map.on('click', function (e) {
     $('.leaflet-container').css('cursor', '');
     clicked = 0;
   }
-  else if (clicked == 2) {   
+  else if (clicked == 2) {
     //set values of inputs for profile
     var nlat = e.latlng.lat;
     var nlon = outlon(e.latlng.lng);
     // TEST retrieveWmtsValueFromLatLon
-    var layer = dataset_config[dst]['layer']+'/'+dataset_config[dst]['vars'][variable];
+    var layer = dataset_config[dst]['layer'] + '/' + dataset_config[dst]['vars'][variable];
     var baseUrl = dataset_config[dst]['url'];
     var time = dataset_config[dst]['daterange'][req_time];
     var elevation = dataset_config[dst]['levels'][level];
@@ -633,16 +649,16 @@ const retrieveWmtsValueFromLatLon = async (
   layer,
   time,
   elevation
-) => {  
-  
+) => {
+
   // Use the highest zoom level possible for best precision
   const zoom = 10;
-  
+
   const { tileX, tileY, pixelX, pixelY } = latLonToTileEPSG4326(lat, lon, zoom);
-  
+
   const url = `${baseUrl}?SERVICE=WMTS&REQUEST=GetFeatureInfo&VERSION=1.0.0&LAYER=${layer}&INFOFORMAT=application/json&TILEMATRIXSET=EPSG:4326&TILEMATRIX=${zoom}&TILEROW=${tileY}&TILECOL=${tileX}&I=${pixelX}&J=${pixelY}&elevation=${elevation}&time=${time}`;
   console.log(url);
-  
+
   const res = await fetch(url);
   const info = await res.json();
 

@@ -117,10 +117,15 @@ def open_dap_ds(ix,decode_times=True,conf={}):
     if (dataset_config[ix]['credentials']=="cmems"):
         # open with cmems cred & new cmems marine data store
         # login               
+        # cm.login(username=os.environ['MOTU_USERNAME'], 
+        #          password=os.environ['MOTU_PASSWORD'],
+        #          overwrite_configuration_file=True,
+        #          skip_if_user_logged_in=True) 
+        # new copernicusmarine client version
         cm.login(username=os.environ['MOTU_USERNAME'], 
                  password=os.environ['MOTU_PASSWORD'],
-                 overwrite_configuration_file=True,
-                 skip_if_user_logged_in=True)                
+                 force_overwrite=True,
+                 )                
         # Load xarray dataset
         ds = cm.open_dataset(
             dataset_id = dataset_config[ix]['dataset-id'],
@@ -338,10 +343,10 @@ def snapshot(lat0, lon0, lat1, lon1, dataset, variable, depth, date, lowval, hig
                     dsb_2['longitude'] = dsb_2['longitude']+360
                     dsb = xr.concat([dsb_1,dsb_2],dim='longitude')
                 
-                if(np.all(dsa.longitude.values == dsb.longitude.values) & np.all(dsa.latitude.values == dsb.latitude.values)):
-                    ds = dsb - dsa
-                else:     
-                    ds = dsb.interp(latitude=dsa.latitude,longitude=dsb.longitude) - dsa
+                #if(np.all(dsa.longitude.values == dsb.longitude.values) & np.all(dsa.latitude.values == dsb.latitude.values)):
+                #    ds = dsb - dsa
+                #else:     
+                ds = dsb.interp(latitude=dsa.latitude,longitude=dsa.longitude) - dsa
 
                 clabel=variable+' anomaly'                
             else :
@@ -459,10 +464,10 @@ def section(lat0, lon0, lat1, lon1, dataset, variable, date, lowval, highval, pt
                     dsb_2['longitude'] = dsb_2['longitude']+360
                     dsb = xr.concat([dsb_1,dsb_2],dim='longitude')
 
-                if(np.all(dsa.longitude.values == dsb.longitude.values) & np.all(dsa.latitude.values == dsb.latitude.values) & np.all(dsa.depth.values == dsb.depth.values)):
-                    ds = dsb - dsa
-                else :    
-                    ds = dsb.interp(latitude=dsa.latitude,longitude=dsb.longitude)-dsa.interp(depth=dsb.depth)
+                #if(np.all(dsa.longitude.values == dsb.longitude.values) & np.all(dsa.latitude.values == dsb.latitude.values) & np.all(dsa.depth.values == dsb.depth.values)):
+                #    ds = dsb - dsa
+                #else :    
+                ds = dsb.interp(latitude=dsa.latitude,longitude=dsa.longitude)-dsa.interp(depth=dsb.depth)
 
                 clabel=variable+' anomaly'
 
