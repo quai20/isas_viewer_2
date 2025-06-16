@@ -312,24 +312,26 @@ map.on('click', function (e) {
     //setMarker
     var nlat = e.latlng.lat;
     var nlon = outlon(e.latlng.lng);
-    // retrieveWmtsValueFromLatLon
-    var layer = dataset_config[dst]['layer'] + '/' + dataset_config[dst]['vars'][variable];
-    var baseUrl = dataset_config[dst]['url'];
-    var time = dataset_config[dst]['daterange'][req_time];
-    var elevation = dataset_config[dst]['levels'][level];
-    var feature_info = '';
-    GF_Marker.setLatLng([nlat, nlon]);
-    const run = async () => {
-      feature_info = await retrieveWmtsValueFromLatLon(baseUrl, nlat, nlon, layer, time, elevation);
-      //console.log(feature_info);
-      GF_Marker.bindPopup(feature_info.value.toFixed(2) + ' ' + feature_info.units.toString());
-      GF_Marker.getPopup().on('close', function() {
-        tempLayer.clearLayers();
-      });
-      GF_Marker.addTo(tempLayer);
-      GF_Marker.openPopup();      
-    };
-    run();
+    if (dst == 7) {
+      // for isas nrt : retrieveWmtsValueFromLatLon
+      var layer = dataset_config[dst]['layer'] + '/' + dataset_config[dst]['vars'][variable];
+      var baseUrl = dataset_config[dst]['url'];
+      var time = dataset_config[dst]['daterange'][req_time];
+      var elevation = dataset_config[dst]['levels'][level];
+      var feature_info = '';
+      GF_Marker.setLatLng([nlat, nlon]);
+      const run = async () => {
+        feature_info = await retrieveWmtsValueFromLatLon(baseUrl, nlat, nlon, layer, time, elevation);
+        //console.log(feature_info);
+        GF_Marker.bindPopup(feature_info.value.toFixed(2) + ' ' + feature_info.units.toString());
+        GF_Marker.getPopup().on('close', function () {
+          tempLayer.clearLayers();
+        });
+        GF_Marker.addTo(tempLayer);
+        GF_Marker.openPopup();
+      };
+      run();
+    }
     //reset clicked
     $('.leaflet-container').css('cursor', '');
     clicked = 0;
@@ -691,3 +693,41 @@ const retrieveWmtsValueFromLatLon = async (
 
   return info.features[0].properties;
 };
+
+const retrieveWmsValueFromLatLon = async (
+  baseUrl,
+  lat,
+  lon,
+  layer,
+  time,
+  elevation
+) => {
+  var parameters = {
+    service: 'WMS',
+    version: '1.3.0',
+    request: 'GetFeatureInfo',
+    layers: layer,
+    query_layers: layer,
+    time: time,
+    elevation: elevation,
+    info_format: 'text/xml',
+    crs: 'EPSG:4326',
+    width: 101,
+    height: 101,
+    i: 50,
+    j: 50,
+    bbox: (lat - 0.1) + ',' + (lon - 0.1) + ',' + (lat + 0.1) + ',' + (lon + 0.1)
+  }
+  url = baseUrl + L.Util.getParamString(parameters);
+  console.log(url);
+
+  $.ajax({
+
+    url: url,
+    type: 'GET',    
+    dataType: 'jsonp',
+    success: function ( response ) { console.log(response); },
+    error: function () { console.log('Failed!'); }
+  });
+
+}
