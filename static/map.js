@@ -721,13 +721,6 @@ const retrieveWmsValueFromLatLon = async (
   url = baseUrl + L.Util.getParamString(parameters);
   console.log(url);
 
-  $.ajax({
-
-    url: url,
-    type: 'GET',    
-    dataType: 'jsonp',
-    success: function ( response ) { console.log(response); },
-    error: function () { console.log('Failed!'); }
-  });
-
+  const res = await fetch(url);
+  console.log(res);
 }
