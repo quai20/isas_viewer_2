@@ -518,7 +518,7 @@ function gen_img(clicked) {
     '&operation=' + clicked.toString() + '&anomaly=' + ano.toString() + '&dataset=' + user_selection['dataset'] +
     '&variable=' + user_selection['variable'] + '&depth=' + user_selection['depth'].toString() +
     '&time=' + user_selection['time'] + '&lowval=' + user_selection['lowval'].toString() +
-    '&highval=' + user_selection['highval'].toString() + '&clim=' + user_selection['climatology']
+    '&highval=' + user_selection['highval'].toString() + '&clim=' + user_selection['climatology'] + '&rd=0';
 
   //FLASK REQUEST
   $.ajax({
@@ -582,7 +582,7 @@ function gen_img(clicked) {
         '&operation=' + clicked.toString() + '&anomaly=' + ano.toString() + '&dataset=' + pdataset +
         '&variable=' + pvariable + '&depth=' + pdepth.toString() +
         '&time=' + ptime + '&lowval=' + lowval2.toString() +
-        '&highval=' + highval2.toString() + '&clim=' + pclim
+        '&highval=' + highval2.toString() + '&clim=' + pclim  + '&rd=1';
     }
 
     //Loading
