@@ -689,8 +689,9 @@ const retrieveWmtsValueFromLatLon = async (
   console.log(url);
 
   const res = await fetch(url);
+  console.log(res);
   const info = await res.json();
-
+  console.log(info);
   return info.features[0].properties;
 };
 
@@ -720,7 +721,14 @@ const retrieveWmsValueFromLatLon = async (
   }
   url = baseUrl + L.Util.getParamString(parameters);
   console.log(url);
-
-  const res = await fetch(url);
+  const res = await getData(url);
   console.log(res);
+  return res;
 }
+
+function getData(ajaxurl) { 
+  return $.ajax({
+    url: ajaxurl,
+    type: 'GET',
+  });
+};
