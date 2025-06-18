@@ -269,7 +269,6 @@ function clear_ip() {
 
 //"click on map" management, regarding what button we clicked before
 map.on('click', function (e) {
-
   if (clicked == 1) {
     //set values of inputs for time serie
     var nlat = e.latlng.lat;
@@ -324,6 +323,26 @@ map.on('click', function (e) {
         feature_info = await retrieveWmtsValueFromLatLon(baseUrl, nlat, nlon, layer, time, elevation);
         //console.log(feature_info);
         GF_Marker.bindPopup(feature_info.value.toFixed(2) + ' ' + feature_info.units.toString());
+        GF_Marker.getPopup().on('close', function () {
+          tempLayer.clearLayers();
+        });
+        GF_Marker.addTo(tempLayer);
+        GF_Marker.openPopup();
+      };
+      run();
+    }
+    else {
+      // for others : retrieveWmsValueFromLatLon
+      var layer = dataset_config[dst]['vars'][variable];
+      var baseUrl = dataset_config[dst]['url'];
+      var time = dataset_config[dst]['daterange'][req_time];
+      var elevation = dataset_config[dst]['levels'][level];
+      var feature_info = '';
+      GF_Marker.setLatLng([nlat, nlon]);
+      const run = async () => {
+        feature_info = await retrieveWmsValueFromLatLon(baseUrl, nlat, nlon, layer, time, elevation);
+        //console.log(feature_info.FeatureInfoResponse.FeatureInfo.value);
+        GF_Marker.bindPopup(parseFloat(feature_info.FeatureInfoResponse.FeatureInfo.value).toFixed(2));
         GF_Marker.getPopup().on('close', function () {
           tempLayer.clearLayers();
         });
@@ -686,12 +705,10 @@ const retrieveWmtsValueFromLatLon = async (
   const { tileX, tileY, pixelX, pixelY } = latLonToTileEPSG4326(lat, lon, zoom);
 
   const url = `${baseUrl}?SERVICE=WMTS&REQUEST=GetFeatureInfo&VERSION=1.0.0&LAYER=${layer}&INFOFORMAT=application/json&TILEMATRIXSET=EPSG:4326&TILEMATRIX=${zoom}&TILEROW=${tileY}&TILECOL=${tileX}&I=${pixelX}&J=${pixelY}&elevation=${elevation}&time=${time}`;
-  console.log(url);
+  //console.log(url);
 
   const res = await fetch(url);
-  console.log(res);
   const info = await res.json();
-  console.log(info);
   return info.features[0].properties;
 };
 
@@ -722,8 +739,7 @@ const retrieveWmsValueFromLatLon = async (
   url = baseUrl + L.Util.getParamString(parameters);
   console.log(url);
   const res = await getData(url);
-  console.log(res);
-  return res;
+  return xml2json(res);
 }
 
 function getData(ajaxurl) { 
@@ -732,3 +748,34 @@ function getData(ajaxurl) {
     type: 'GET',
   });
 };
+
+function xml2json(srcDOM) {
+  let children = [...srcDOM.children];
+  
+  // base case for recursion. 
+  if (!children.length) {
+    return srcDOM.innerHTML
+  }
+  
+  // initializing object to be returned. 
+  let jsonResult = {};
+  
+  for (let child of children) {
+    
+    // checking is child has siblings of same name. 
+    let childIsArray = children.filter(eachChild => eachChild.nodeName === child.nodeName).length > 1;
+
+    // if child is array, save the values as array, else as strings. 
+    if (childIsArray) {
+      if (jsonResult[child.nodeName] === undefined) {
+        jsonResult[child.nodeName] = [xml2json(child)];
+      } else {
+        jsonResult[child.nodeName].push(xml2json(child));
+      }
+    } else {
+      jsonResult[child.nodeName] = xml2json(child);
+    }
+  }
+  
+  return jsonResult;
+}
