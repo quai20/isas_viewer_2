@@ -545,6 +545,8 @@ function gen_img(clicked) {
         winc_list[oneshotname].content("<img src=\"" + dataarray + "\" alt=\"img\"></img>");
       }
 
+      
+
     }
   });
 

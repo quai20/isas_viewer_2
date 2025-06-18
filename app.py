@@ -18,7 +18,7 @@ app = Flask(__name__,
 def init_webpage():
     """landing page routing function
 
-    Clear the image cache & clear the nc cache when it's over 500Mb
+    Clear the image cache & clear the nc cache when it's over 200Mb
     Render the index.html template
     """        
     # Clean img dir if it's too big
