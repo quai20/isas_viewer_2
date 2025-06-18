@@ -280,7 +280,7 @@ def profile_on_point(lat, lon, dataset, variable, date, ptype, clim):
     return png_filename
 
 
-def snapshot(lat0, lon0, lat1, lon1, dataset, variable, depth, date, lowval, highval, ptype, clim):
+def snapshot(lat0, lon0, lat1, lon1, dataset, variable, depth, date, lowval, highval, ptype, clim, rd):
     """plot a region
 
     Args:
@@ -296,6 +296,7 @@ def snapshot(lat0, lon0, lat1, lon1, dataset, variable, depth, date, lowval, hig
         highval (float): Color high limit
         ptype (int): anomaly var
         clim (str): name of the climatology
+        rd (int) : redraw parameter
 
     Returns:
         str: plot image filename
@@ -369,8 +370,8 @@ def snapshot(lat0, lon0, lat1, lon1, dataset, variable, depth, date, lowval, hig
         ax = fig.add_subplot(1,1,1,projection=ccrs.Miller(central_longitude=0))    
     else:
         ax = fig.add_subplot(1,1,1,projection=ccrs.Miller(central_longitude=180))
-
-    if((lowval==None)&(highval==None)):
+    
+    if(((lowval==None)&(highval==None))|((ptype==1)&(rd==0))):
         lowval = ds[variable].squeeze().min().values
         highval = ds[variable].squeeze().max().values    
 
@@ -386,7 +387,7 @@ def snapshot(lat0, lon0, lat1, lon1, dataset, variable, depth, date, lowval, hig
     plt.savefig(png_filename, bbox_inches='tight')
     return png_filename        
 
-def section(lat0, lon0, lat1, lon1, dataset, variable, date, lowval, highval, ptype, clim):
+def section(lat0, lon0, lat1, lon1, dataset, variable, date, lowval, highval, ptype, clim, rd):
     """plot vertical section
 
     Args:
@@ -401,6 +402,7 @@ def section(lat0, lon0, lat1, lon1, dataset, variable, date, lowval, highval, pt
         highval (float): Color high limit
         ptype (int): anomaly var
         clim (str) : name of the climatology
+        rd (int) : redraw parameter
 
     Returns:
         str: plot image filename
@@ -508,9 +510,14 @@ def section(lat0, lon0, lat1, lon1, dataset, variable, date, lowval, highval, pt
     my_dpi=100
     f,ax = plt.subplots(1,1,figsize=(900/my_dpi, 350/my_dpi), dpi=my_dpi) 
     
-    if((lowval==None)&(highval==None)):
+    if(rd==0):
         lowval = dsi[variable].squeeze().min().values
         highval = dsi[variable].squeeze().max().values    
+    else:
+        if (lowval==None):
+            lowval = dsi[variable].squeeze().min().values
+        if (highval==None):
+            highval = dsi[variable].squeeze().max().values    
 
     dsi[variable].squeeze().plot(y='depth',cmap=plt.get_cmap('turbo'),cbar_kwargs={'shrink':0.8,'label':clabel},ax=ax,vmin=lowval,vmax=highval)
     #dsi[variable].squeeze().plot.contourf(levels=50,y='depth',cmap=plt.get_cmap('turbo'),cbar_kwargs={'shrink':0.8,'label':clabel},ax=ax,vmin=lowval,vmax=highval)

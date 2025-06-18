@@ -53,6 +53,7 @@ def gen_img_route():
     depth = float(request.args.get('depth'))
     date = request.args.get('time')
     clim = request.args.get('clim')
+    rd = int(request.args.get('rd'))
     try:
         lowval = float(request.args.get('lowval'))
         highval = float(request.args.get('highval'))
@@ -71,10 +72,10 @@ def gen_img_route():
         img_path = profile_on_point(lat0, lon0, dataset, variable, date,anomaly, clim)
     elif (operation == 3):
         img_path = snapshot(lat0, lon0, lat1, lon1, dataset,
-                            variable, depth, date, lowval, highval,anomaly, clim)
+                            variable, depth, date, lowval, highval,anomaly, clim, rd)
     elif (operation == 4):
         img_path = section(lat0, lon0, lat1, lon1, dataset,
-                           variable, date, lowval, highval,anomaly, clim)    
+                           variable, date, lowval, highval,anomaly, clim, rd)    
     else:
         img_path = url_for("static", filename='dist/unavailable.png')
 
