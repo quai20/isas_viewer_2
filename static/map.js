@@ -50,20 +50,6 @@ function updateMap() {
     'time': dataset_config[dst]['daterange'][req_time], 'lowval': lowval, 'highval': highval, 'climatology': dataset_config[clim]['name']
   };
 
-  // var parser = new ol.format.WMTSCapabilities();
-  // var GetCapURL = 'https://wmts.marine.copernicus.eu/teroWmts/'+dataset_config[dst]['layer']+'?SERVICE=WMTS&version=1.0.0&REQUEST=GetCapabilities'
-  // console.log(GetCapURL);
-
-  //   $.ajax({    
-  //     url: GetCapURL,
-  //     dataType: "xml",
-  //     success: function(data) {
-  //         console.log(data);
-  //         var result = parser.read(data);
-  //         datae = result;
-  //     }
-  // });
-
   //WMTS LAYER (CMEMS)
   if (dataset_config[dst]['name'] == 'ISAS-NRT') {
 
@@ -545,26 +531,27 @@ function gen_img(clicked) {
     url: window.location.href + '/get_img',
     data: reqstring,
     contentType: 'application/json;charset=UTF-8',
-    success: function (data) {
-      dataarray = JSON.parse(data)
+    success: function (data) {      
+      dataarray = JSON.parse(data)      
       // EDIT IMG WINDOW (Add clim inputs for map plots)
       clim_input = "<a style=\"margin-left: 10px; float: left;\">Color range :</a>" +
         "<input type=\"number\" id=\"lowval2_" + oneshotname + "\" name=\"lowval2\" style=\"width:70px; margin-left: 10px; float: left;\">" +
         "<input type=\"number\" id=\"highval2_" + oneshotname + "\" name=\"highval2\" style=\"width:70px; margin-left: 10px; float:left;\">" +
         "<input type=\"button\" id=\"Redraw_" + oneshotname + "\" value=\"Redraw\" style=\"width:60px; margin-left: 10px;\" />";
 
+      dl_lines = "<br><br><center><a href=\""+ dataarray[0] +"\" download>Download figure</a>" + 
+                 "<br><a href=\""+ dataarray[1] +"\" download>Download data</a></center>";
+
       if ([3, 7, 4, 8].includes(clicked)) {
-        winc_list[oneshotname].content("<img src=\"" + dataarray + "\" alt=\"img\"></img><br>" + clim_input);
+        winc_list[oneshotname].content("<img src=\"" + dataarray[0] + "\" alt=\"img\"></img><br>" + clim_input + dl_lines);
         redraw_button = document.getElementById("Redraw_" + oneshotname);
         redraw_button.cparam = reqstring;
         redraw_button.rid = oneshotname;
         redraw_button.addEventListener("click", redrawMap, false);
       }
       else {
-        winc_list[oneshotname].content("<img src=\"" + dataarray + "\" alt=\"img\"></img>");
+        winc_list[oneshotname].content("<img src=\"" + dataarray[0] + "\" alt=\"img\"></img>" + dl_lines);
       }
-
-      
 
     }
   });
@@ -623,15 +610,18 @@ function gen_img(clicked) {
           "<input type=\"number\" id=\"highval2_" + oneshotname1 + "\" name=\"highval2\" style=\"width:70px; margin-left: 10px; float:left;\">" +
           "<input type=\"button\" id=\"Redraw_" + oneshotname1 + "\" value=\"Redraw\" style=\"width:60px; margin-left: 10px;\" />";
 
+        dl_lines = "<br><br><center><a href=\""+ dataarray[0] +"\" download>Download figure</a>" + 
+                 "<br><a href=\""+ dataarray[1] +"\" download>Download data</a></center>";
+
         if ([3, 7, 4, 8].includes(pclicked)) {
-          winc_list[oneshotname1].content("<img src=\"" + dataarray + "\" alt=\"img\"></img><br>" + clim_input);
+          winc_list[oneshotname1].content("<img src=\"" + dataarray[0] + "\" alt=\"img\"></img><br>" + clim_input + dl_lines);
           redraw_button = document.getElementById("Redraw_" + oneshotname1);
           redraw_button.cparam = reqstring2;
           redraw_button.rid = oneshotname1;
           redraw_button.addEventListener("click", redrawMap, false);
         }
         else {
-          winc_list[oneshotname1].content("<img src=\"" + dataarray + "\" alt=\"img\"></img>");
+          winc_list[oneshotname1].content("<img src=\"" + dataarray[0] + "\" alt=\"img\"></img>" + dl_lines);
         }
 
       }
