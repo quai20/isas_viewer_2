@@ -208,7 +208,7 @@ def time_serie_on_point(lat, lon, dataset, variable, depth,ptype, clim):
     ax.grid(linestyle=':')
 
     plt.savefig(png_filename, bbox_inches='tight')    
-    return png_filename
+    return png_filename, nc_filename
 
 
 def profile_on_point(lat, lon, dataset, variable, date, ptype, clim):
@@ -277,7 +277,7 @@ def profile_on_point(lat, lon, dataset, variable, date, ptype, clim):
     ax.invert_yaxis()
     plt.savefig(png_filename, bbox_inches='tight')    
 
-    return png_filename
+    return png_filename, nc_filename
 
 
 def snapshot(lat0, lon0, lat1, lon1, dataset, variable, depth, date, lowval, highval, ptype, clim, rd):
@@ -385,7 +385,7 @@ def snapshot(lat0, lon0, lat1, lon1, dataset, variable, depth, date, lowval, hig
     gl.top_labels = None
     
     plt.savefig(png_filename, bbox_inches='tight')
-    return png_filename        
+    return png_filename, nc_filename        
 
 def section(lat0, lon0, lat1, lon1, dataset, variable, date, lowval, highval, ptype, clim, rd):
     """plot vertical section
@@ -526,4 +526,4 @@ def section(lat0, lon0, lat1, lon1, dataset, variable, date, lowval, highval, pt
     ax.invert_yaxis()
     ax.set_xlabel('distance along section (km)')
     plt.savefig(png_filename, bbox_inches='tight')
-    return png_filename       
+    return png_filename, nc_filename       
