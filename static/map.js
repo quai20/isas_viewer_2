@@ -611,7 +611,7 @@ function gen_img(clicked) {
           "<input type=\"button\" id=\"Redraw_" + oneshotname1 + "\" value=\"Redraw\" style=\"width:60px; margin-left: 10px;\" />";
 
         dl_lines = "<br><br><center><a href=\""+ dataarray[0] +"\" download>Download figure</a>" + 
-                 "<br><a href=\""+ dataarray[1] +"\" download>Download data</a></center>";
+                 " / <a href=\""+ dataarray[1] +"\" download>Download data</a></center>";
 
         if ([3, 7, 4, 8].includes(pclicked)) {
           winc_list[oneshotname1].content("<img src=\"" + dataarray[0] + "\" alt=\"img\"></img><br>" + clim_input + dl_lines);
