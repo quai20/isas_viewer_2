@@ -1,0 +1,20 @@
+resp_codes = {
+    200 : 'Ok',
+    301 : 'Permanent redirect',
+    302 : 'Temporary redirect',
+    304 : 'Not Modified',
+    307 : 'Temporary Redirect',
+    308 : 'Permanent Redirect',
+    404 : 'Not Found',
+    410 : 'Gone/removed',
+    500 : 'Internal server error',
+    503 : 'Service unavailable',
+    201 : 'Created',
+    204 : 'No content',
+    400 : 'Bad Request',
+    401 : 'Unauthorized',
+    403 : 'Forbidden',
+    406 : 'Not Acceptable',
+    429 : 'Too many requests',
+    451 : 'Unavailable For Legal Reasons'
+}

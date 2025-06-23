@@ -50,6 +50,15 @@ function updateMap() {
     'time': dataset_config[dst]['daterange'][req_time], 'lowval': lowval, 'highval': highval, 'climatology': dataset_config[clim]['name']
   };
 
+  //Check server availability
+  if(dst==7){
+    var getcapSuffix = 'SERVICE=WMTS&REQUEST=GetCapabilities';
+  }
+  else {
+    var getcapSuffix = 'SERVICE=WMS&REQUEST=GetCapabilities';
+  }
+  checkStatus(dataset_config[dst]['url']+getcapSuffix);
+
   //WMTS LAYER (CMEMS)
   if (dataset_config[dst]['name'] == 'ISAS-NRT') {
 
@@ -531,16 +540,16 @@ function gen_img(clicked) {
     url: window.location.href + '/get_img',
     data: reqstring,
     contentType: 'application/json;charset=UTF-8',
-    success: function (data) {      
-      dataarray = JSON.parse(data)      
+    success: function (data) {
+      dataarray = JSON.parse(data)
       // EDIT IMG WINDOW (Add clim inputs for map plots)
       clim_input = "<a style=\"margin-left: 10px; float: left;\">Color range :</a>" +
         "<input type=\"number\" id=\"lowval2_" + oneshotname + "\" name=\"lowval2\" style=\"width:70px; margin-left: 10px; float: left;\">" +
         "<input type=\"number\" id=\"highval2_" + oneshotname + "\" name=\"highval2\" style=\"width:70px; margin-left: 10px; float:left;\">" +
         "<input type=\"button\" id=\"Redraw_" + oneshotname + "\" value=\"Redraw\" style=\"width:60px; margin-left: 10px;\" />";
 
-      dl_lines = "<br><br><center><a href=\""+ dataarray[0] +"\" download>Download figure</a>" + 
-                 " / <a href=\""+ dataarray[1] +"\" download>Download data</a></center>";
+      dl_lines = "<br><br><center><a href=\"" + dataarray[0] + "\" download>Download figure</a>" +
+        " / <a href=\"" + dataarray[1] + "\" download>Download data</a></center>";
 
       if ([3, 7, 4, 8].includes(clicked)) {
         winc_list[oneshotname].content("<img src=\"" + dataarray[0] + "\" alt=\"img\"></img><br>" + clim_input + dl_lines);
@@ -590,7 +599,7 @@ function gen_img(clicked) {
         '&operation=' + clicked.toString() + '&anomaly=' + ano.toString() + '&dataset=' + pdataset +
         '&variable=' + pvariable + '&depth=' + pdepth.toString() +
         '&time=' + ptime + '&lowval=' + lowval2.toString() +
-        '&highval=' + highval2.toString() + '&clim=' + pclim  + '&rd=1';
+        '&highval=' + highval2.toString() + '&clim=' + pclim + '&rd=1';
     }
 
     //Loading
@@ -610,8 +619,8 @@ function gen_img(clicked) {
           "<input type=\"number\" id=\"highval2_" + oneshotname1 + "\" name=\"highval2\" style=\"width:70px; margin-left: 10px; float:left;\">" +
           "<input type=\"button\" id=\"Redraw_" + oneshotname1 + "\" value=\"Redraw\" style=\"width:60px; margin-left: 10px;\" />";
 
-        dl_lines = "<br><br><center><a href=\""+ dataarray[0] +"\" download>Download figure</a>" + 
-                 " / <a href=\""+ dataarray[1] +"\" download>Download data</a></center>";
+        dl_lines = "<br><br><center><a href=\"" + dataarray[0] + "\" download>Download figure</a>" +
+          " / <a href=\"" + dataarray[1] + "\" download>Download data</a></center>";
 
         if ([3, 7, 4, 8].includes(pclicked)) {
           winc_list[oneshotname1].content("<img src=\"" + dataarray[0] + "\" alt=\"img\"></img><br>" + clim_input + dl_lines);
@@ -734,7 +743,7 @@ const retrieveWmsValueFromLatLon = async (
   return xml2json(res);
 }
 
-function getData(ajaxurl) { 
+function getData(ajaxurl) {
   return $.ajax({
     url: ajaxurl,
     type: 'GET',
@@ -743,17 +752,17 @@ function getData(ajaxurl) {
 
 function xml2json(srcDOM) {
   let children = [...srcDOM.children];
-  
+
   // base case for recursion. 
   if (!children.length) {
     return srcDOM.innerHTML
   }
-  
+
   // initializing object to be returned. 
   let jsonResult = {};
-  
+
   for (let child of children) {
-    
+
     // checking is child has siblings of same name. 
     let childIsArray = children.filter(eachChild => eachChild.nodeName === child.nodeName).length > 1;
 
@@ -768,6 +777,24 @@ function xml2json(srcDOM) {
       jsonResult[child.nodeName] = xml2json(child);
     }
   }
-  
+
   return jsonResult;
 }
+
+async function checkStatus(url) {
+  var request = new XMLHttpRequest();
+    request.onreadystatechange = function() {
+        if (request.readyState === 4){
+            request.status;//this contains the status code
+            setStatus(request.status);
+        }
+    };
+        request.open("GET", url, true);
+        request.send(); 
+  }
+
+  function setStatus(htmldata) {
+    console.log(htmldata);
+    var theDiv = document.getElementById('status');
+    theDiv.innerHTML = '<b>'+htmldata+'</b> : '+resp_codes[parseInt(htmldata)];
+  }

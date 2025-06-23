@@ -37,7 +37,7 @@
         </div>
 
         <nav id="bssidebar" style="overflow-y: auto; height:88vh !important;">>
-            <div class="p-4 pt-5" style="padding-top: 0rem !important;">
+            <div class="p-4 pt-5" style="padding-top: 0rem !important; background-color:rgb(221, 224, 226);">
                 <ul class="list-unstyled components mb-5" style="margin-bottom: 0px !important;">
                     <li>
                         <a><b>Dataset</b></a>
@@ -212,6 +212,11 @@
                         <a href="https://www.umr-lops.fr/SNO-Argo/Products/ISAS-in-situ-T-S-gridded-fields"
                             target="_blank">ISAS-in-situ-T-S-gridded-fields</a>
                     </div>
+                    <hr>
+                    <div>
+                        <p style="color:black;"><b>Server status</b></p>
+                        <p style="color:cadetblue;" id="status"><b>...</b></p>
+                    </div>     
                 </div>
         </nav>
     </div>
@@ -358,6 +363,6 @@
     <script src="{{ url_for('static', filename='dist/easybutton/easy-button.js')}}"></script>
 
     <script src="{{ url_for('static', filename='dist/xml-js.min.js')}}"></script>
+    <script src="{{ url_for('static', filename='dist/resp_codes.js')}}"></script>
 </body>
-
 </html>
