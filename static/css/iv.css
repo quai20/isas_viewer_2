@@ -51,7 +51,7 @@
   display: inline-block; 
   top: 60%; 
   margin-left: 15px;
-  border-style: ridge;
+  border-style:none;
   background-color: white;
   z-index: 400;
 }
