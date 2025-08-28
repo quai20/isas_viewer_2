@@ -842,9 +842,9 @@ function buildCbar(colorname, minval, maxval, clabel, unit) {
 
   //Create div elements for colorbar
   var div = document.createElement('cbar_out');
-  div.style = "width: 120px; height: 264px; position:relative;";
+  div.style = "width: 120px; height: 264px;";
   var udiv = document.createElement('cbar');
-  udiv.style = "width: 37px; height: 264px; left: 0px; position:relative; border: solid; border-width: 1px;";
+  udiv.style = "width: 37px; height: 258px; left: 0px; position:absolute; border: solid; border-width: 1px;";
   div.appendChild(udiv);
   var vdiv = document.createElement('maxval');
   vdiv.style = "margin-left:45px; top:0px; position:absolute; font-size: small;";
@@ -859,6 +859,7 @@ function buildCbar(colorname, minval, maxval, clabel, unit) {
   //gen cmap
   var colorlist = dicopal.getSequentialColors(colorname, 10)
   //const cbar = document.getElementById('cbar');  
+  udiv.style.borderColor = 'white';
   udiv.style.background = 'linear-gradient(0deg,' + colorlist.reverse().join(',') + ')';
 
   //const mina = document.getElementById('minval');
@@ -872,6 +873,9 @@ function buildCbar(colorname, minval, maxval, clabel, unit) {
   //const clabela = document.getElementById('clabel');
   clabeld.innerHTML = String(clabel + ' (' + unit + ')');
 
+  var dcbar = document.getElementById('colorbar');
+  dcbar.style.height = '264px';
+  dcbar.style.width = '120px';
   document.getElementById("colorbar").appendChild(div);
 
 }
