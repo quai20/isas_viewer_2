@@ -1,3 +1,12 @@
+//init dicopal new color
+dicopal.addPalette({
+  type: 'sequential',
+  name: 'Rainbow',
+  colors: ['#6600FF', '#004EFF', '#00D5FF', '#00FFB2', '#88FF00', '#FFF600', '#FFA400', '#FF0002'],
+  provider: 'CustomPalette'
+});
+
+
 var wms_layer = new L.LayerGroup();
 var islayed = false;
 
@@ -73,6 +82,8 @@ function updateMap() {
         noWrap: true
       }).addTo(map);
       wms_layer.bringToFront();
+      //LEGEND
+      genCmap(dataset_config[dst]['vars'][variable],NaN,NaN);
     }
     else {
       var wmts_template =
@@ -87,7 +98,9 @@ function updateMap() {
         noWrap: true
       }).addTo(map);
       wms_layer.bringToFront();
-    }
+      //LEGEND
+      genCmap(dataset_config[dst]['vars'][variable], lowval, highval);
+    }    
 
   }
   else {
@@ -798,3 +811,82 @@ async function checkStatus(url) {
     var theDiv = document.getElementById('status');
     theDiv.innerHTML = '<b>'+htmldata+'</b> : '+resp_codes[parseInt(htmldata)];
   }
+
+var resxv = null;
+var resvg = null;
+const wmts_url = "https://wmts.marine.copernicus.eu/teroWmts/INSITU_GLO_PHY_TS_OA_NRT_013_002/cmems_obs-ins_glo_phy-temp-sal_nrt_oa_P1M_202411?request=GetCapabilities&service=WMS"
+
+const genCmap = async (varid, lowval, highval) => {
+  const input = varid
+  const res = await getData(wmts_url);
+  const resx = xml2json(res)
+  resvg = resx['Capabilities']['Contents']['Layer'];
+  var i = 0;
+  for (i = 0; i < resvg.length + 1; i++) {
+    if (i == resvg.length) {
+      alert("Variable not found, default cmap");
+      i = 0;
+      break;
+    }
+    if (resvg[i]['ows:Metadata']['VariableInformation']['Id'] == input) {
+      break;
+    }
+  }
+  resxv = resx['Capabilities']['Contents']['Layer'][i]['ows:Metadata']['VariableInformation']  
+  if (isNaN(lowval) || isNaN(highval) || (lowval > highval)) {
+  buildCbar(resxv['Colormap'].charAt(0).toUpperCase() + resxv['Colormap'].slice(1),
+    parseFloat(resxv['MinimumValue']).toFixed(2),
+    parseFloat(resxv['MaximumValue']).toFixed(2),
+    resxv['Name'],
+    resxv['Unit']);
+    }
+    else {
+      buildCbar(resxv['Colormap'].charAt(0).toUpperCase() + resxv['Colormap'].slice(1),
+        lowval.toFixed(2),
+        highval.toFixed(2),
+        resxv['Name'],
+        resxv['Unit']);
+    }
+}
+
+function buildCbar(colorname, minval, maxval, clabel, unit) {
+
+  //Create div elements for colorbar
+  var div = document.createElement('cbar_out');
+  div.style = "width: 120px; height: 264px;";
+  var udiv = document.createElement('cbar');
+  udiv.style = "width: 37px; height: 264px; left: 0px; position:absolute; border: solid; border-width: 1px;";
+  div.appendChild(udiv);
+  var vdiv = document.createElement('maxval');
+  vdiv.style = "margin-left:45px; top:0px; position:absolute; font-size: small;";
+  div.appendChild(vdiv);
+  var wdiv = document.createElement('minval');
+  wdiv.style = "margin-left:45px; bottom: 0px; position:absolute; font-size: small;";
+  div.appendChild(wdiv);
+  var clabeld = document.createElement('clabel');
+  clabeld.style = "margin-left:65px; top: 20px; height:264px; position:absolute; font-size: small; writing-mode: vertical-rl; text-orientation: mixed;";
+  div.appendChild(clabeld);
+
+  //gen cmap
+  var colorlist = dicopal.getSequentialColors(colorname, 10)
+  //const cbar = document.getElementById('cbar');  
+  udiv.style.borderColor = 'white';
+  udiv.style.background = 'linear-gradient(0deg,' + colorlist.join(',') + ')';
+
+  //const mina = document.getElementById('minval');
+  wdiv.innerHTML = minval;
+
+  //const maxa = document.getElementById('maxval');
+  vdiv.innerHTML = maxval;
+  vdiv.style.float = 'right';
+  vdiv.style.marginRight = '10px';
+
+  //const clabela = document.getElementById('clabel');
+  clabeld.innerHTML = String(clabel + ' (' + unit + ')');
+
+  var dcbar = document.getElementById('colorbar');
+  dcbar.style.height = '264px';
+  dcbar.style.width = '120px';
+  document.getElementById("colorbar").appendChild(div);
+
+}
