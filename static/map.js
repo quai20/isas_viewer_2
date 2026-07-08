@@ -814,7 +814,7 @@ async function checkStatus(url) {
 
 var resxv = null;
 var resvg = null;
-const wmts_url = "https://wmts.marine.copernicus.eu/teroWmts/INSITU_GLO_PHY_TS_OA_NRT_013_002/cmems_obs-ins_glo_phy-temp-sal_nrt_oa_P1M_202411?request=GetCapabilities&service=WMS"
+const wmts_url = "https://wmts.marine.copernicus.eu/teroWmts/INSITU_GLO_PHY_TS_OA_NRT_013_002/cmems_obs-ins_glo_phy-temp-sal_nrt_oa_P1M_202603?request=GetCapabilities&service=WMS"
 
 const genCmap = async (varid, lowval, highval) => {
   const input = varid
