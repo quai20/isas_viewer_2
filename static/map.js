@@ -271,6 +271,12 @@ function clear_ip() {
   document.getElementById('se_la0').value = "";
   document.getElementById('se_lo1').value = "";
   document.getElementById('se_la1').value = "";
+  document.getElementById('ex_lo0').value = "";
+  document.getElementById('ex_la0').value = "";
+  document.getElementById('ex_lo1').value = "";
+  document.getElementById('ex_la1').value = "";
+  document.getElementById('ex_de1').value = "";
+  document.getElementById('ex_de0').value = "";
   prefill = 0;
   tempLayer.clearLayers();
 }
