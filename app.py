@@ -34,13 +34,32 @@ def init_webpage():
     # Render index
     return render_template('index.html')
 
+@app.route(f"{sub_uri}/get_extr", methods=['POST', 'GET'])
+def gen_extraction_route():
+    """routing function to generate a netcdf extraction
+
+    Returns:
+        json: path to generated file
+    """
+    lat0 = float(request.args.get('lat0'))
+    lon0 = float(request.args.get('lon0'))
+    lat1 = float(request.args.get('lat1'))
+    lon1 = float(request.args.get('lon1'))
+    depth0 = float(request.args.get('dep0'))
+    depth1 = float(request.args.get('dep1'))
+    dataset = request.args.get('dataset')
+    date0 = request.args.get('date0')
+    date1 = request.args.get('date1')
+    #print(f"Extraction request: {lat0}, {lon0}, {lat1}, {lon1}, {depth0}, {depth1}, {dataset}, {date0}, {date1}")
+    return json.dumps("Extraction request received. Please wait for the download link to appear.")
+
 
 @app.route(f"{sub_uri}/get_img", methods=['POST', 'GET'])
 def gen_img_route():
     """routing function to generate an image
 
     Returns:
-        json: path to generated img
+        json: path to generated img and generated netcdf
     """
     lat0 = float(request.args.get('lat0'))
     lon0 = float(request.args.get('lon0'))

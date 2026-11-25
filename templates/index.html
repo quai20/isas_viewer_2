@@ -207,6 +207,50 @@
                     </div>
                     </p>
 
+                    <!-- Extractor -->
+                    <p>
+                        <a data-toggle="collapse" href="#extractormenu" role="button" aria-expanded="false"
+                            aria-controls="collapseExample" style="color:black; font-weight: bold;">
+                            &#128317; Extraction
+                        </a>
+                    <div class="collapse" id="extractormenu">
+                        <div class="card card-body" style="color:black;">
+                            <form>
+                                Lon : <input type="number" id="ex_lo1" name="ex_lo1"
+                                    style="width:35%; float: right; margin-top: 2px; margin-right: 2px;" tabindex="2">
+                                <input type="number" id="ex_lo0" name="ex_lo0"
+                                    style="width:35%; float: right; margin-top: 2px; margin-right: 2px;" tabindex="1">
+                            </form>
+
+                            <form>
+                                Lat : <input type="number" id="ex_la1" name="ex_la1"
+                                    style="width:35%; float: right; margin-top: 2px; margin-right: 2px;" tabindex="4">
+                                <input type="number" id="ex_la0" name="ex_la0"
+                                    style="width:35%; float: right; margin-top: 2px; margin-right: 2px;" tabindex="3">
+                            </form>
+
+                            <form>
+                                Depth : <input type="number" id="ex_de1" name="ex_de1"
+                                    style="width:35%; float: right; margin-top: 2px; margin-right: 2px;" tabindex="6">
+                                <input type="number" id="ex_de0" name="ex_de0"
+                                    style="width:35%; float: right; margin-top: 2px; margin-right: 2px;" tabindex="5">
+                            </form>
+                            
+                            <select name="ex_daterange1" id="ex_date1" style="width:99%; float: right; margin-top: 4px; margin-right: 2px;">                            
+                            </select>    
+                            to
+                            <select name="ex_daterange2" id="ex_date2" style="width:99%; float: right; margin-top: 4px; margin-right: 2px;">                            
+                            </select>    
+
+                            <form>
+                                <img class="mbut" src="{{ url_for('static', filename='/dist/icons/trash_carbon.png')}}"
+                                    onclick="clear_ip();" width="30px" height="30px" title="Clear" style="float: right;margin-top: 4px; margin-right: 2px;">
+                                <input type="button" value="Extract" onclick="gen_extraction();" style="float: right;margin-top: 4px; margin-right: 2px;">
+                            </form>
+                        </div>
+                    </div>
+                    </p>
+
                     <hr>
                     <div>
                         <p style="color:black;"><b>More informations</b></p>
@@ -282,7 +326,13 @@
                 sel2.add(opt2, sel2.options[i]);
             }
 
-            //DEFINE RANGE
+            //DEFINE RANGE & EXTRACTOR DATE SELECTORS
+            const sel5 = document.getElementById("ex_date1");
+            $("#ex_date1").empty();
+            for (a in sel5.options) { sel5.options.remove(0); }
+            const sel6 = document.getElementById("ex_date2");
+            $("#ex_date2").empty();
+            for (a in sel6.options) { sel6.options.remove(0); }
             const sel3 = document.getElementById("daterange");
             $("#daterange").empty();
             for (a in sel3.options) { sel3.options.remove(0); }
@@ -300,10 +350,20 @@
                 opt3.value = String(i);
                 opt3.text = drange[i].substr(0, 10);
                 sel3.add(opt3, sel3.options[i]);
+                const opt5 = document.createElement("option");
+                opt5.value = String(i);
+                opt5.text = drange[i].substr(0, 10);
+                sel5.add(opt5, sel5.options[i]);
+                const opt6 = document.createElement("option");
+                opt6.value = String(i);
+                opt6.text = drange[i].substr(0, 10);
+                sel6.add(opt6, sel6.options[i]);
             }
 
             //force last timestamp
             document.getElementById("daterange").value = drange.length-1;
+            document.getElementById("ex_date1").value = 0;
+            document.getElementById("ex_date2").value = drange.length-1;
 
             updateUserSelection();
 

@@ -60,13 +60,13 @@ function updateMap() {
   };
 
   //Check server availability
-  if(dst==7){
+  if (dst == 7) {
     var getcapSuffix = 'SERVICE=WMTS&REQUEST=GetCapabilities';
   }
   else {
     var getcapSuffix = 'SERVICE=WMS&REQUEST=GetCapabilities';
   }
-  checkStatus(dataset_config[dst]['url']+getcapSuffix);
+  checkStatus(dataset_config[dst]['url'] + getcapSuffix);
 
   //WMTS LAYER (CMEMS)
   if (dataset_config[dst]['name'] == 'ISAS-NRT') {
@@ -83,7 +83,7 @@ function updateMap() {
       }).addTo(map);
       wms_layer.bringToFront();
       //LEGEND
-      genCmap(dataset_config[dst]['vars'][variable],NaN,NaN);
+      genCmap(dataset_config[dst]['vars'][variable], NaN, NaN);
     }
     else {
       var wmts_template =
@@ -100,7 +100,7 @@ function updateMap() {
       wms_layer.bringToFront();
       //LEGEND
       genCmap(dataset_config[dst]['vars'][variable], lowval, highval);
-    }    
+    }
 
   }
   else {
@@ -271,6 +271,12 @@ function clear_ip() {
   document.getElementById('se_la0').value = "";
   document.getElementById('se_lo1').value = "";
   document.getElementById('se_la1').value = "";
+  document.getElementById('ex_lo0').value = "";
+  document.getElementById('ex_la0').value = "";
+  document.getElementById('ex_lo1').value = "";
+  document.getElementById('ex_la1').value = "";
+  document.getElementById('ex_de1').value = "";
+  document.getElementById('ex_de0').value = "";
   prefill = 0;
   tempLayer.clearLayers();
 }
@@ -436,6 +442,80 @@ function prefill_snapshot() {
   prefill = prefill < regions.length - 1 ? prefill + 1 : 0;
 }
 
+function gen_extraction() {
+  //get inputs
+  var lat0 = parseFloat(document.getElementById('ex_la0').value);
+  var lon0 = parseFloat(document.getElementById('ex_lo0').value);
+  var lat1 = parseFloat(document.getElementById('ex_la1').value);
+  var lon1 = parseFloat(document.getElementById('ex_lo1').value);
+  var depth0 = parseFloat(document.getElementById('ex_de0').value);
+  var depth1 = parseFloat(document.getElementById('ex_de1').value);
+  var date0 = parseInt(document.getElementById('ex_date1').value);
+  var date1 = parseInt(document.getElementById('ex_date2').value);
+
+  //CLEAR TEMPLAYER (for markers only)
+  tempLayer.clearLayers();
+
+  //CREATE ONESHOTNAME : a random id so that the plot (window obj) is handled individually
+  var oneshotname = "l" + (Math.floor(Math.random() * 1e6)).toString();
+  window[oneshotname] = L.layerGroup().addTo(map);
+
+  //CREATE WINDOW OBJ
+  winc_list[oneshotname] = L.control.window(map, { title: '', position: 'left', modal: false }).on('hide', function () {
+    window[oneshotname].clearLayers();
+    //When closing the window, we also need to remove the div element  
+    winc_divlist[oneshotname].remove();
+    //removing from dict
+    delete winc_divlist[oneshotname];
+    delete winc_list[oneshotname];
+  });
+
+  //store winc element in a dict with unique key, so it can be delete in the above func
+  mapd = document.getElementById('map');
+  winc_divlist[oneshotname] = mapd.lastElementChild;
+
+  //Draw rectangle for extraction
+  if (lon0 < lon1) {
+    var rectangle = L.rectangle([[lat0, lon0], [lat1, lon1]], { color: 'Red', weight: 1 }).addTo(window[oneshotname]);
+    map.panTo([(lat0 + lat1) / 2, (lon0 + lon1) / 2]);
+  }
+  else { //crossing meridian
+    var rectangle = L.rectangle([[lat0, lon0], [lat1, lon1 + 360]], { color: 'Red', weight: 1 }).addTo(window[oneshotname]);
+    map.panTo([(lat0 + lat1) / 2, (lon0 + lon1 + 360) / 2]);
+  }  
+
+  //SET WINDOW CONTENT
+  winc_list[oneshotname].content("<div id='img_div'><center><div class=\"lds-dual-ring\"></div></center></div>");
+  //SET WINDOW TITLE
+  winc_list[oneshotname].title("<a style=\"font-size:20px; font-weight:bold;\">User extraction</a>");
+
+  //show
+  winc_list[oneshotname].show();
+
+  //AJAX CALL TO GENERATE EXTRACTION FILE & REPORT
+  var dst = parseInt(document.getElementById('dataset').value);  
+
+  reqstring = 'lat0=' + lat0.toString() + '&lon0=' + lon0.toString() +
+    '&lat1=' + lat1.toString() + '&lon1=' + lon1.toString() +
+    '&dep0=' + depth0.toString() + '&dep1=' + depth1.toString() +
+    '&dataset=' + user_selection['dataset'] + 
+    '&date0=' + dataset_config[dst]['daterange'][date0] + 
+    '&date1=' + dataset_config[dst]['daterange'][date1] ;
+
+  //FLASK REQUEST
+  $.ajax({
+    type: "GET",
+    url: window.location.href + '/get_extr',
+    data: reqstring,
+    contentType: 'application/json;charset=UTF-8',
+    success: function (data) {
+      dataarray = JSON.parse(data)
+      // EDIT WINDOW
+        winc_list[oneshotname].content(dataarray);      
+        console.log(dataarray);
+    }
+  });  
+}
 
 function gen_img(clicked) {
 
@@ -796,21 +876,21 @@ function xml2json(srcDOM) {
 
 async function checkStatus(url) {
   var request = new XMLHttpRequest();
-    request.onreadystatechange = function() {
-        if (request.readyState === 4){
-            request.status;//this contains the status code
-            setStatus(request.status);
-        }
-    };
-        request.open("GET", url, true);
-        request.send(); 
-  }
+  request.onreadystatechange = function () {
+    if (request.readyState === 4) {
+      request.status;//this contains the status code
+      setStatus(request.status);
+    }
+  };
+  request.open("GET", url, true);
+  request.send();
+}
 
-  function setStatus(htmldata) {
-    console.log(htmldata);
-    var theDiv = document.getElementById('status');
-    theDiv.innerHTML = '<b>'+htmldata+'</b> : '+resp_codes[parseInt(htmldata)];
-  }
+function setStatus(htmldata) {
+  console.log(htmldata);
+  var theDiv = document.getElementById('status');
+  theDiv.innerHTML = '<b>' + htmldata + '</b> : ' + resp_codes[parseInt(htmldata)];
+}
 
 var resxv = null;
 var resvg = null;
@@ -832,21 +912,21 @@ const genCmap = async (varid, lowval, highval) => {
       break;
     }
   }
-  resxv = resx['Capabilities']['Contents']['Layer'][i]['ows:Metadata']['VariableInformation']  
+  resxv = resx['Capabilities']['Contents']['Layer'][i]['ows:Metadata']['VariableInformation']
   if (isNaN(lowval) || isNaN(highval) || (lowval > highval)) {
-  buildCbar(resxv['Colormap'].charAt(0).toUpperCase() + resxv['Colormap'].slice(1),
-    parseFloat(resxv['MinimumValue']).toFixed(2),
-    parseFloat(resxv['MaximumValue']).toFixed(2),
-    resxv['Name'],
-    resxv['Unit']);
-    }
-    else {
-      buildCbar(resxv['Colormap'].charAt(0).toUpperCase() + resxv['Colormap'].slice(1),
-        lowval.toFixed(2),
-        highval.toFixed(2),
-        resxv['Name'],
-        resxv['Unit']);
-    }
+    buildCbar(resxv['Colormap'].charAt(0).toUpperCase() + resxv['Colormap'].slice(1),
+      parseFloat(resxv['MinimumValue']).toFixed(2),
+      parseFloat(resxv['MaximumValue']).toFixed(2),
+      resxv['Name'],
+      resxv['Unit']);
+  }
+  else {
+    buildCbar(resxv['Colormap'].charAt(0).toUpperCase() + resxv['Colormap'].slice(1),
+      lowval.toFixed(2),
+      highval.toFixed(2),
+      resxv['Name'],
+      resxv['Unit']);
+  }
 }
 
 function buildCbar(colorname, minval, maxval, clabel, unit) {
