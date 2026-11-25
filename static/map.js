@@ -513,6 +513,9 @@ function gen_extraction() {
       if (dataarray[0] == 'error') {
         winc_list[oneshotname].content("<div id='img_div'><center><p>" + dataarray[1] + "</p></center></div>");
       }
+      else if (dataarray[0] == 'cached') {
+        winc_list[oneshotname].content("<div id='img_div'><center><p>File is already cached</p><a href=\"" + dataarray[1] + "\" download>Download</a></center></div>");
+      }
       else {
         winc_list[oneshotname].content("<div id='img_div'><center><p>Extraction file is ready</p><a href=\"" + dataarray[1] + "\" download>Download</a></center></div>");
       }      

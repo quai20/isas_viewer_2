@@ -212,6 +212,13 @@ def extract_netcdf(lat0, lon0, lat1, lon1, depth0, depth1, dataset, date0, date1
 
     # Gen filename for the extraction
     extracted_filename = gen_extraction_filename(lat0, lon0, lat1, lon1, depth0, depth1, dataset, date0, date1)
+
+    #Check if the file already exists in cache
+    if (os.path.exists(extracted_filename)):
+        # return a message and the filename
+        file_list = ["cached",extracted_filename]
+        return file_list
+
     # Gen conf for dl
     ix = [dataset==dataset_config[i]['name'] for i in range(len(dataset_config))]
     ix = np.argmax(ix)           
