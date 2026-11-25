@@ -60,6 +60,27 @@ def gen_filename(op, lat0, lon0, lat1, lon1, dataset, variable, depth, date, pty
     else:
         return pfx + '_'.join(params) + '_' + clim + '.nc'   
         
+def gen_extraction_filename(lat0, lon0, lat1, lon1, depth0, depth1, dataset, date0, date1):
+    """funtion that return a unique filename string 
+    corresponding to the extraction requests
+
+    Args:
+        lat0 (float): latitude value
+        lon0 (float): longitude value
+        lat1 (float): latitude value
+        lon1 (float): longitude value
+        depth0 (float): depth value
+        depth1 (float): depth value
+        dataset (str): dataset name
+        date0 (str): start date
+        date1 (str): end date
+
+    Returns:
+        str: filename
+    """
+    pfx = 'static/nc_cache/'    
+    params = ('E', dataset, '%.2f'%lat0, '%.2f'%lon0, '%.2f'%lat1, '%.2f'%lon1, '%d'%depth0, '%d'%depth1, str(date0)[:10], str(date1)[:10])  
+    return pfx + '_'.join(params) + '.nc'
 
 def gen_figname(op, lat0, lon0, lat1, lon1, dataset, variable, depth, date, ptype, lowval, highval, clim):   
     """funtion that return a unique filename string 
@@ -125,23 +146,88 @@ def open_dap_ds(ix,decode_times=True,conf={}):
         cm.login(username=os.environ['MOTU_USERNAME'], 
                  password=os.environ['MOTU_PASSWORD'],
                  force_overwrite=True,
-                 )                
+                 )                        
         # Load xarray dataset
-        ds = cm.open_dataset(
-            dataset_id = dataset_config[ix]['dataset-id'],
-            minimum_longitude = conf['lon_min'],
-            maximum_longitude = conf['lon_max'],
-            minimum_latitude = conf['lat_min'],
-            maximum_latitude = conf['lat_max'],
-            start_datetime = conf['date'] if ('date' in conf) else '2000-01-01',
-            end_datetime = conf['date'] if ('date' in conf) else '2100-01-01',
-            variables = [conf['variable']],
-            minimum_depth = conf['depth'] if ('depth' in conf) else 0,
-            maximum_depth = conf['depth'] if ('depth' in conf) else 5000
-        )
+        # with the variable option
+        if ('variable' in conf):
+            ds = cm.open_dataset(
+                dataset_id = dataset_config[ix]['dataset-id'], 
+                minimum_longitude = conf['lon_min'],
+                maximum_longitude = conf['lon_max'],
+                minimum_latitude = conf['lat_min'],
+                maximum_latitude = conf['lat_max'],
+                start_datetime = conf['date0'] if ('date0' in conf) else '2000-01-01',
+                end_datetime = conf['date1'] if ('date1' in conf) else '2100-01-01',
+                variables = [conf['variable']],
+                minimum_depth = conf['depth_min'] if ('depth_min' in conf) else 0,
+                maximum_depth = conf['depth_max'] if ('depth_max' in conf) else 5000
+            )
+        else:
+            ds = cm.open_dataset(
+                dataset_id = dataset_config[ix]['dataset-id'], 
+                minimum_longitude = conf['lon_min'],
+                maximum_longitude = conf['lon_max'],
+                minimum_latitude = conf['lat_min'],
+                maximum_latitude = conf['lat_max'],
+                start_datetime = conf['date0'] if ('date0' in conf) else '2000-01-01',
+                end_datetime = conf['date1'] if ('date1' in conf) else '2100-01-01',
+                minimum_depth = conf['depth_min'] if ('depth_min' in conf) else 0,
+                maximum_depth = conf['depth_max'] if ('depth_max' in conf) else 5000
+                )            
     else: #for classic opendap, no need to reducte ds
         ds = xr.open_dataset(dataset_config[ix]['opendap'],decode_times=decode_times)
     return ds
+
+def extract_netcdf(lat0, lon0, lat1, lon1, depth0, depth1, dataset, date0, date1):
+    """extract a netcdf file from the dataset
+
+    Args:
+        lat0 (float): Latitude value
+        lon0 (float): Longitude value
+        lat1 (float): Latitude value
+        lon1 (float): Longitude value
+        depth0 (float): Depth value
+        depth1 (float): Depth value
+        dataset (str): dataset name
+        date0 (str): Start date
+        date1 (str): End date
+
+    Returns:
+        str list: list of netcdf files corresponding to the request with a prefix indicating message of file
+    """
+    # check order of lat,lon,depth
+    if lat0>lat1:
+        lat0,lat1 = lat1,lat0
+    if lon0>lon1:
+        lon0,lon1 = lon1,lon0
+    if depth0>depth1:
+        depth0,depth1 = depth1,depth0        
+    #check if lat,lon fits in the grid    
+    if lat0<lat_array.min() :
+        lat0 = lat_array.min()
+    if lat1>lat_array.max() :
+        lat1 = lat_array.max()
+    if lon0<lon_array.min() :
+        lon0 = lon_array.min()                
+
+    # Gen filename for the extraction
+    extracted_filename = gen_extraction_filename(lat0, lon0, lat1, lon1, depth0, depth1, dataset, date0, date1)
+    # Gen conf for dl
+    ix = [dataset==dataset_config[i]['name'] for i in range(len(dataset_config))]
+    ix = np.argmax(ix)           
+    
+    conf={'lat_min':lat0,'lat_max':lat1,'lon_min':lon0,'lon_max':lon1,'depth_min':depth0,'depth_max':depth1, 'date0':date0[:10], 'date1':date1[:10]}
+    ds = open_dap_ds(ix,decode_times=True, conf=conf)
+    ds = ds.sel(latitude=slice(lat0,lat1),longitude=slice(lon0,lon1),depth=slice(depth0,depth1),time=slice(np.datetime64(date0),np.datetime64(date1)))
+    print(ds)
+    # check size
+    if(ds.nbytes>300e6):  # 300 MB
+        return ["error","The extracted file is too big, please reduce the request"]
+    else:
+        ds.to_netcdf(extracted_filename)    # DRY
+        # return a message and the filename
+        file_list = ["ok",extracted_filename]
+        return file_list
 
 def time_serie_on_point(lat, lon, dataset, variable, depth,ptype, clim):    
     """plot time series
@@ -166,7 +252,7 @@ def time_serie_on_point(lat, lon, dataset, variable, depth,ptype, clim):
     png_filename = gen_figname(0, lat, lon, None, None, dataset, variable, depth, None, ptype, None, None, clim)
 
     # Gen conf for dl
-    conf={'lat_min':lat,'lat_max':lat,'lon_min':lon,'lon_max':lon,'depth':np.abs(depth),'variable':variable}
+    conf={'lat_min':lat,'lat_max':lat,'lon_min':lon,'lon_max':lon,'depth_min':np.abs(depth),'depth_max':np.abs(depth),'variable':variable}
 
     if (os.path.exists(nc_filename)):
         ds = xr.open_dataset(nc_filename)
@@ -231,7 +317,7 @@ def profile_on_point(lat, lon, dataset, variable, date, ptype, clim):
 
     png_filename = gen_figname(1, lat, lon, None, None, dataset, variable, None, date, ptype, None, None, clim)
     # Gen conf for dl
-    conf={'lat_min':lat,'lat_max':lat,'lon_min':lon,'lon_max':lon,'date':date[:10],'variable':variable}
+    conf={'lat_min':lat,'lat_max':lat,'lon_min':lon,'lon_max':lon,'date0':date[:10],'date1':date[:10],'variable':variable}
 
     if (os.path.exists(nc_filename)):
         ds = xr.open_dataset(nc_filename)
@@ -267,17 +353,19 @@ def profile_on_point(lat, lon, dataset, variable, date, ptype, clim):
             ds = ds.sel(latitude=lat,longitude=lon,time=np.datetime64(date),method='nearest')
             xlabel = variable
         ds.to_netcdf(nc_filename) 
-        
-    my_dpi=100
-    f,ax = plt.subplots(1,1,figsize=(250/my_dpi, 600/my_dpi), dpi=my_dpi)
-    ds[variable].plot(linewidth=2,y='depth',ax=ax)    
+
+    # Figure definition
+    my_dpi = 100
+    f, ax = plt.subplot(1, 1, figsize=(250, 600), dpi=my_dpi)
+    ds[variable].plot(linewidth=2, y='depth', ax=ax)
     ax.set_title('')
-    ax.set_xlabel(xlabel)    
+    ax.set_xlabel(xlabel)
     ax.grid(linestyle=':')
     ax.invert_yaxis()
-    plt.savefig(png_filename, bbox_inches='tight')    
+    plt.savefig(png_filename,bbox_inches='tight')
 
-    return png_filename, nc_filename
+    return png_filename, nc_filename 
+
 
 
 def snapshot(lat0, lon0, lat1, lon1, dataset, variable, depth, date, lowval, highval, ptype, clim, rd):
@@ -306,7 +394,8 @@ def snapshot(lat0, lon0, lat1, lon1, dataset, variable, depth, date, lowval, hig
     
     png_filename = gen_figname(2, lat0, lon0, lat1, lon1, dataset, variable, depth, date, ptype, lowval, highval, clim)
     # Gen conf for dl
-    conf={'lat_min':lat0,'lat_max':lat1,'lon_min':lon0,'lon_max':lon1,'depth':np.abs(depth),'date':date[:10],'variable':variable}
+    conf={'lat_min':lat0,'lat_max':lat1,'lon_min':lon0,'lon_max':lon1,'depth_min':np.abs(depth),
+          'depth_max':np.abs(depth),'date0':date[:10],'date1':date[:10],'variable':variable}
     
     if (os.path.exists(nc_filename)):
         ds = xr.open_dataset(nc_filename)
@@ -437,8 +526,7 @@ def section(lat0, lon0, lat1, lon1, dataset, variable, date, lowval, highval, pt
             lon1f+=1
         
         # Gen conf for dl
-        conf={'lat_min':lat0f,'lat_max':lat1f,'lon_min':lon0f,'lon_max':lon1f,'date':date[:10],'variable':variable}
-
+        conf={'lat_min':lat0f,'lat_max':lat1f,'lon_min':lon0f,'lon_max':lon1f,'date0':date[:10],'date1':date[:10],'variable':variable}
 
         month_index = pd.to_datetime(np.datetime64(date)).month - 1  
 

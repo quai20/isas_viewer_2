@@ -18,16 +18,16 @@ app = Flask(__name__,
 def init_webpage():
     """landing page routing function
 
-    Clear the image cache & clear the nc cache when it's over 200Mb
+    Clear the image cache & clear the nc cache when it's over 20Mb for images and 300Mb for netcdf files.
     Render the index.html template
     """        
     # Clean img dir if it's too big
-    if (sum(os.path.getsize(f) for f in glob.glob('static/img/*.png'))/1e6 > 200):
+    if (sum(os.path.getsize(f) for f in glob.glob('static/img/*.png'))/1e6 > 20):
         files_tbrm = glob.glob('static/img/*.png')
         for f in files_tbrm:
             os.remove(f)
     # Clean netcdf cache dir if dir too big
-    if (sum(os.path.getsize(f) for f in glob.glob('static/nc_cache/*.nc'))/1e6 > 200):
+    if (sum(os.path.getsize(f) for f in glob.glob('static/nc_cache/*.nc'))/1e6 > 300):
         files_tbrn = glob.glob('static/nc_cache/*.nc')
         for f in files_tbrn:
             os.remove(f)
@@ -51,7 +51,8 @@ def gen_extraction_route():
     date0 = request.args.get('date0')
     date1 = request.args.get('date1')
     #print(f"Extraction request: {lat0}, {lon0}, {lat1}, {lon1}, {depth0}, {depth1}, {dataset}, {date0}, {date1}")
-    return json.dumps("Extraction request received. Please wait for the download link to appear.")
+    extracted_path = extract_netcdf(lat0, lon0, lat1, lon1, depth0, depth1, dataset, date0, date1)
+    return json.dumps(extracted_path)
 
 
 @app.route(f"{sub_uri}/get_img", methods=['POST', 'GET'])

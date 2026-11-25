@@ -510,9 +510,12 @@ function gen_extraction() {
     contentType: 'application/json;charset=UTF-8',
     success: function (data) {
       dataarray = JSON.parse(data)
-      // EDIT WINDOW
-        winc_list[oneshotname].content(dataarray);      
-        console.log(dataarray);
+      if (dataarray[0] == 'error') {
+        winc_list[oneshotname].content("<div id='img_div'><center><p>" + dataarray[1] + "</p></center></div>");
+      }
+      else {
+        winc_list[oneshotname].content("<div id='img_div'><center><p>Extraction file is ready</p><a href=\"" + dataarray[1] + "\" download>Download</a></center></div>");
+      }      
     }
   });  
 }
